@@ -1,5 +1,3 @@
-.linuxbrew/
 .snakemake/
-bin/py3/
 results/*
-doc/*
+./bin/fast
