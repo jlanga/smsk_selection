@@ -1,0 +1,132 @@
+rule orthofinder_prepare_link_species:
+    """
+    Link proteomes into another folder since orthofinder populates such folder.
+    """
+    input:
+        pep= tag + "{species}.pep"
+    output:
+        fasta= temp(
+            orthofinder + "{species}.fasta"
+        )
+    threads:
+        1
+    log:
+        orthofinder + "prepare_link_{species}.log"
+    benchmark:
+        orthofinder + "prepare_link_{species}.json"
+    shell:
+        "ln --symbolic $(readlink -f {input.pep}) {output.fasta} 2> {log}"
+
+
+
+rule orthofinder_prepare:
+    """
+    Split fasta files, rename species and sequences and prepare blast databases.
+    """
+    input:
+        fastas = expand(
+            orthofinder + "{species}.fasta",
+            species = config["species"]
+        )
+    output:
+        txt = touch(
+            orthofinder + "prepare.txt"
+        ),
+        fastas = expand(
+            orthofinder + "Species{species_number}.fa",
+            species_number = [x for x in range(0,n_species)]
+        ),
+        db = touch(
+            expand(
+                orthofinder + "BlastDBSpecies{database_number}",
+                database_number = [x for x in range(0,n_species)]
+            )
+        )
+    params:
+        fasta_dir = orthofinder
+    threads:
+        1
+    log:
+        orthofinder + "prepare.log"
+    benchmark:
+        orthofinder + "prepare.json"
+    shell:
+        "orthofinder.py "
+            "--fasta {params.fasta_dir} "
+            "--prepare "
+        "2> {log} 1>&2 ; "
+        "mv "
+            "{params.fasta_dir}/*/WorkingDirectory/* "
+            "{params.fasta_dir}/ "
+            "2>> {log} 1>&2"
+
+
+
+rule orthofinder_blastp_database_species:
+    """
+    Run blastp from one proteome against other.
+    """
+    input:
+        txt = orthofinder + "prepare.txt",
+        db = orthofinder + "BlastDBSpecies{species_number}",
+        fasta = orthofinder + "Species{database_number}.fa"
+    output:
+        tsv = orthofinder + "Blast{database_number}_{species_number}.txt"
+    threads:
+        24 # All you have
+    params:
+        evalue = config["params"]["orthofinder"]["blastp_evalue"],
+        chunk_size = config["params"]["orthofinder"]["blastp_chunk_size"]
+    log:
+        orthofinder + "blastp_{database_number}_{species_number}.log"
+    benchmark:
+        orthofinder + "blastp_{database_number}_{species_number}.json"
+    shell:
+        "( cat {input.fasta} | "
+        "parallel "
+            "--pipe "
+            "--jobs {threads} "
+            "--recstart \'>\' "
+            "--max-replace-args {params.chunk_size} "
+            "--keep-order "
+            "blastp "
+                "-outfmt 6 "
+                "-evalue {params.evalue} "
+                "-db {input.db} "
+        "> {output.tsv} ) "
+        "2> {log}"
+
+
+
+rule orthofinder_cluster:
+    """
+    Join blastp results, normalize bitscores and run mcl.
+    """
+    input:
+        tsv = expand(
+                orthofinder + "Blast{database_number}_{species_number}.txt",
+                species_number = [x for x in range(0,n_species)],
+                database_number = [x for x in range(0,n_species)]
+            ),
+    output:
+        orthologous_groups_csv = protected(
+            orthofinder + "OrthologousGroups.csv"
+        ),
+        orthologous_groups_txt = protected(
+            orthofinder + "OrthologousGroups.txt"
+        )
+    params:
+        fasta_dir = orthofinder,
+        inflation = config["params"]["orthofinder"]["mcl_inflation"]
+    threads:
+        8 # There is no reason to go beyond this value
+    log:
+        orthofinder + "cluster.log"
+    benchmark:
+        orthofinder + "cluster.json"
+    shell:
+        "orthofinder.py "
+            "--algthreads {threads} "
+            "--inflation 1.5 "
+            "--blast {params.fasta_dir} "
+        "2> {log} 1>&2"

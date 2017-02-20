@@ -1,0 +1,156 @@
+rule transdecoder_longorfs_species: ##transcriptome.fa.transdecoder/{bunch of files} - Predicted ORFs
+	input:
+		fasta = raw + "{species}.fasta"
+	output:
+		base_freqs = temp(
+			"{species}.fasta.transdecoder/base_freqs.dat"
+		),
+		base_freqs_ok = temp(
+			"{species}.fasta.transdecoder/base_freqs.dat.ok"
+		),
+		cds = temp(
+			"{species}.fasta.transdecoder/longest_orfs.cds"
+		),
+		gff3 = temp(
+			"{species}.fasta.transdecoder/longest_orfs.gff3"
+		),
+		pep = temp(
+			"{species}.fasta.transdecoder/longest_orfs.pep"
+		),
+		dir = temp(
+			"{species}.fasta.transdecoder/"
+		)
+	threads:
+		1
+	log:
+		transdecoder + "longorfs_{species}.log"
+	benchmark:
+		transdecoder + "longorfs_{species}.json"
+	shell:
+		"perl src/TransDecoder-3.0.0/TransDecoder.LongOrfs "
+			"-t {input.fasta} "
+		"2> {log} 1>&2"
+
+
+
+
+rule transdecoder_hmmscan_pfama_species: ##data/transdecoder/pfama.tsv - hmmscan results
+	input:
+		pep = "{species}.fasta.transdecoder/longest_orfs.pep",
+		hmm = db + "pfama.hmm"
+	output:
+		tsv = protected(transdecoder + "pfama_{species}.tsv")
+	threads:
+		4
+	log:
+		transdecoder + "hmmscan_pfama_{species}.log"
+	benchmark:
+		transdecoder + "hmmscan_pfama_{species}.json"
+	shell:
+		"hmmscan "
+			"--cpu {threads} "
+			"--domtblout {output.tsv} "
+			"{input.hmm} "
+			"{input.pep} "
+		"2> {log} 1>&2"
+
+
+
+rule transdecoder_blastp_uniref90_species:
+	input:
+		pep = "{species}.fasta.transdecoder/longest_orfs.pep",
+		db = db + "uniref90"
+	output:
+		tsv = protected(transdecoder + "uniref90_{species}.tsv")
+	threads:
+		24
+	params:
+		evalue = config["params"]["transdecoder"]["blastp"]["evalue"],
+		max_target_seqs = config["params"]["transdecoder"]["blastp"]["max_target_seqs"]
+	log:
+		transdecoder + "blastp_uniref90_{species}.log"
+	benchmark:
+		transdecoder + "blastp_uniref90_{species}.json"
+	shell:
+		"blastp "
+			"-query {input.pep} "
+			"-db {input.db} "
+			"-max_target_seqs {params.max_target_seqs} "
+			"-outfmt 6 "
+			"-evalue {params.evalue} "
+			"-num_threads {threads} "
+			"-out {output.tsv} "
+		"2> {log} 1>&2"
+
+
+
+
+rule transdecoder_blastp_swissprot_species:
+	input:
+		pep = "{species}.fasta.transdecoder/longest_orfs.pep",
+		db = db + "swissprot"
+	output:
+		tsv = protected(transdecoder + "swissprot_{species}.tsv")
+	threads:
+		24
+	params:
+		evalue = config["params"]["transdecoder"]["blastp"]["evalue"],
+		max_target_seqs = config["params"]["transdecoder"]["blastp"]["max_target_seqs"]
+	log:
+		transdecoder + "blastp_swissprot_{species}.log"
+	benchmark:
+		transdecoder + "blastp_swissprot_{species}.json"
+	shell:
+		"blastp "
+			"-query {input.pep} "
+			"-db {input.db} "
+			"-max_target_seqs {params.max_target_seqs} "
+			"-outfmt 6 "
+			"-evalue {params.evalue} "
+			"-num_threads {threads} "
+			"-out {output.tsv} "
+		"2> {log} 1>&2"
+
+
+
+
+rule transdecoder_predict_species:
+	input:
+		fasta = raw + "{species}.fasta",
+		pfam_tsv = transdecoder + "pfama_{species}.tsv",
+		blastp_tsv = transdecoder + config["params"]["transdecoder"]["blastp"]["database"] + "_{species}.tsv",
+		folder = "{species}.fasta.transdecoder/",
+		base_freqs = "{species}.fasta.transdecoder/base_freqs.dat",
+		base_freqs_ok = "{species}.fasta.transdecoder/base_freqs.dat.ok",
+		cds = "{species}.fasta.transdecoder/longest_orfs.cds",
+		gff3 = "{species}.fasta.transdecoder/longest_orfs.gff3",
+		pep = "{species}.fasta.transdecoder/longest_orfs.pep"
+	output:
+		bed  = protected(transdecoder + "{species}.bed"),
+		cds  = protected(transdecoder + "{species}.cds"),
+		gff3 = protected(transdecoder + "{species}.gff3"),
+		pep  = protected(transdecoder + "{species}.pep"),
+	params:
+		dir = "{species}.fasta.transdecoder/",
+		bed  = "{species}.fasta.transdecoder.bed",
+		cds  = "{species}.fasta.transdecoder.cds",
+		gff3 = "{species}.fasta.transdecoder.gff3",
+		pep  = "{species}.fasta.transdecoder.pep",
+	threads:
+		24
+	log:
+		transdecoder + "predict_{species}.log"
+	benchmark:
+		transdecoder + "predict_{species}.json"
+	shell:
+		"perl src/TransDecoder-3.0.0/TransDecoder.Predict "
+			"-t {input.fasta} "
+			"--retain_pfam_hits {input.pfam_tsv} "
+			"--retain_blastp_hits {input.pfam_tsv} "
+			"--cpu {threads} "
+		"2> {log} 1>&2 && "
+		"mv {params.bed} {output.bed} 2>> {log} 1>&2 && "
+		"mv {params.cds} {output.cds} 2>> {log} 1>&2 && "
+		"mv {params.gff3} {output.gff3} 2>> {log} 1>&2 && "
+		"mv {params.pep} {output.pep} 2>> {log} 1>&2 && "
+		"rm -rf {params.dir} 2>> {log} 1>&2"
