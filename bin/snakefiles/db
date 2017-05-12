@@ -12,7 +12,7 @@ rule db_makeblastdb_uniref90:
     benchmark:
         db + "makeblastdb_uniref90.json"
     shell:
-        "pigz "
+        "gzip "
             "--decompress "
             "--stdout "
             "{input.fa_gz} | "
@@ -39,7 +39,7 @@ rule db_makeblastdb_swissprot:
     benchmark:
         db + "makeblastdb_swissprot.json"
     shell:
-        "pigz "
+        "gzip "
             "--decompress "
             "--stdout "
             "{input.fa_gz} | "

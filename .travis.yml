@@ -11,4 +11,4 @@ before_install:
   - bash bin/install/from_pip3.sh
 
 script:
-  - snakemake 
+  - snakemake -j

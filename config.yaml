@@ -1,12 +1,12 @@
 species:
-    #aalo:
+    # aalo:
     #    fasta: data/transcriptomes/aalo.fasta
     #    url: ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/GE/TY/GETY01/GETY01.1.fsa_nt.gz
     #    name: "Alosa alosa"
-    #btyr:
+    # btyr:
     #    fasta: data/transcriptomes/btyr.fasta
     #    name: "Brevoortia tyrannus"
-    #spil:
+    # spil:
     #    fasta: data/transcriptomes/spil.fasta
     #    name: "Sardina pilchardus"
     amex:
@@ -17,31 +17,31 @@ species:
         fasta: data/transcriptomes/gmor.fasta.1000
         url: ftp://ftp.ensembl.org/pub/release-85/fasta/gadus_morhua/cdna/Gadus_morhua.gadMor1.cdna.all.fa.gz
         name: "Gadus morhua"
-    #trur:
-    #    fasta: data/transcriptomes/trur.fasta
-    #    url: ftp://ftp.ensembl.org/pub/release-85/fasta/takifugu_rubripes/cdna/Takifugu_rubripes.FUGU4.cdna.all.fa.gz
-    #    name: "Takifugu rubripes"
-    orap:
-        fasta: data/transcriptomes/orap.fasta.1000
-        url: ftp://ftp.ensembl.org/pub/release-85/fasta/oryzias_latipes/cdna/Oryzias_latipes.MEDAKA1.cdna.all.fa.gz
-        name: "Oryzias latipes"
-    xmac:
-        fasta: data/transcriptomes/xmac.fasta.1000
-        url: ftp://ftp.ensembl.org/pub/release-85/fasta/xiphophorus_maculatus/cdna/Xiphophorus_maculatus.Xipmac4.4.2.cdna.all.fa.gz
-        name: "Xiphophorus maculatus"
-    #locu:
+    trur:
+        fasta: data/transcriptomes/trur.fasta.1000
+        url: ftp://ftp.ensembl.org/pub/release-85/fasta/takifugu_rubripes/cdna/Takifugu_rubripes.FUGU4.cdna.all.fa.gz
+        name: "Takifugu rubripes"
+    # orap:
+    #     fasta: data/transcriptomes/orap.fasta.1000
+    #     url: ftp://ftp.ensembl.org/pub/release-85/fasta/oryzias_latipes/cdna/Oryzias_latipes.MEDAKA1.cdna.all.fa.gz
+    #     name: "Oryzias latipes"
+    # xmac:
+    #     fasta: data/transcriptomes/xmac.fasta.1000
+    #     url: ftp://ftp.ensembl.org/pub/release-85/fasta/xiphophorus_maculatus/cdna/Xiphophorus_maculatus.Xipmac4.4.2.cdna.all.fa.gz
+    #     name: "Xiphophorus maculatus"
+    # locu:
     #    fasta: data/transcriptomes/locu.fasta
     #    url: ftp://ftp.ensembl.org/pub/release-85/fasta/lepisosteus_oculatus/cdna/Lepisosteus_oculatus.LepOcu1.cdna.all.fa.gz
     #    name: "Lepisosteus oculatus"
-    #gacu:
+    # gacu:
     #    fasta: data/transcriptomes/gacu.fasta
     #    url: ftp://ftp.ensembl.org/pub/release-85/fasta/gasterosteus_aculeatus/cdna/Gasterosteus_aculeatus.BROADS1.cdna.all.fa.gz
     #    name: "Gasterosteus aculeatus"
-    #tnig:
+    # tnig:
     #    fasta: data/transcriptomes/tnig.fasta
     #    url: ftp://ftp.ensembl.org/pub/release-85/fasta/tetraodon_nigroviridis/cdna/Tetraodon_nigroviridis.TETRAODON8.cdna.all.fa.gz
     #    name: "Tetraodon nigroviridis"
-    #onil:
+    # onil:
     #    fasta: data/transcriptomes/onil.fasta
     #    url: ftp://ftp.ensembl.org/pub/release-85/fasta/oreochromis_niloticus/cdna/Oreochromis_niloticus.Orenil1.0.cdna.all.fa.gz
     #    name: "Oreochromis niloticus"
@@ -64,6 +64,7 @@ databases:
 
 params:
     transdecoder:
+        number_of_chunks: 30 # Same for blastx and hmmscan
         blastp:
             database: swissprot # or uniref90
             evalue: 1e-5
@@ -72,7 +73,7 @@ params:
         predict:
     orthofinder:
         blastp_evalue: 0.001
-        blastp_chunk_size: 100
+        number_of_chunks: 30
         mcl_inflation: 1.5
     orthogroups:
         extract_orthogroups:
