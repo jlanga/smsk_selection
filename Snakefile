@@ -6,14 +6,14 @@ n_species = len(species)
 
 snakefiles = "src/snakefiles/"
 
-include: snakefiles + "folders"
-include: snakefiles + "clean"
-include: snakefiles + "raw"
-include: snakefiles + "download"
-include: snakefiles + "db"
-include: snakefiles + "transdecoder"
-include: snakefiles + "tag"
-include: snakefiles + "orthofinder"
+include: snakefiles + "folders.py"
+include: snakefiles + "clean.py"
+include: snakefiles + "raw.py"
+include: snakefiles + "download.py"
+include: snakefiles + "db.py"
+include: snakefiles + "transdecoder.py"
+include: snakefiles + "tag.py"
+include: snakefiles + "orthofinder.py"
 # include: snakefiles + "orthogroups"
 
 rule all:
