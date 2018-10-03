@@ -1,0 +1,22 @@
+transdecoder:
+    chunks: 4 # Same for blastx and hmmscan
+    blastp:
+        database: swissprot # or uniref90
+        evalue: 1e-5
+        max_target_seqs: 1
+
+hmmscan:
+
+predict:
+
+orthofinder:
+    blastp_evalue: 0.001
+    number_of_chunks: 30
+    mcl_inflation: 1.5
+
+orthogroups:
+    extract_orthogroups:
+        minimum: 2
+
+fastcodeml:
+    maximizer: 22

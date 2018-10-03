@@ -1,67 +1,82 @@
-rule download_wget_uniref90:
+rule download_uniprot_sprot:
     output:
-        fa_gz = protected(
-            download + "uniref90.fa.gz"
-        )
-    threads:
-        1
+        download + "uniprot_sprot.dat.gz"
     params:
-        url = config["databases"]["uniref90"]["url"]
+        url = features["swissprot"]
     log:
-        download + "wget_uniref90.log"
+        download + "uniprot_sprot.log"
     benchmark:
-        download + "wget_uniref90.json"
+        download + "uniprot_sprot.json"
+    conda:
+        "download.yml"
     shell:
-        "wget "
-            "--continue "
-            "--output-document {output.fa_gz} "
-            "{params.url} "
-        "2> {log}"
+        """
+        wget \
+            --continue \
+            --output-document {output} \
+            {params.url} \
+        2> {log}
+        """
 
 
-
-rule download_wget_swissprot:
+rule download_nog_annotations:
     output:
-        fa_gz = protected(
-            download + "swissprot.fa.gz"
-        )
-    threads:
-        1
+        download + "NOG.annotations.tsv.gz"
     params:
-        url = config["databases"]["swissprot"]["url"]
+        url = features["NOG.annotations"]
     log:
-        download + "wget_swissprot.log"
+        download + "NOG.annotations.log"
     benchmark:
-        download + "wget_swissprot.json"
+        download + "NOG.annotations.json"
+    conda:
+        "download.yml"
     shell:
-        "wget "
-            "--continue "
-            "--output-document {output.fa_gz} "
-            "{params.url} "
-        "2> {log}"
+        """
+        wget \
+            --continue \
+            --output-document {output} \
+            {params.url} \
+        2> {log}
+        """
 
 
-
-
-rule download_wget_pfama:
+rule download_obo:
     output:
-        hmm_gz = protected(
-            download + "pfama.hmm.gz"
-        )
-    threads:
-        1
+        download + "go-basic.obo"
     params:
-        url = config["databases"]["pfama"]["url"]
+        url = features["obo"]
     log:
-        download + "wget_pfama.log"
+        download + "obo.log"
     benchmark:
-        download + "wget_pfams.json"
+        download + "obo.json"
+    conda:
+        "download.yml"
     shell:
-        "wget "
-            "--continue "
-            "--output-document {output.hmm_gz} "
-            "{params.url} "
-        "2> {log}"
+        """
+        wget \
+            --continue \
+            --output-document {output} \
+            {params.url} \
+        2> {log}
+        """
 
 
-
+rule download_pfama:
+    output:
+        download + "Pfam-A.hmm.gz"
+    params:
+        url = features["Pfam-A"]
+    log:
+        download + "pfama.log"
+    benchmark:
+        download + "pfama.json"
+    conda:
+        "download.yml"
+    shell:
+        """
+        wget \
+            --continue \
+            --output-document {output} \
+            {params.url} \
+        2> {log}
+        """

@@ -1,42 +1,34 @@
-rule raw_make_link_species:
-    output:
-        fasta= raw + "{species}.fasta"
-    threads:
-        1
-    log:
-        raw + "make_link_{species}.log"
-    benchmark:
-        raw + "make_link_{species}.json"
-    params:
-        original_file= lambda wildcards: config["species"][wildcards.species]["fasta"]
+def get_species_fasta(wildcards):
+    return samples.loc[wildcards.species]["fasta"]
+
+
+def get_species_g2t(wildcards):
+    return samples.loc[wildcards.species]["g2t"]
+
+
+def get_species_url(wildcards):
+    return samples.loc[wildcards.species]["url"]
+
+
+rule raw_link_fa:
+    output: raw + "{species}.fasta"
+    params: get_species_fasta
+    shell: "ln --symbolic $(readlink --canonicalize {params}) {output}"
+
+
+rule raw_link_g2t:
+    output: raw + "{species}.g2t.tsv"
+    params: get_species_g2t
+    shell: "ln --symbolic $(readlink --canonicalize {params}) {output}"
+
+
+rule raw_download_species:
+    output: protected( "data/transcriptomes/" + "{species}.fasta")
+    params: get_species_url
+    log: raw + "download_{species}.log"
     shell:
-        "ln -s "
-            "$(readlink -f {params.original_file}) "
-            "{output.fasta} "
-        "2> {log} "
-        "1>&2"
-
-
-
-rule raw_dowload_species:
-    output:
-        fasta = protected(
-            "data/transcriptomes/" + "{species}.fasta"
-        )
-    params:
-        url = lambda wildcards: config["species"][wildcards.species]["url"]
-    threads:
-        1
-    log:
-        raw + "download_{species}.log"
-    benchmark:
-        raw + "download_{species}.json"
-    shell:
-        "( wget "
-            "--output-document - "
-            "{params.url} | "
-        "pigz "
-            "--decompress "
-            "--stdout "
-        "> {output.fasta} ) "
-        "2> {log}"
+        """
+        (wget --output-document - {params.url} \
+        | pigz --decompress --stdout \
+        > {output}) 2> {log}
+        """

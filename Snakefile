@@ -1,19 +1,32 @@
-shell.prefix("set -euo pipefail;")
-configfile: "config.yaml"
+import pandas as pd
+import yaml
 
-species = [x for x in config["species"]]
-n_species = len(species)
+
+from snakemake.utils import min_version
+min_version("5.0")
+
+shell.prefix("set -euo pipefail;")
+
+params = yaml.load(open("params.yml", "r"))
+features = yaml.load(open("features.yml", "r"))
+samples = pd.read_table("samples.tsv").set_index("species")
+
+singularity: "docker://continuumio/miniconda3:4.4.10"
+
+SPECIES = samples.index.tolist()
+N_SPECIES = len(SPECIES)
 
 snakefiles = "src/snakefiles/"
 
 include: snakefiles + "folders.py"
 include: snakefiles + "clean.py"
+include: snakefiles + "generic.py"
 include: snakefiles + "raw.py"
 include: snakefiles + "download.py"
 include: snakefiles + "db.py"
 include: snakefiles + "transdecoder.py"
-include: snakefiles + "tag.py"
-include: snakefiles + "orthofinder.py"
+# include: snakefiles + "tag.py"
+# include: snakefiles + "orthofinder.py"
 # include: snakefiles + "orthogroups"
 
 rule all:

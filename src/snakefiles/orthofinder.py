@@ -1,22 +1,11 @@
-rule orthofinder_prepare_link_species:
+rule orthofinder_link:
     """
     Link proteomes into another folder since orthofinder populates such folder.
     """
-    input:
-        pep= tag + "{species}.pep"
-    output:
-        fasta= temp(
-            orthofinder + "{species}.fasta"
-        )
-    threads:
-        1
-    log:
-        orthofinder + "prepare_link_{species}.log"
-    benchmark:
-        orthofinder + "prepare_link_{species}.json"
+    input: tag + "{species}.pep"
+    output: temp(orthofinder + "{species}.fasta")
     shell:
-        "ln --symbolic $(readlink -f {input.pep}) {output.fasta} 2> {log}"
-
+        "ln --symbolic $(readlink --canonicalize {input}) {output}"
 
 
 rule orthofinder_prepare:
@@ -26,7 +15,7 @@ rule orthofinder_prepare:
     input:
         fastas = expand(
             orthofinder + "{species}.fasta",
-            species = config["species"]
+            species=SAMPLES.index
         )
     output:
         txt = touch(
@@ -133,7 +122,7 @@ rule orthofinder_blastp_species_chunk:
             "-max_target_seqs 1 "
             "-outfmt 6 "
             "-evalue 1e-5 "
-            "-out {output.tsv} " 
+            "-out {output.tsv} "
         "2> {log} 1>&2"
 
 

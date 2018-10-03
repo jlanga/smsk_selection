@@ -1,69 +1,121 @@
-rule db_makeblastdb_uniref90:
+rule db_parse_uniprot_sprot:
     input:
-        fa_gz = download + "uniref90.fa.gz"
+        download + "uniprot_sprot.dat.gz"
     output:
-        db = touch(
-            db + "uniref90"
-            )
-    threads:
-        1
+        taxonomy = db + "trinotate.TaxonomyIndex",
+        uniprot = db + "trinotate.UniprotIndex",
+        pep = download + "uniprot_sprot.pep"
+    params:
+        pep_tmp = download + "uniprot_sprot.dat.gz.pep",
+        prefix = db + "trinotate"
     log:
-        db + "makeblastdb_uniref90.log"
+        db + "parse_uniprot_sprot.log"
     benchmark:
-        db + "makeblastdb_uniref90.json"
+        db + "parse_uniprot_sprot.josn"
+    conda:
+        "db.yml"
     shell:
-        "gzip "
-            "--decompress "
-            "--stdout "
-            "{input.fa_gz} | "
-        "makeblastdb "
-            "-dbtype prot "
-            "-title {output.db} "
-            "-out {output.db} "
-            "-parse_seqids "
-        "2> {log} 1>&2"
+        "EMBL_swissprot_parser.pl {input} {params.prefix} "
+        "2> {log}; "
+        "mv {params.pep_tmp} {output.pep}"
 
 
-
-rule db_makeblastdb_swissprot:
+rule db_obo_to_tab:
     input:
-        fa_gz = download + "swissprot.fa.gz"
+        download + "go-basic.obo"
     output:
-        db = touch(
-            db + "swissprot"
-            )
-    threads:
-        1
+        db + "go-basic.obo.tab"
     log:
-        db + "makeblastdb_swissprot.log"
+        db + "obo_to_tab.log"
     benchmark:
-        db + "makeblastdb_swissprot.json"
+        db + "obo_to_tab.json"
+    conda:
+        "db.yml"
     shell:
-        "gzip "
-            "--decompress "
-            "--stdout "
-            "{input.fa_gz} | "
-        "makeblastdb "
-            "-dbtype prot "
-            "-title {output.db} "
-            "-out {output.db} "
-            "-parse_seqids "
-        "2> {log} 1>&2"
+        "obo_to_tab.pl {input} > {output} 2> {log}"
 
 
-
-
-rule db_hmmpress_pfama: ##data/db/Pfam-A.hmm - Pfam database
+rule db_parse_nog:
     input:
-        hmm_gz = download + "pfama.hmm.gz"
+        tab = download + "NOG.annotations.tsv.gz"
     output:
-        hmm = db + "pfama.hmm" # Be careful! The database and the original hmm file share the same name!
-    threads:
-        1
+        db + "NOG.annotations.tsv.bulk_load"
+    log:
+        db + "parse_nog.log"
+    benchmark:
+        db + "parse_nog.json"
+    conda:
+        "db.yml"
+    shell:
+        "(gzip -dc {input} "
+        "| print.pl 1 5 "
+        "> {output} ) 2> {log}"
+
+
+rule db_parse_pfam:
+    input:
+        download + "Pfam-A.hmm.gz"
+    output:
+        db + "Pfam-A.hmm.gz.pfam_sqlite_bulk_load"
+    params:
+        tmp = download + "Pfam-A.hmm.gz.pfam_sqlite_bulk_load"
+    log:
+        db + "parse_pfam.log"
+    benchmark:
+        db + "parse_pfam.json"
+    conda:
+        "db.yml"
+    shell:
+        "PFAM_dat_parser.pl {input} 2> {log}; "
+        "mv {params.tmp} {output} 2>> {log}"
+
+
+rule db_hmmpress_pfama:
+    """
+    Format the HMM Pfam-A database
+    """
+    input:
+        hmm_gz = download + "Pfam-A.hmm.gz"
+    output:
+        hmm = db + "Pfam-A.hmm",
+        other = expand(
+            db + "Pfam-A.hmm.{extension}",
+            extension="h3i h3f h3p".split()
+        )
     log:
         db + "hmmpress_pfama.log"
     benchmark:
         db + "hmmpress_pfama.json"
+    conda:
+        "db.yml"
     shell:
-        "pigz --decompress --keep --stdout {input.hmm_gz} > {output.hmm} 2> {log} ; "
-        "hmmpress {output.hmm} 2>> {log} 1>&2"
+        "gzip --decompress --keep --stdout {input.hmm_gz} "
+        "> {output.hmm} 2> {log}; "
+        "hmmpress {output.hmm} 2>> {log} 1>&2; "
+        "cat /dev/null > {output.hmm} 2>> {log} 1>&2"
+
+
+rule db_makeblastdb_uniprot_sprot:
+    """
+    Make the SwissProt filtered database
+    """
+    input:
+        download + "uniprot_sprot.pep"
+    output:
+        touch(db + "uniprot_sprot")
+    threads:
+        1
+    log:
+        db + "makeblastdb_uniprot_sprot.log"
+    benchmark:
+        db + "makeblastdb_uniprot_sprot.json"
+    conda:
+        "db.yml"
+    shell:
+        "makeblastdb "
+        "    -dbtype prot "
+        "    -title {output} "
+        "    -out {output} "
+        "    -parse_seqids "
+        "    -in {input} "
+        "2> {log} 1>&2"
