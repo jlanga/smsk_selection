@@ -1,3 +1,5 @@
+CHUNKS_TD = config["params"]["transdecoder"]["number_of_chunks"]
+
 rule transdecoder_longorfs_species:
     """
     Predict ORFs by length
@@ -5,24 +7,13 @@ rule transdecoder_longorfs_species:
     input:
         fasta = raw + "{species}.fasta"
     output:
-        base_freqs = temp(
-            "{species}.fasta.transdecoder_dir/base_freqs.dat"
-        ),
+        base_freqs = temp("{species}.fasta.transdecoder_dir/base_freqs.dat"),
         base_freqs_ok = temp(
             "{species}.fasta.transdecoder_dir/base_freqs.dat.ok"
         ),
-        cds = temp(
-            "{species}.fasta.transdecoder_dir/longest_orfs.cds"
-        ),
-        gff3 = temp(
-            "{species}.fasta.transdecoder_dir/longest_orfs.gff3"
-        ),
-        pep = temp(
-            "{species}.fasta.transdecoder_dir/longest_orfs.pep"
-        ),
-        dir = temp(
-            "{species}.fasta.transdecoder_dir/"
-        )
+        cds = temp("{species}.fasta.transdecoder_dir/longest_orfs.cds"),
+        gff3 = temp("{species}.fasta.transdecoder_dir/longest_orfs.gff3"),
+        pep = temp("{species}.fasta.transdecoder_dir/longest_orfs.pep")
     threads:
         1
     log:
@@ -62,10 +53,10 @@ rule transdecoder_split_longest_orfs_species:
     output:
         expand(
             transdecoder + "{{species}}/chunks/longest_orfs_{chunk_id}.tsv",
-            chunk_id = ['{0:05d}'.format(x) for x in range(0, config["params"]["transdecoder"]["number_of_chunks"])]
+            chunk_id=['{0:05d}'.format(x) for x in range(0, CHUNKS_TD)]
         )
     params:
-        number_of_chunks = config["params"]["transdecoder"]["number_of_chunks"],
+        number_of_chunks = CHUNKS_TD,
         species = "{species}"
     log:
         transdecoder + "{species}/chunks/split_longest_orfs.log"
@@ -116,7 +107,7 @@ rule transdecoder_hmmscan_merge_species:
     input:
         expand(
             transdecoder + "{{species}}/hmmscan/longest_orfs_{chunk_id}.tsv",
-            chunk_id = ['{0:05d}'.format(x) for x in range(0, config["params"]["transdecoder"]["number_of_chunks"])]
+            chunk_id = ['{0:05d}'.format(x) for x in range(0, CHUNKS_TD)]
         )
     output:
         tsv = transdecoder + "{species}/hmmscan.tsv"
@@ -152,7 +143,7 @@ rule transdecoder_blastp_species_chunk:
             "-max_target_seqs 1 "
             "-outfmt 6 "
             "-evalue 1e-5 "
-            "-out {output.tsv} " 
+            "-out {output.tsv} "
         "2> {log} 1>&2"
 
 
@@ -164,7 +155,7 @@ rule transdecoder_blastp_species_merge:
     input:
         expand(
             transdecoder + "{{species}}/blastp/longest_orfs_{chunk_id}.tsv",
-            chunk_id = ['{0:05d}'.format(x) for x in range(0, config["params"]["transdecoder"]["number_of_chunks"])]
+            chunk_id = ['{0:05d}'.format(x) for x in range(0, CHUNKS_TD)]
         )
     output:
         tsv = transdecoder + "{species}/blastp.tsv"
@@ -181,7 +172,6 @@ rule transdecoder_predict_species:
         fasta = raw + "{species}.fasta",
         pfam_tsv = transdecoder + "{species}/hmmscan.tsv",
         blastp_tsv = transdecoder + "{species}/blastp.tsv",
-        folder = "{species}.fasta.transdecoder_dir/",
         base_freqs = "{species}.fasta.transdecoder_dir/base_freqs.dat",
         base_freqs_ok = "{species}.fasta.transdecoder_dir/base_freqs.dat.ok",
         cds = "{species}.fasta.transdecoder_dir/longest_orfs.cds",
@@ -193,7 +183,7 @@ rule transdecoder_predict_species:
         gff3 = protected(transdecoder + "{species}.gff3"),
         pep  = protected(transdecoder + "{species}.pep"),
     params:
-        dir = "{species}.fasta.transdecoder_dir/",
+        folder = "{species}.fasta.transdecoder_dir/",
         bed  = "{species}.fasta.transdecoder.bed",
         cds  = "{species}.fasta.transdecoder.cds",
         gff3 = "{species}.fasta.transdecoder.gff3",
@@ -215,4 +205,4 @@ rule transdecoder_predict_species:
         "mv {params.cds} {output.cds} 2>> {log} 1>&2 && "
         "mv {params.gff3} {output.gff3} 2>> {log} 1>&2 && "
         "mv {params.pep} {output.pep} 2>> {log} 1>&2 && "
-        "rm -rf {params.dir} 2>> {log} 1>&2"
+        "rm -rf {params.folder} 2>> {log} 1>&2"
