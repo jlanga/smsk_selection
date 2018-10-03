@@ -7,7 +7,7 @@ rule tag_pep_species:
     input: transdecoder + "{species}.pep"
     output: tag + "{species}.pep"
     params: "{species}"
-    shell: "python3 bin/fasta_tagger.py {params} < {input} > {output} "
+    shell: "python3 src/fasta_tagger.py {params} < {input} > {output} "
 
 
 rule tag_cds_species:
@@ -19,9 +19,14 @@ rule tag_cds_species:
     input: transdecoder + "{species}.cds"
     output: tag + "{species}.cds"
     params: "{species}"
-    shell:
-        "python3 bin/fasta_tagger.py "
-            "{params.tag} "
-        "< {input.cds} "
-        "> {output.cds} "
-        "2> {log}"
+    shell: "python3 src/fasta_tagger.py {params} < {input} > {output}"
+
+
+rule tag:
+    """Perform all tag tasks"""
+    input:
+        expand(
+            tag + "{species}.{extension}",
+            species=SPECIES,
+            extension="pep cds".split()
+        )

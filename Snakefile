@@ -25,7 +25,7 @@ include: snakefiles + "raw.py"
 include: snakefiles + "download.py"
 include: snakefiles + "db.py"
 include: snakefiles + "transdecoder.py"
-# include: snakefiles + "tag.py"
+include: snakefiles + "tag.py"
 # include: snakefiles + "orthofinder.py"
 # include: snakefiles + "orthogroups"
 
