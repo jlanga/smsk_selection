@@ -4,7 +4,7 @@ configfile: "config.yaml"
 species = [x for x in config["species"]]
 n_species = len(species)
 
-snakefiles = "bin/snakefiles/"
+snakefiles = "src/snakefiles/"
 
 include: snakefiles + "folders"
 include: snakefiles + "clean"
