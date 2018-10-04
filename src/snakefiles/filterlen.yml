@@ -1,0 +1,9 @@
+channels:
+- bioconda
+- r
+- defaults
+- conda-forge
+dependencies:
+- python>=3
+- biopython=1.72
+- seqtk

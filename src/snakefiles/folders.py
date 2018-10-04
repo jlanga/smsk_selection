@@ -3,6 +3,8 @@ download = "data/downloads/"
 db = "data/db/"
 transdecoder = "results/transdecoder/"
 tag = "results/tag/"
+filterlen = "results/filterlen/"
+
 orthofinder = "results/orthofinder/"
 
 orthogroups = "results/orthogroups/"

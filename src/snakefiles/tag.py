@@ -7,6 +7,7 @@ rule tag_pep_species:
     input: transdecoder + "{species}.pep"
     output: tag + "{species}.pep"
     params: "{species}"
+    conda: "tag.yml"
     shell: "python3 src/fasta_tagger.py {params} < {input} > {output} "
 
 
@@ -19,6 +20,7 @@ rule tag_cds_species:
     input: transdecoder + "{species}.cds"
     output: tag + "{species}.cds"
     params: "{species}"
+    conda: "tag.yml"
     shell: "python3 src/fasta_tagger.py {params} < {input} > {output}"
 
 

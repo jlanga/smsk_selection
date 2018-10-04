@@ -26,7 +26,8 @@ include: snakefiles + "download.py"
 include: snakefiles + "db.py"
 include: snakefiles + "transdecoder.py"
 include: snakefiles + "tag.py"
-# include: snakefiles + "orthofinder.py"
+include: snakefiles + "filterlen.py"
+include: snakefiles + "orthofinder.py"
 # include: snakefiles + "orthogroups"
 
 rule all:
@@ -43,8 +44,8 @@ rule all:
         #     species = species,
         #     extension = "pep cds".split()
         # ),
-        #orthofinder + "prepare.txt"
-        orthofinder + "Orthogroups.csv",
+        orthofinder + "prepare.txt"
+        # orthofinder + "Orthogroups.csv",
         #expand(
         #    orthofinder + "{species}.pep.fai",
         #    species = species
