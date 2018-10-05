@@ -6,6 +6,12 @@ tag = "results/tag/"
 filterlen = "results/filterlen/"
 
 orthofinder = "results/orthofinder/"
+orthofinder_fasta = orthofinder + "fasta/"
+orthofinder_search = orthofinder + "search/"
+orthofinder_orthogroups = orthofinder + "orthogroups/"
+orthofinder_sequences = orthofinder + "sequences/"
+orthofinder_trees = orthofinder + "trees/"
+
 
 orthogroups = "results/orthogroups/"
 

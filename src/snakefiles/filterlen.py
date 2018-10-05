@@ -7,7 +7,7 @@ rule filterlen_pep:
 
 rule filterlen_cds:
     input:
-        tag_cds = tag + "{species}.cds"
+        tag_cds = tag + "{species}.cds",
         pep_fai = filterlen + "{species}.pep.fai"
     output: filterlen + "{species}.cds"
     conda: "filterlen.yml"

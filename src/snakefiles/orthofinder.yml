@@ -4,6 +4,4 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - numpy=1.15.2=py27h99e49ec_1
   - orthofinder=2.2.7
-  - python=2.7
