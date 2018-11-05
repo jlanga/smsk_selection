@@ -30,7 +30,7 @@ rule orthofinder_prepare:
             species=SPECIES
         )
     output:
-        #txt = touch(orthofinder + "prepare.txt"),
+        txt = touch(orthofinder + "prepare.txt"),
         fastas = expand(
             orthofinder + "Species{species_number}.fa",
             species_number=[x for x in range(0, N_SPECIES)]
@@ -225,6 +225,52 @@ rule orthofinder_orthologues:
             --from-trees {params.orthofinder_dir}/Orthologues_*/ \
             --algthreads {threads} \
         2> {log} 1>&2
+        """
+
+
+rule orthofinder_clean:
+    input: orthofinder + "orthologues.ok"
+    output: touch(orthofinder + "clean.ok")
+    params:
+        orthofinder_dir = orthofinder,
+        n_species = N_SPECIES - 1
+    shell:
+        """
+        pushd {params.orthofinder_dir}
+        mkdir search/
+        for i in {{0..{params.n_species}}}; do
+            mv ${{i}} search/
+        done
+        mv \
+            Blast*.txt \
+            BlastDB* \
+            Species*.fa* \
+            SequenceIDs.txt \
+            SpeciesIDs.txt \
+            search/
+
+        mkdir groups/
+        mv \
+            clusters_OrthoFinder_* \
+            OrthoFinder_*_graph.txt \
+            Orthogroups* \
+            SingleCopyOrthogroups.txt \
+            Statistics_Overall.csv \
+            Statistics_PerSpecies.csv \
+            groups/
+
+        mv \
+            Orthologues_*/Alignments \
+            Orthologues_*/Gene_Trees \
+            Orthologues_*/Sequences \
+            .
+
+        mkdir species_tree/
+        mv Orthologues_*/SpeciesTree* species_tree
+
+        mv Orthologues_*/New_Analysis_*/* .
+
+        rm -rf Orthologues_*l
         """
 
 # rule orthofinder_orthologues:
