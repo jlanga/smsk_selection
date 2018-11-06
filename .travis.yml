@@ -11,10 +11,11 @@ addons:
         - curl
 
 cache:
-    pip: true
+    pip:
+        - true
     directories:
-        - "$HOME"/download/
-        - "$HOME"/miniconda3_"$TRAVIS_OS_NAME"
+        - "$HOME/download/"
+        - "$HOME/miniconda3_$TRAVIS_OS_NAME"
 
 before_install:
     - bash .travis/travis_before_install.sh
