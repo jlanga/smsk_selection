@@ -117,7 +117,7 @@ rule transdecoder_blastp_chunk:
         pep = "{species}.fasta.transdecoder_dir/longest_orfs.pep",
         fai = "{species}.fasta.transdecoder_dir/longest_orfs.pep.fai",
         chunk = TRANSDECODER + "{species}/chunks/longest_orfs_{chunk_id}.tsv",
-        db = DB + "swissprot"
+        db = DB + "uniprot_sprot"
     output:
         tsv = TRANSDECODER + "{species}/blastp/longest_orfs_{chunk_id}.tsv"
     log:
