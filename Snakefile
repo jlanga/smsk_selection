@@ -1,7 +1,6 @@
 import pandas as pd
 import yaml
 
-
 from snakemake.utils import min_version
 min_version("5.0")
 
