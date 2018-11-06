@@ -233,13 +233,16 @@ rule orthofinder_clean:
     params:
         orthofinder_dir = ORTHOFINDER,
         n_species = N_SPECIES - 1
+    log: ORTHOFINDER + "clean.log"
     shell:
         """
-        pushd {params.orthofinder_dir}
+        pushd {params.orthofinder_dir} 2> {log} 1>&2
+
         mkdir search/
         for i in {{0..{params.n_species}}}; do
             mv ${{i}} search/
         done
+
         mv \
             Blast*.txt \
             BlastDB* \
@@ -269,5 +272,5 @@ rule orthofinder_clean:
 
         mv Orthologues_*/New_Analysis_*/* .
 
-        rm -rf Orthologues_*l
+        rm -rf Orthologues_*
         """
