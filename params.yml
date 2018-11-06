@@ -1,7 +1,9 @@
+# Snakemake parameter configuration file
+---
 transdecoder:
-    chunks: 4 # Same for blastx and hmmscan
+    chunks: 4  # Same for blastx and hmmscan
     blastp:
-        database: swissprot # or uniref90
+        database: swissprot  # or uniref90
         evalue: 1e-5
         max_target_seqs: 1
 

@@ -11,13 +11,13 @@ def get_species_url(wildcards):
 
 
 rule raw_link_fa:
-    output: raw + "{species}.fasta"
+    output: RAW + "{species}.fasta"
     params: get_species_fasta
     shell: "ln --symbolic $(readlink --canonicalize {params}) {output}"
 
 
 rule raw_link_g2t:
-    output: raw + "{species}.g2t.tsv"
+    output: RAW + "{species}.g2t.tsv"
     params: get_species_g2t
     shell: "ln --symbolic $(readlink --canonicalize {params}) {output}"
 
@@ -25,7 +25,7 @@ rule raw_link_g2t:
 rule raw_download_species:
     output: protected( "data/transcriptomes/" + "{species}.fasta")
     params: get_species_url
-    log: raw + "download_{species}.log"
+    log: RAW + "download_{species}.log"
     shell:
         """
         (wget --output-document - {params.url} \

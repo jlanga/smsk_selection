@@ -2,22 +2,19 @@ CHUNKS_ORTHO = params["orthofinder"]["number_of_chunks"]
 
 rule orthofinder_link:
     """
-    Link proteomes into another folder since orthofinder populates such folder.
+    Link proteomes into another folder since ORTHOFINDER populates such folder.
     """
-    input: filterlen + "{species}.pep"
-    output: orthofinder + "{species}.fasta"
+    input: FILTERLEN + "{species}.pep"
+    output: ORTHOFINDER + "{species}.fasta"
     shell: "ln --symbolic $(readlink --canonicalize {input}) {output}"
 
 
 rule orthofinder_link_all:
     input:
         fastas = expand(
-            orthofinder + "{species}.fasta",
+            ORTHOFINDER + "{species}.fasta",
             species=SPECIES
         )
-
-
-
 
 
 rule orthofinder_prepare:
@@ -26,29 +23,29 @@ rule orthofinder_prepare:
     """
     input:
         fastas = expand(
-            orthofinder + "{species}.fasta",
+            ORTHOFINDER + "{species}.fasta",
             species=SPECIES
         )
     output:
-        txt = touch(orthofinder + "prepare.txt"),
+        txt = touch(ORTHOFINDER + "prepare.txt"),
         fastas = expand(
-            orthofinder + "Species{species_number}.fa",
+            ORTHOFINDER + "Species{species_number}.fa",
             species_number=[x for x in range(0, N_SPECIES)]
         ),
         db = touch(
             expand(
-                orthofinder + "BlastDBSpecies{database_number}",
+                ORTHOFINDER + "BlastDBSpecies{database_number}",
                 database_number=[x for x in range(0, N_SPECIES)]
             )
         )
     params:
-        fasta_dir = orthofinder,
-        temp_dir1 = orthofinder + "Results_*",
-        temp_dir2 = orthofinder + "Results_*/WorkingDirectory/"
+        fasta_dir = ORTHOFINDER,
+        temp_dir1 = ORTHOFINDER + "Results_*",
+        temp_dir2 = ORTHOFINDER + "Results_*/WorkingDirectory/"
     log:
-        orthofinder + "prepare.log"
+        ORTHOFINDER + "prepare.log"
     benchmark:
-        orthofinder + "prepare.json"
+        ORTHOFINDER + "prepare.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -65,19 +62,20 @@ rule orthofinder_split:
     Split the headers from transdecoder_longest_orfs into multiple files
     """
     input:
-        fai = ancient(orthofinder + "Species{species_number}.fa.fai")
+        fai = ancient(ORTHOFINDER + "Species{species_number}.fa.fai")
     output:
         expand(
-            orthofinder + "{{species_number}}/chunks/ids_{chunk_id}.tsv",
+            ORTHOFINDER + "{{species_number}}/chunks/ids_{chunk_id}.tsv",
             chunk_id=['{0:05d}'.format(x) for x in range(0, CHUNKS_ORTHO)]
         )
     params:
+        folder = ORTHOFINDER,
         number_of_chunks = CHUNKS_ORTHO,
         species = "{species_number}"
     log:
-        orthofinder + "{species_number}/split.log"
+        ORTHOFINDER + "{species_number}/split.log"
     benchmark:
-        orthofinder + "{species_number}/split.json"
+        ORTHOFINDER + "{species_number}/split.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -87,7 +85,7 @@ rule orthofinder_split:
             "--suffix-length 5 "
             "--additional-suffix .tsv "
             "{input.fai} "
-            "{orthofinder}/{params.species}/chunks/ids_ "
+            "{params.folder}/{params.species}/chunks/ids_ "
         "2> {log}"
 
 
@@ -97,16 +95,16 @@ rule orthofinder_blastp:
     Run blastp of each chunk
     """
     input:
-        fasta = orthofinder + "Species{species_number}.fa",
-        fai   = ancient(orthofinder + "Species{species_number}.fa.fai"),
-        chunk = orthofinder + "{species_number}/chunks/ids_{chunk_id}.tsv",
-        db    = orthofinder + "BlastDBSpecies{database_number}",
+        fasta = ORTHOFINDER + "Species{species_number}.fa",
+        fai   = ancient(ORTHOFINDER + "Species{species_number}.fa.fai"),
+        chunk = ORTHOFINDER + "{species_number}/chunks/ids_{chunk_id}.tsv",
+        db    = ORTHOFINDER + "BlastDBSpecies{database_number}",
     output:
-        tsv = orthofinder + "{species_number}/{database_number}/blastp_{chunk_id}.tsv"
+        tsv = ORTHOFINDER + "{species_number}/{database_number}/blastp_{chunk_id}.tsv"
     log:
-        orthofinder + "{species_number}/{database_number}/blastp_{chunk_id}.log"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_{chunk_id}.log"
     benchmark:
-        orthofinder + "{species_number}/{database_number}/blastp_{chunk_id}.json"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_{chunk_id}.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -127,15 +125,15 @@ rule orthofinder_blastp_merge:
     """
     input:
         expand(
-            orthofinder + "{{species_number}}/{{database_number}}/blastp_{chunk_id}.tsv",
+            ORTHOFINDER + "{{species_number}}/{{database_number}}/blastp_{chunk_id}.tsv",
             chunk_id = ['{0:05d}'.format(x) for x in range(0, CHUNKS_ORTHO)]
         )
     output:
-        tsv = orthofinder + "Blast{species_number}_{database_number}.txt"
+        tsv = ORTHOFINDER + "Blast{species_number}_{database_number}.txt"
     log:
-        orthofinder + "{species_number}/{database_number}/blastp_merge.log"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_merge.log"
     benchmark:
-        orthofinder + "{species_number}/{database_number}/blastp_merge.json"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_merge.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -148,34 +146,34 @@ rule orthofinder_groups:
     """
     input:
         tsv = expand(
-                orthofinder + "Blast{database_number}_{species_number}.txt",
+                ORTHOFINDER + "Blast{database_number}_{species_number}.txt",
                 species_number = [x for x in range(0,N_SPECIES)],
                 database_number = [x for x in range(0,N_SPECIES)]
             ),
     output:
-        touch(orthofinder + "groups.ok")
-        # cluster_json = orthofinder + "cluster.json",
-        # cluster_log = orthofinder + "cluster.log",
-        # clusters_inflation = orthofinder + "clusters_OrthoFinder_v2.2.7_I1.5.txt",
-        # clusters_pairs = orthofinder + "clusters_OrthoFinder_v2.2.7_I1.5.txt_id_pairs.txt",
-        # graph = orthofinder + "OrthoFinder_v2.2.7_graph.txt",
-        # ortho_csv = orthofinder + "Orthogroups.csv",
-        # gene_count = orthofinder + "Orthogroups.GeneCount.csv",
-        # species_overlaps = orthofinder + "Orthogroups_SpeciesOverlaps.csv",
-        # ortho_txt = orthofinder + "Orthogroups.txt",
-        # unassigned = protected(orthofinder + "Orthogroups_UnassignedGenes.csv"),
-        # sigle_copy = protected(orthofinder + "SingleCopyOrthogroups.txt"),
-        # statistics_overall = protected(orthofinder + "Statistics_Overall.csv"),
-        # statistics_species = protected(orthofinder + "Statistics_PerSpecies.csv")
+        touch(ORTHOFINDER + "groups.ok")
+        # cluster_json = ORTHOFINDER + "cluster.json",
+        # cluster_log = ORTHOFINDER + "cluster.log",
+        # clusters_inflation = ORTHOFINDER + "clusters_OrthoFinder_v2.2.7_I1.5.txt",
+        # clusters_pairs = ORTHOFINDER + "clusters_OrthoFinder_v2.2.7_I1.5.txt_id_pairs.txt",
+        # graph = ORTHOFINDER + "OrthoFinder_v2.2.7_graph.txt",
+        # ortho_csv = ORTHOFINDER + "Orthogroups.csv",
+        # gene_count = ORTHOFINDER + "Orthogroups.GeneCount.csv",
+        # species_overlaps = ORTHOFINDER + "Orthogroups_SpeciesOverlaps.csv",
+        # ortho_txt = ORTHOFINDER + "Orthogroups.txt",
+        # unassigned = protected(ORTHOFINDER + "Orthogroups_UnassignedGenes.csv"),
+        # sigle_copy = protected(ORTHOFINDER + "SingleCopyOrthogroups.txt"),
+        # statistics_overall = protected(ORTHOFINDER + "Statistics_Overall.csv"),
+        # statistics_species = protected(ORTHOFINDER + "Statistics_PerSpecies.csv")
     params:
-        fasta_dir = orthofinder,
+        fasta_dir = ORTHOFINDER,
         inflation = params["orthofinder"]["mcl_inflation"]
     threads:
         8 # There is no reason to go beyond this value
     log:
-        orthofinder + "groups.log"
+        ORTHOFINDER + "groups.log"
     benchmark:
-        orthofinder + "groups.json"
+        ORTHOFINDER + "groups.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -192,12 +190,13 @@ rule orthofinder_groups:
 rule orthofinder_trees:
     input: rules.orthofinder_groups.output
     output:
-        touch(orthofinder + "trees.ok")
+        touch(ORTHOFINDER + "trees.ok")
     params:
-        orthofinder_dir = orthofinder,
-    conda: "orthofinder.yml"
+        orthofinder_dir = ORTHOFINDER,
+    conda:
+        "orthofinder.yml"
     log:
-        orthofinder + "trees.log"
+        ORTHOFINDER + "trees.log"
     threads: 32
     shell:
         """
@@ -212,12 +211,12 @@ rule orthofinder_trees:
         """
 
 rule orthofinder_orthologues:
-    input: orthofinder + "trees.ok"
-    output: touch(orthofinder + "orthologues.ok")
+    input: ORTHOFINDER + "trees.ok"
+    output: touch(ORTHOFINDER + "orthologues.ok")
     conda: "orthofinder.yml"
     params:
-        orthofinder_dir = orthofinder,
-    log: orthofinder + "orthologues.log"
+        orthofinder_dir = ORTHOFINDER,
+    log: ORTHOFINDER + "orthologues.log"
     threads: 64
     shell:
         """
@@ -229,10 +228,10 @@ rule orthofinder_orthologues:
 
 
 rule orthofinder_clean:
-    input: orthofinder + "orthologues.ok"
-    output: touch(orthofinder + "clean.ok")
+    input: ORTHOFINDER + "orthologues.ok"
+    output: touch(ORTHOFINDER + "clean.ok")
     params:
-        orthofinder_dir = orthofinder,
+        orthofinder_dir = ORTHOFINDER,
         n_species = N_SPECIES - 1
     shell:
         """
@@ -272,67 +271,3 @@ rule orthofinder_clean:
 
         rm -rf Orthologues_*l
         """
-
-# rule orthofinder_orthologues:
-#     input:
-#         rules.orthofinder_trees.output
-#     output:
-#         orthogroups_csv =
-#     params:
-#         msa_program = "mafft",
-#         tree_program = "iqtree"
-#     conda:
-#         "orthofinder.yml"
-#     shell:
-#         """orthofinder \
-#             --from-groups {{orthofinder}} \
-#             --method msa \
-#             --msa_program {params.msa_program} \
-#             --tree_program {params.tree_program} \
-#             --algthreads {threads} \
-#         2> {log} 1>&2
-#         """
-
-
-# rule orthofinder_mafft:
-#     input: orthofinder + "Sequences/{clusterid}.fa"
-#     output: orthofinder + "Alignments/{clusterid}.mafft.fa"
-#     conda: "orthofinder.yml"
-#     log: "orthofinder" + "Alignments/{clusterid}.mafft.fa"
-#     shell:
-#         """mafft \
-#             --localpair \
-#             --maxiterate 1000 \
-#             --anysymbol \
-#             {input} \
-#         > {output} \
-#         2> {log}
-#         """
-#
-#
-# rule orthofinder_raxml:
-#     input: orthofinder + "Alignments/{clusterid}.mafft.fa"
-#     output:
-#         best_nwk = orthofinder + "Trees/RAxML_bestTree.{clusterid}",
-#         info = orthofinder + "Trees/RAxML_info.{clusterid}",
-#         log = orthofinder + "Trees/RAxML_log.{clusterid}",
-#         mp_nwk = orthofinder + "Trees/RAxML_parsimonyTree.{clusterid}",
-#         result_nwk = orthofinder + "Trees/RAxML_result.{clusterid}"
-#     params:
-#         clusterid = "{clusterid}",
-#         directory = orthofinder + "Trees",
-#     conda: "orthofinder.yml"
-#     shell:
-#         """(raxmlHPC-AVX2 \
-#             -m PROTGAMMALG \
-#             -p 12345 \
-#             -s $(readlink --canonicalize {input}) \
-#             -n {params.clusterid} \
-#             -w $(readlink --canonicalize {params.directory}) \
-#         || true) \
-#         2> /dev/null 1>&2
-#         """
-
-
-# rule orthofinder:
-#     input:  dynamic(orthofinder + "Trees/RAxML_bestTree.{clusterid}")

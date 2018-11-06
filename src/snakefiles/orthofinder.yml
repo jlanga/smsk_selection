@@ -1,7 +1,13 @@
+# Environment for orthofinder and the tools it uses:
+#   blast
+#   diamond
+#   raxml
+#   fasttree
+#   etc
+---
 channels:
-  - bioconda
-  - r
-  - defaults
-  - conda-forge
+    - conda-forge
+    - bioconda
+    - defaults
 dependencies:
-  - orthofinder=2.2.7
+    - orthofinder=2.2.7

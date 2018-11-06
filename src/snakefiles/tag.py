@@ -4,8 +4,8 @@ rule tag_pep_species:
     comes, i.e. for Danio rerio: >drer|seq_id
     PEP version
     """
-    input: transdecoder + "{species}.pep"
-    output: tag + "{species}.pep"
+    input: TRANSDECODER + "{species}.pep"
+    output: TAG + "{species}.pep"
     params: "{species}"
     conda: "tag.yml"
     shell: "python3 src/fasta_tagger.py {params} < {input} > {output} "
@@ -17,18 +17,18 @@ rule tag_cds_species:
     comes, i.e. for Danio rerio: >drer|seq_id
     CDS version
     """
-    input: transdecoder + "{species}.cds"
-    output: tag + "{species}.cds"
+    input: TRANSDECODER + "{species}.cds"
+    output: TAG + "{species}.cds"
     params: "{species}"
     conda: "tag.yml"
     shell: "python3 src/fasta_tagger.py {params} < {input} > {output}"
 
 
 rule tag:
-    """Perform all tag tasks"""
+    """Perform all TAG tasks"""
     input:
         expand(
-            tag + "{species}.{extension}",
+            TAG + "{species}.{extension}",
             species=SPECIES,
             extension="pep cds".split()
         )

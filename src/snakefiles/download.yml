@@ -1,7 +1,8 @@
+# Environment to download data for transdecoder
+---
 channels:
-  - bioconda
-  - r
-  - defaults
-  - conda-forge
+    - conda-forge
+    - bioconda
+    - defaults
 dependencies:
     - wget=1.19.1

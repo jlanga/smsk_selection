@@ -1,26 +1,22 @@
-raw = "results/transcriptome/"
-download = "data/downloads/"
-db = "data/db/"
-transdecoder = "results/transdecoder/"
-tag = "results/tag/"
-filterlen = "results/filterlen/"
-
-orthofinder = "results/orthofinder/"
-orthofinder_fasta = orthofinder + "fasta/"
-orthofinder_search = orthofinder + "search/"
-orthofinder_orthogroups = orthofinder + "orthogroups/"
-orthofinder_sequences = orthofinder + "sequences/"
-orthofinder_trees = orthofinder + "trees/"
+"""Folders.py: folder variables"""
 
 
-orthogroups = "results/orthogroups/"
+RAW = "results/transcriptome/"
+DOWNLOAD = "data/downloads/"
+DB = "data/db/"
+TRANSDECODER = "results/transdecoder/"
+TAG = "results/tag/"
+FILTERLEN = "results/filterlen/"
 
-orthogroups_pep = orthogroups + "pep/"
-orthogroups_pep_nonstop = orthogroups + "pep_nonstop/"
-orthogroups_pep_msa = orthogroups + "pep_msa/"
-orthogroups_pep_trim = orthogroups + "pep_trim/"
+ORTHOFINDER = "results/orthofinder/"
+OF_FASTA = ORTHOFINDER + "fasta/"
+OF_SEARCH = ORTHOFINDER + "search/"
+OF_ORTHOGROUPS = ORTHOFINDER + "orthogroups/"
+OF_SEQUENCES = ORTHOFINDER + "sequences/"
+OF_TREES = ORTHOFINDER + "trees/"
 
-orthogroups_cds = orthogroups + "cds/"
-orthogroups_cds_msa = orthogroups + "cds_msa/"
 
-fastcodeml = "results/fastcodeml/"
+# orthogroups_cds = orthogroups + "cds/"
+# orthogroups_cds_msa = orthogroups + "cds_msa/"
+#
+# fastcodeml = "results/fastcodeml/"
