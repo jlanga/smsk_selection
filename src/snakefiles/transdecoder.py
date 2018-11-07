@@ -109,7 +109,7 @@ rule transdecoder_hmmscan_merge:
 
 
 
-rule transdecoder_blastp_chunk:
+rule transdecoder_diamond_chunk:
     """
     Run blastp of each chunk
     """
@@ -117,7 +117,7 @@ rule transdecoder_blastp_chunk:
         pep = "{species}.fasta.transdecoder_dir/longest_orfs.pep",
         fai = "{species}.fasta.transdecoder_dir/longest_orfs.pep.fai",
         chunk = TRANSDECODER + "{species}/chunks/longest_orfs_{chunk_id}.tsv",
-        db = DB + "uniprot_sprot"
+        db = DB + "uniprot_sprot.dmnd"
     output:
         tsv = TRANSDECODER + "{species}/blastp/longest_orfs_{chunk_id}.tsv"
     log:
@@ -130,12 +130,12 @@ rule transdecoder_blastp_chunk:
         """
         cut -f 1 {input.chunk} \
         | xargs samtools faidx {input.pep} \
-        | blastp \
-            -db  {input.db} \
-            -max_target_seqs 1 \
-            -outfmt 6 \
-            -evalue 1e-5 \
-            -out {output.tsv} \
+        | diamond blastp \
+            --db {input.db} \
+            --max-target-seqs 1 \
+            --outfmt 6 \
+            --evalue 1e-5 \
+            --out {output.tsv} \
         2> {log} 1>&2
         """
 

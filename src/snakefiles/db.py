@@ -95,27 +95,25 @@ rule db_hmmpress_pfama:
         "cat /dev/null > {output.hmm} 2>> {log} 1>&2"
 
 
-rule db_makeblastdb_uniprot_sprot:
+rule db_makedb_uniprot_sprot:
     """
     Make the SwissProt filtered database
     """
     input:
         DOWNLOAD + "uniprot_sprot.pep"
     output:
-        touch(DB + "uniprot_sprot")
+        DB + "uniprot_sprot.dmnd"
     threads:
-        1
+        24
+
     log:
-        DB + "makeblastdb_uniprot_sprot.log"
+        DB + "makedb_uniprot_sprot.log"
     benchmark:
-        DB + "makeblastdb_uniprot_sprot.json"
+        DB + "makedb_uniprot_sprot.json"
     conda:
         "db.yml"
     shell:
-        "makeblastdb "
-        "    -dbtype prot "
-        "    -title {output} "
-        "    -out {output} "
-        "    -parse_seqids "
-        "    -in {input} "
+        "diamond makedb "
+            "--db {output} "
+            "--in {input} "
         "2> {log} 1>&2"
