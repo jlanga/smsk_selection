@@ -28,3 +28,6 @@ script:
     - python --version
     - export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
     - snakemake --use-conda --jobs 2
+
+after_failuer:
+    cat data/downloads/uniprot_sprot.log
