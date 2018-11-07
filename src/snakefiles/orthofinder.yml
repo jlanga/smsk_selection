@@ -11,3 +11,4 @@ channels:
     - defaults
 dependencies:
     - orthofinder=2.2.7
+    - samtools
