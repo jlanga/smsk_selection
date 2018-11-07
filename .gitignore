@@ -1,3 +1,4 @@
 .snakemake/
 results/*
-./bin/fast
+.conda/
+.ipynb_checkpoints/

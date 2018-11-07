@@ -1,0 +1,9 @@
+# Generic tools:
+#   samtools for fasta slicing
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - samtools

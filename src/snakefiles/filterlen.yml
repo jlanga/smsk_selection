@@ -1,0 +1,10 @@
+# Environment to get the longest transcript of a gene
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - python>=3
+    - biopython=1.69
+    - seqtk

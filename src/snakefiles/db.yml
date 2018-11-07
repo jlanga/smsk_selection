@@ -1,0 +1,10 @@
+# Environment for transdecoder database formatting
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - trinotate=3.0.2=pl5.22.0_0
+    - hmmer=3.1b2=2
+    - diamond=0.9.22

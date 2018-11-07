@@ -1,0 +1,8 @@
+# Environment to tag sequences
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - python>=3
