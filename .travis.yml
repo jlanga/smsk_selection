@@ -11,8 +11,6 @@ addons:
         - curl
 
 cache:
-    pip:
-        - true
     directories:
         - "$HOME/download/"
         - "$HOME/miniconda3_$TRAVIS_OS_NAME"
@@ -27,7 +25,16 @@ script:
     - echo $PATH
     - python --version
     - export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
-    - snakemake --use-conda --jobs 2
+    - CONDA_PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"
+    - snakemake --use-conda --jobs 2 --conda-prefix "$CONDA_PATH"
+    - snakemake --cleanup-conda
 
-after_failuer:
+before_cache:
+    - CONDA_PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"
+    - conda clean --all --yes
+    - rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
+    - snakemake --cleanup-conda --conda-prefix "$CONDA_PATH"
+
+
+after_failure:
     cat data/downloads/uniprot_sprot.log
