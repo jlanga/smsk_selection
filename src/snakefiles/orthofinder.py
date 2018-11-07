@@ -32,11 +32,9 @@ rule orthofinder_prepare:
             ORTHOFINDER + "Species{species_number}.fa",
             species_number=[x for x in range(0, N_SPECIES)]
         ),
-        db = touch(
-            expand(
-                ORTHOFINDER + "BlastDBSpecies{database_number}",
-                database_number=[x for x in range(0, N_SPECIES)]
-            )
+        db = expand(
+            ORTHOFINDER + "diamondDBSpecies{database_number}.dmnd",
+            database_number=[x for x in range(0, N_SPECIES)]
         )
     params:
         fasta_dir = ORTHOFINDER,
@@ -50,7 +48,11 @@ rule orthofinder_prepare:
         "orthofinder.yml"
     shell:
         """
-        orthofinder --fasta {params.fasta_dir} --only-prepare 2> {log} 1>&2
+        orthofinder \
+            --fasta {params.fasta_dir} \
+            --search diamond \
+            --only-prepare \
+        2> {log} 1>&2
 
         mv {params.temp_dir2}/* {params.fasta_dir}/
         rm --recursive --force {params.temp_dir1}
@@ -98,7 +100,7 @@ rule orthofinder_blastp:
         fasta = ORTHOFINDER + "Species{species_number}.fa",
         fai   = ancient(ORTHOFINDER + "Species{species_number}.fa.fai"),
         chunk = ORTHOFINDER + "{species_number}/chunks/ids_{chunk_id}.tsv",
-        db    = ORTHOFINDER + "BlastDBSpecies{database_number}",
+        db    = ORTHOFINDER + "diamondDBSpecies{database_number}.dmnd",
     output:
         tsv = ORTHOFINDER + "{species_number}/{database_number}/blastp_{chunk_id}.tsv"
     log:
@@ -109,12 +111,12 @@ rule orthofinder_blastp:
         "orthofinder.yml"
     shell:
         "cut -f 1 {input.chunk} "
-        "| xargs samtools faidx {input.fasta} "
-        "| blastp "
-            "-db {input.db} "
-            "-outfmt 6 "
-            "-evalue 0.001 "
-            "-out {output.tsv} "
+        "| xargs samtools faidx {input.fasta}"
+        "| diamond blastp "
+            "--db {input.db} "
+            "--outfmt 6 "
+            "--evalue 0.001 "
+            "--out {output.tsv} "
         "2> {log} 1>&2"
 
 
@@ -146,10 +148,10 @@ rule orthofinder_groups:
     """
     input:
         tsv = expand(
-                ORTHOFINDER + "Blast{database_number}_{species_number}.txt",
-                species_number = [x for x in range(0,N_SPECIES)],
-                database_number = [x for x in range(0,N_SPECIES)]
-            ),
+            ORTHOFINDER + "Blast{database_number}_{species_number}.txt",
+            species_number = [x for x in range(0,N_SPECIES)],
+            database_number = [x for x in range(0,N_SPECIES)]
+        )
     output:
         touch(ORTHOFINDER + "groups.ok")
         # cluster_json = ORTHOFINDER + "cluster.json",
@@ -244,8 +246,7 @@ rule orthofinder_clean:
         done
 
         mv \
-            Blast*.txt \
-            BlastDB* \
+            diamondDB* \
             Species*.fa* \
             SequenceIDs.txt \
             SpeciesIDs.txt \

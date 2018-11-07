@@ -13,7 +13,7 @@ predict:
 
 orthofinder:
     blastp_evalue: 0.001
-    number_of_chunks: 30
+    number_of_chunks: 4
     mcl_inflation: 1.5
 
 orthogroups:
