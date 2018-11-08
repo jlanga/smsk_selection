@@ -6,10 +6,8 @@ transdecoder:
         database: swissprot  # or uniref90
         evalue: 1e-5
         max_target_seqs: 1
-
-hmmscan:
-
-predict:
+    hmmscan:
+    predict:
 
 orthofinder:
     blastp_evalue: 0.001
