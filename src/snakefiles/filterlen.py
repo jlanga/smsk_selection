@@ -1,5 +1,5 @@
 rule filterlen_pep:
-    input: TAG + "{species}.pep"
+    input: TRANSDECODER + "{species}.pep"
     output: FILTERLEN + "{species}.pep"
     conda: "filterlen.yml"
     shell: "python src/filter_longest_protein_per_gene.py {output} {input}"
@@ -7,7 +7,7 @@ rule filterlen_pep:
 
 rule filterlen_cds:
     input:
-        tag_cds = TAG + "{species}.cds",
+        cds = TRANSDECODER + "{species}.cds",
         pep_fai = FILTERLEN + "{species}.pep.fai"
     output: FILTERLEN + "{species}.cds"
     conda: "filterlen.yml"
