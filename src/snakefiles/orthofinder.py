@@ -209,6 +209,7 @@ rule orthofinder_trees:
             --msa_program mafft \
             --tree_program iqtree \
             --algthreads {threads} \
+            --threads {threads} \
         2> {log} 1>&2
         """
 
@@ -225,6 +226,7 @@ rule orthofinder_orthologues:
         orthofinder \
             --from-trees {params.orthofinder_dir}/Orthologues_*/ \
             --algthreads {threads} \
+            --threads {threads} \
         2> {log} 1>&2
         """
 
