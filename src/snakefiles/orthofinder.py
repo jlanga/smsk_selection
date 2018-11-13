@@ -195,10 +195,14 @@ rule orthofinder_trees:
         touch(ORTHOFINDER + "trees.ok")
     params:
         orthofinder_dir = ORTHOFINDER,
+        tree_program = params["orthofinder"]["tree_program"],
+        msa_program = params["orthofinder"]["msa_program"]
     conda:
         "orthofinder.yml"
     log:
         ORTHOFINDER + "trees.log"
+    benchmark:
+        ORTHOFINDER + "trees.bmk"
     threads: 32
     shell:
         """
@@ -206,8 +210,8 @@ rule orthofinder_trees:
             --from-groups {params.orthofinder_dir} \
             --only-trees \
             --method msa \
-            --msa_program mafft \
-            --tree_program iqtree \
+            --msa_program {params.msa_program} \
+            --tree_program {params.tree_program} \
             --algthreads {threads} \
             --threads {threads} \
         2> {log} 1>&2
