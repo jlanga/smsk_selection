@@ -1,0 +1,8 @@
+# Environment for transdecoder database formatting
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - busco=3.0.2=py36_8

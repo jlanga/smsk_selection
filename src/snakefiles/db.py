@@ -117,3 +117,21 @@ rule db_makedb_uniprot_sprot:
             "--db {output} "
             "--in {input} "
         "2> {log} 1>&2"
+
+
+rule db_busco:
+    """
+    Extract Busco database
+    """
+    input:
+        DOWNLOAD + "{database}_odb9.tar.gz"
+    output:
+        directory(DB + "{database}_odb9")
+    log:
+        DB + "{database}_odb9.log"
+    benchmark:
+        DB + "{database}_odb9.bmk"
+    shell:
+        """
+        tar --extract --verbose --file {input} --directory {DB} 2> {log} 1>&2
+        """

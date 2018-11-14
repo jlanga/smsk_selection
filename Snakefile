@@ -23,6 +23,7 @@ include: snakefiles + "generic.py"
 include: snakefiles + "raw.py"
 include: snakefiles + "download.py"
 include: snakefiles + "db.py"
+include: snakefiles + "busco.py"
 include: snakefiles + "transdecoder.py"
 include: snakefiles + "tag.py"
 include: snakefiles + "filterlen.py"
@@ -43,4 +44,5 @@ rule all:
         #     species=species,
         #     extension="pep cds".split()
         # ),
-        ORTHOFINDER + "clean.ok"
+        ORTHOFINDER + "clean.ok",
+        rules.busco.input

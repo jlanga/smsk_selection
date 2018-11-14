@@ -8,3 +8,6 @@ obo:
     http://purl.obolibrary.org/obo/go/go-basic.obo
 Pfam-A:
     ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz
+
+busco_species:
+    - actinopterygii
