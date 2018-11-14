@@ -19,6 +19,9 @@ cache:
 
 before_install:
     - bash .travis/travis_before_install.sh
+    -   if -d [[ "$HOME/download/downloads" ]]; then
+            rsync -Pravt "$HOME/download/downloads" data/;
+        fi
 
 install:
     - bash .travis/travis_install.sh
@@ -33,9 +36,10 @@ script:
 
 before_cache:
     - CONDA_PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"
+    - rsync -Pravt "$TRAVIS_BUILD_DIR/data/downloads" "$HOME/download/"
     - conda clean --all --yes
     - rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
-    - snakemake --cleanup-conda --conda-prefix "$CONDA_PATH"
+    - snakemake --cleanup-conda
 
 
 after_failure:

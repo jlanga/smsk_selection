@@ -4,6 +4,7 @@
 RAW = "results/transcriptome/"
 DOWNLOAD = "data/downloads/"
 DB = "data/db/"
+BUSCO = "results/busco/"
 TRANSDECODER = "results/transdecoder/"
 TAG = "results/tag/"
 FILTERLEN = "results/filterlen/"
