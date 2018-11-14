@@ -80,3 +80,20 @@ rule download_pfama:
             {params.url} \
         2> {log}
         """
+
+
+rule download_busco_database:
+    output:
+        DOWNLOAD + "{database}_odb9.tar.gz"
+    params:
+        url = "http://busco.ezlab.org/v2/datasets/{database}_odb9.tar.gz"
+    conda:
+        "download.yml"
+    log:
+        DOWNLOAD + "busco_{database}_odb9.log"
+    benchmark:
+        DOWNLOAD + "busco_{database}_odb9.bmk"
+    shell:
+        """
+        wget --continue {params.url} --output-document {output} 2> {log} 1>&2
+        """
