@@ -9,6 +9,8 @@ rule download_uniprot_sprot:
         DOWNLOAD + "uniprot_sprot.json"
     conda:
         "download.yml"
+    priority:
+        50
     shell:
         """
         wget \
@@ -30,6 +32,8 @@ rule download_nog_annotations:
         DOWNLOAD + "NOG.annotations.json"
     conda:
         "download.yml"
+    priority:
+        50
     shell:
         """
         wget \
@@ -51,6 +55,8 @@ rule download_obo:
         DOWNLOAD + "obo.json"
     conda:
         "download.yml"
+    priority:
+        50
     shell:
         """
         wget \
@@ -72,6 +78,8 @@ rule download_pfama:
         DOWNLOAD + "pfama.json"
     conda:
         "download.yml"
+    priority:
+        50
     shell:
         """
         wget \
@@ -93,6 +101,8 @@ rule download_busco_database:
         DOWNLOAD + "busco_{database}_odb9.log"
     benchmark:
         DOWNLOAD + "busco_{database}_odb9.bmk"
+    priority:
+        50
     shell:
         """
         wget --continue {params.url} --output-document {output} 2> {log} 1>&2

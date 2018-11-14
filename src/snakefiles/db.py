@@ -14,6 +14,8 @@ rule db_parse_uniprot_sprot:
         DB + "parse_uniprot_sprot.josn"
     conda:
         "db.yml"
+    priority:
+        50
     shell:
         "EMBL_swissprot_parser.pl {input} {params.prefix} "
         "2> {log}; "
@@ -31,6 +33,8 @@ rule db_obo_to_tab:
         DB + "obo_to_tab.json"
     conda:
         "db.yml"
+    priority:
+        50
     shell:
         "obo_to_tab.pl {input} > {output} 2> {log}"
 
@@ -46,6 +50,8 @@ rule db_parse_nog:
         DB + "parse_nog.json"
     conda:
         "db.yml"
+    priority:
+        50
     shell:
         "(gzip -dc {input} "
         "| print.pl 1 5 "
@@ -65,6 +71,8 @@ rule db_parse_pfam:
         DB + "parse_pfam.json"
     conda:
         "db.yml"
+    priority:
+        50
     shell:
         "PFAM_dat_parser.pl {input} 2> {log}; "
         "mv {params.tmp} {output} 2>> {log}"
@@ -88,6 +96,8 @@ rule db_hmmpress_pfama:
         DB + "hmmpress_pfama.json"
     conda:
         "db.yml"
+    priority:
+        50
     shell:
         "gzip --decompress --keep --stdout {input.hmm_gz} "
         "> {output.hmm} 2> {log}; "
@@ -105,13 +115,14 @@ rule db_makedb_uniprot_sprot:
         DB + "uniprot_sprot.dmnd"
     threads:
         24
-
     log:
         DB + "makedb_uniprot_sprot.log"
     benchmark:
         DB + "makedb_uniprot_sprot.json"
     conda:
         "db.yml"
+    priority:
+        50
     shell:
         "diamond makedb "
             "--db {output} "
@@ -131,6 +142,8 @@ rule db_busco:
         DB + "{database}_odb9.log"
     benchmark:
         DB + "{database}_odb9.bmk"
+    priority:
+        50
     shell:
         """
         tar --extract --verbose --file {input} --directory {DB} 2> {log} 1>&2
