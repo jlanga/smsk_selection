@@ -13,7 +13,7 @@ addons:
 cache:
     timeout: 1000
     directories:
-        - "$HOME/download/"
+        # - "$HOME/download/"
         - "$HOME/miniconda3_$TRAVIS_OS_NAME"
         - "$TRAVIS_BUILD_DIR/.snakemake"  # Conda cache!
         # - "$TRAVIS_BUILD_DIR/data/download"
