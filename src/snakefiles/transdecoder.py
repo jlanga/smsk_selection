@@ -186,7 +186,7 @@ rule transdecoder_predict:
         pep = "{species}.fasta.transdecoder.pep",
         checkpoints = "{species}.fasta.transdecoder_dir.__checkpoints"
     threads:
-        24
+        1
     log:
         TRANSDECODER + "{species}/predict.log"
     benchmark:
