@@ -6,7 +6,10 @@ rule orthofinder_parse_ids:
     """
     input: FILTERLEN + "{species}.pep"
     output: ORTHOFINDER + "{species}.fasta"
-    shell: "awk '{print $1}' < {input} > {output}"
+    shell:
+        """
+        cut -f 1 -d \" \" < {input} > {output}
+        """
 
 
 rule orthofinder_link_all:
