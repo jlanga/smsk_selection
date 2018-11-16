@@ -10,7 +10,7 @@ conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
 
-conda install --yes --channel bioconda snakemake
+conda install --yes --channel bioconda snakemake=5.3.0
 conda clean --all --yes
 
-snakemake --use-conda
+snakemake --use-conda --create-envs-only
