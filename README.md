@@ -13,7 +13,7 @@ This is a pipeline to (briefly described):
 3. __WIP__ Find patterns of positive selection with FastCodeML.
 
 
-![smsk_orthofinder pipeline](https://cdn.rawgit.com/jlanga/smsk_orthofinder/master/rulegraph.svg)
+![smsk_orthofinder pipeline](rulegraph.svg)
 
 ## 2. First steps
 
