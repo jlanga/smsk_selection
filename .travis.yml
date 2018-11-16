@@ -19,9 +19,9 @@ cache:
 
 before_install:
     - bash .travis/travis_before_install.sh
-    -   if -d [[ "$HOME/download/downloads" ]]; then
-            rsync -Pravt "$HOME/download/downloads" data/;
-        fi
+    - if -d [[ "$HOME/download/downloads" ]]; then
+        rsync -Pravt "$HOME/download/downloads" data/;
+      fi
 
 install:
     - bash .travis/travis_install.sh

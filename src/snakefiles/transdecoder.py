@@ -80,6 +80,7 @@ rule transdecoder_hmmscan:
         | xargs samtools faidx {input.pep} \
         | hmmscan \
             --domtblout {output.tsv} \
+            --cpu {threads} \
             {input.hmm} \
             - \
         2> {log} 1>&2
@@ -136,6 +137,7 @@ rule transdecoder_diamond_chunk:
             --outfmt 6 \
             --evalue 1e-5 \
             --out {output.tsv} \
+            --threads {threads} \
         2> {log} 1>&2
         """
 

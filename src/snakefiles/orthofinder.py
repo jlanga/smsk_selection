@@ -117,6 +117,7 @@ rule orthofinder_blastp:
             "--outfmt 6 "
             "--evalue 0.001 "
             "--out {output.tsv} "
+            "--threads {threads} "
         "2> {log} 1>&2"
 
 
