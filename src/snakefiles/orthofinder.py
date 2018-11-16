@@ -1,12 +1,12 @@
 CHUNKS_ORTHO = params["orthofinder"]["number_of_chunks"]
 
-rule orthofinder_link:
+rule orthofinder_parse_ids:
     """
-    Link proteomes into another folder since ORTHOFINDER populates such folder.
+    Parse the input transcriptomes and split the fasta header by " "
     """
     input: FILTERLEN + "{species}.pep"
     output: ORTHOFINDER + "{species}.fasta"
-    shell: "ln --symbolic $(readlink --canonicalize {input}) {output}"
+    shell: "awk '{print $1}' < {input} > {output}"
 
 
 rule orthofinder_link_all:
