@@ -1,24 +1,28 @@
 #!/usr/bin/env python3
 
+"""
+filter_longest_protein_per_gene
+"""
+
 import sys
 from Bio import SeqIO
 
 if len(sys.argv) != 3:
     exit(
         """ERROR!: Incorrect number of arguments!
-        Usage: python3 filter_longest_protein_per_gene.py fasta_out fasta_in
+        Usage: python3 filter_longest_protein_per_gene.py FASTA_OUT FASTA_IN
         - is allowed for /dev/stdin or /dev/stdout
         """
     )
 
-fasta_out = sys.argv[1]
-fasta_in = sys.argv[2]
+FASTA_OUT = sys.argv[1]
+FASTA_IN = sys.argv[2]
 
-if fasta_in == "-":
-    fasta_in = sys.stdin
+if FASTA_IN == "-":
+    FASTA_IN = sys.stdin
 
-if fasta_out == "-":
-    fasta_out = sys.stdout
+if FASTA_OUT == "-":
+    FASTA_OUT = sys.stdout
 
 
 def compute_gene_to_longest_protein(protein_dict):
@@ -46,13 +50,13 @@ def compute_gene_to_longest_protein(protein_dict):
 
 if __name__ == '__main__':
 
-    protein_dict = SeqIO.to_dict(SeqIO.parse(handle=fasta_in, format="fasta"))
+    PROTEIN_DICT = SeqIO.to_dict(SeqIO.parse(handle=FASTA_IN, format="fasta"))
 
-    gene_to_protein = compute_gene_to_longest_protein(protein_dict)
+    GENE_TO_PROTEIN = compute_gene_to_longest_protein(PROTEIN_DICT)
 
-    with open(fasta_out, "w") as f_out:
+    with open(FASTA_OUT, "w") as f_out:
         SeqIO.write(
-            sequences=gene_to_protein.values(),
+            sequences=GENE_TO_PROTEIN.values(),
             format="fasta",
             handle=f_out
         )

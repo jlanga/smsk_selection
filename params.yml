@@ -1,7 +1,7 @@
 # Snakemake parameter configuration file
 ---
 transdecoder:
-    chunks: 4  # Same for blastx and hmmscan
+    chunks: 1  # Same for blastx and hmmscan
     blastp:
         database: swissprot  # or uniref90
         evalue: 1e-5
@@ -11,7 +11,7 @@ transdecoder:
 
 orthofinder:
     blastp_evalue: 0.001
-    number_of_chunks: 4
+    number_of_chunks: 1
     mcl_inflation: 1.5
     msa_program: mafft
     tree_program: fasttree
