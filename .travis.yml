@@ -51,10 +51,9 @@ script: |
     python --version
     export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
     snakemake --use-conda --jobs 2
-    # snakemake --cleanup-conda
 
 before_cache: |
-    CONDA_PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"
+    # snakemake --cleanup-conda
     conda clean --all --yes
     rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
 
