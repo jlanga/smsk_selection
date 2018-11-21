@@ -10,4 +10,4 @@ Pfam-A:
     ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz
 
 busco_species:  # https://busco.ezlab.org/frame_wget.html
-    - actinopterygii
+    - eukaryota
