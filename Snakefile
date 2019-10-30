@@ -8,7 +8,7 @@ shell.prefix("set -euo pipefail;")
 
 params = yaml.load(open("params.yml", "r"))
 features = yaml.load(open("features.yml", "r"))
-samples = pd.read_table("samples.tsv").set_index("species")
+samples = pd.read_csv("samples.tsv", sep="\t").set_index("species")
 
 singularity: "docker://continuumio/miniconda3:4.4.10"
 
