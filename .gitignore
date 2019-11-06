@@ -2,3 +2,5 @@
 results/*
 .conda/
 .ipynb_checkpoints/
+data/db/*
+data/downloads/*
