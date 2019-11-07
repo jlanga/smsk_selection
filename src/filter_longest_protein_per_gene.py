@@ -27,7 +27,9 @@ if FASTA_OUT == "-":
 
 def compute_gene_to_longest_protein(protein_dict):
     """Build a dict gene: protein, where protein is the longest protein that
-    that gene has. In case of tie, the first seen is the one that remains.
+    that gene has.
+
+    In case of tie, the first seen is the one that remains.
     """
     gene_to_protein = {}
 
