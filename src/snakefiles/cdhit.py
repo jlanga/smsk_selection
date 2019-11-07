@@ -14,7 +14,7 @@ rule cdhit_pep:
             "-c {params.threshold} "
             "-n 5 "  # Word length
             "-T {threads} "
-        "2> {log}"
+        "2> {log} 1>&2"
 
 
 rule cdhit_filter_cds:
@@ -32,3 +32,15 @@ rule cdhit_filter_cds:
             "{input.cds} "
             "<(cut -f 1 {input.fai}) "
         "2> {log}"
+
+
+rule cdhit:
+    input:
+        expand(
+            CDHIT + "{species}.pep",
+            species=SPECIES
+        ),
+        expand(
+            CDHIT + "{species}.cds",
+            species=SPECIES
+        )
