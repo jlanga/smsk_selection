@@ -4,7 +4,7 @@ rule orthofinder_parse_ids:
     """
     Parse the input transcriptomes and split the fasta header by " "
     """
-    input: FILTERLEN + "{species}.pep"
+    input: CDHIT + "{species}.pep"
     output: ORTHOFINDER + "{species}.fasta"
     shell:
         """

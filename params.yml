@@ -9,6 +9,10 @@ transdecoder:
     hmmscan:
     predict:
 
+cd-hit:
+    threshold: 0.995  # Identity threshold to merge proteins
+
+
 orthofinder:
     blastp_evalue: 0.001
     number_of_chunks: 1
