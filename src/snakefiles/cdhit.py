@@ -31,6 +31,7 @@ rule cdhit_filter_cds:
         "seqtk subseq "
             "{input.cds} "
             "<(cut -f 1 {input.fai}) "
+        "> {output.cds} "
         "2> {log}"
 
 

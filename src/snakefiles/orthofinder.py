@@ -114,7 +114,7 @@ rule orthofinder_search_blastp:
         "orthofinder.yml"
     shell:
         "cut -f 1 {input.chunk} "
-        "| xargs samtools faidx {input.fasta}"
+        "| seqtk subseq {input.fasta} - "
         "| diamond blastp "
             "--db {input.db} "
             "--outfmt 6 "
@@ -214,3 +214,63 @@ rule orthofinder_groups:
         mv {params.statistics_overall} {output.statistics_overall}
         mv {params.statistics_species} {output.statistics_species}
         """
+
+
+checkpoint orthofinder_sequences_pep:
+    input:
+        expand(
+            CDHIT + "{species}.pep",
+            species=SPECIES
+        ),
+        orthogroups = OF_GROUPS + "Orthogroups.csv"
+    output:
+        directory(OF_SEQUENCES_PEP)
+    threads:
+        1
+    params:
+        in_folder = CDHIT
+    log:
+        ORTHOFINDER + "sequences_pep.log"
+    benchmark:
+        ORTHOFINDER + "sequences_pep.bmk"
+    conda:
+        "orthofinder.yml"
+    shell:
+        "python src/extract_orthologs.py "
+            "{input.orthogroups} "
+            "{params.in_folder} pep "
+            "{output} pep "
+        "2> {log} 1>&2"
+
+
+checkpoint orthofinder_sequences_cds:
+    input:
+        expand(
+            CDHIT + "{species}.cds",
+            species=SPECIES
+        ),
+        orthogroups = OF_GROUPS + "Orthogroups.csv"
+    output:
+        directory(OF_SEQUENCES_CDS)
+    threads:
+        1
+    params:
+        in_folder = CDHIT
+    log:
+        ORTHOFINDER + "extract_cds.log"
+    benchmark:
+        ORTHOFINDER + "extract_cds.bmk"
+    conda:
+        "orthofinder.yml"
+    shell:
+        "python src/extract_orthologs.py "
+            "{input.orthogroups} "
+            "{params.in_folder} cds "
+            "{output} cds "
+        "2> {log} 1>&2"
+
+
+rule orthofinder:
+    input:
+        OF_SEQUENCES_PEP,
+        OF_SEQUENCES_CDS

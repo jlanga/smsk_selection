@@ -2,7 +2,7 @@ import pandas as pd
 import yaml
 
 from snakemake.utils import min_version
-min_version("5.0")
+min_version("5.7.4")
 
 shell.prefix("set -euo pipefail;")
 
@@ -27,7 +27,7 @@ include: snakefiles + "busco.py"
 include: snakefiles + "transdecoder.py"
 include: snakefiles + "cdhit.py"
 include: snakefiles + "orthofinder.py"
-# include: snakefiles + "orthogroups"
+#include: snakefiles + "homologs.py"
 
 rule all:
     input:
@@ -43,5 +43,7 @@ rule all:
         #     species=species,
         #     extension="pep cds".split()
         # ),
-        OF_GROUPS + "Orthogroups.csv",
-        rules.busco.input
+        #OF_GROUPS + "Orthogroups.csv",
+        rules.orthofinder.input,
+        OF_SEQUENCES_PEP,
+        OF_SEQUENCES_CDS
