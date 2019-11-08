@@ -43,5 +43,5 @@ rule all:
         #     species=species,
         #     extension="pep cds".split()
         # ),
-        ORTHOFINDER + "clean.ok",
+        OF_GROUPS + "Orthogroups.csv",
         rules.busco.input
