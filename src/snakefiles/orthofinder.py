@@ -236,7 +236,7 @@ checkpoint orthofinder_sequences_pep:
     conda:
         "orthofinder.yml"
     shell:
-        "python src/extract_orthologs.py "
+        "python src/extract_orthogroups.py "
             "{input.orthogroups} "
             "{params.in_folder} pep "
             "{output} pep "
@@ -263,7 +263,7 @@ checkpoint orthofinder_sequences_cds:
     conda:
         "orthofinder.yml"
     shell:
-        "python src/extract_orthologs.py "
+        "python src/extract_orthogroups.py "
             "{input.orthogroups} "
             "{params.in_folder} cds "
             "{output} cds "
