@@ -7,5 +7,5 @@
 
 seqtk seq - \
 | paste - - \
-| sed -e "s/TAA$|TGA$T|AA$//g" \
+| sed -e "s/TAG$//g" -e "s/TGA$//g" -e "s/TAA$//g" \
 | tr "\t" "\n"
