@@ -2,13 +2,16 @@ CHUNKS_ORTHO = params["orthofinder"]["number_of_chunks"]
 
 rule orthofinder_search_parse_ids:
     """
-    Parse the input transcriptomes and split the fasta header by " "
+    Parse the input transcriptomes, add the species to the identifier and remove
+    the comments
     """
-    input: CDHIT + "{species}.pep"
+    input: TIDY + "{species}.pep"
     output: OF_SEARCH + "{species}.fasta"
     shell:
         """
-        cut -f 1 -d \" \" < {input} > {output}
+        < {input} \
+        cut -f 1 -d \" \" \
+        > {output}
         """
 
 
@@ -219,7 +222,7 @@ rule orthofinder_groups:
 checkpoint orthofinder_sequences_pep:
     input:
         expand(
-            CDHIT + "{species}.pep",
+            TIDY + "{species}.pep",
             species=SPECIES
         ),
         orthogroups = OF_GROUPS + "Orthogroups.csv"
@@ -228,7 +231,7 @@ checkpoint orthofinder_sequences_pep:
     threads:
         1
     params:
-        in_folder = CDHIT
+        in_folder = TIDY
     log:
         ORTHOFINDER + "sequences_pep.log"
     benchmark:
@@ -246,7 +249,7 @@ checkpoint orthofinder_sequences_pep:
 checkpoint orthofinder_sequences_cds:
     input:
         expand(
-            CDHIT + "{species}.cds",
+            TIDY + "{species}.cds",
             species=SPECIES
         ),
         orthogroups = OF_GROUPS + "Orthogroups.csv"
@@ -255,7 +258,7 @@ checkpoint orthofinder_sequences_cds:
     threads:
         1
     params:
-        in_folder = CDHIT
+        in_folder = TIDY
     log:
         ORTHOFINDER + "extract_cds.log"
     benchmark:

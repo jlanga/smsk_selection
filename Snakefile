@@ -26,6 +26,7 @@ include: snakefiles + "db.py"
 include: snakefiles + "busco.py"
 include: snakefiles + "transdecoder.py"
 include: snakefiles + "cdhit.py"
+include: snakefiles + "tidy.py"
 include: snakefiles + "orthofinder.py"
 #include: snakefiles + "homologs.py"
 
