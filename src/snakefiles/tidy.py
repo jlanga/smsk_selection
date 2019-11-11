@@ -6,7 +6,7 @@ rule tidy_pep:
         """
         < {input} \
         bash src/tag_fasta.sh {params} \
-        bash stc/remove_stops_pep.sh \
+        | bash src/remove_stops_pep.sh \
         > {output}
         """
 
@@ -18,6 +18,6 @@ rule tidy_cds:
         """
         < {input} \
         bash src/tag_fasta.sh {params} \
-        bash stc/remove_stops_cds.sh \
+        | bash src/remove_stops_cds.sh \
         > {output}
         """

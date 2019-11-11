@@ -5,7 +5,7 @@
 # remove_stops_cds.sh < in.cds > out.cds
 
 
-seqtk seq - \
+seqtk seq -C - \
 | paste - - \
 | sed -e "s/TAG$//g" -e "s/TGA$//g" -e "s/TAA$//g" \
 | tr "\t" "\n"
