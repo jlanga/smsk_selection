@@ -1,11 +1,18 @@
 #!/usr/bin/env python2
 
-import newick3,os,sys
+import os
+import sys
+
+import newick3
+
+
 # from tree_utils import *
 
 def get_121(indir,tree_file_ending,min_taxa,outdir,min_bootstrap=0.0):
-	if indir[-1] != "/": indir += "/"
-	if outdir[-1] != "/": outdir += "/"
+	if indir[-1] != "/":
+		indir += "/"
+	if outdir[-1] != "/":
+		outdir += "/"
 	min_taxa = int(min_taxa)
 	min_bootstrap = float(min_bootstrap)
 	infile_count, outfile_count = 0,0

@@ -219,15 +219,19 @@ rule orthofinder_groups:
         """
 
 
-checkpoint orthofinder_sequences_pep:
+checkpoint orthofinder_sequences:
     input:
         expand(
             TIDY + "{species}.pep",
             species=SPECIES
         ),
+        expand(
+            TIDY + "{species}.cds",
+            species=SPECIES
+        ),
         orthogroups = OF_GROUPS + "Orthogroups.csv"
     output:
-        directory(OF_SEQUENCES_PEP)
+        directory(OF_SEQUENCES)
     threads:
         1
     params:
@@ -239,41 +243,17 @@ checkpoint orthofinder_sequences_pep:
     conda:
         "orthofinder.yml"
     shell:
-        "python src/extract_orthogroups.py "
+        "(python src/extract_orthogroups.py "
             "{input.orthogroups} "
             "{params.in_folder} pep "
-            "{output} pep "
-        "2> {log} 1>&2"
-
-
-checkpoint orthofinder_sequences_cds:
-    input:
-        expand(
-            TIDY + "{species}.cds",
-            species=SPECIES
-        ),
-        orthogroups = OF_GROUPS + "Orthogroups.csv"
-    output:
-        directory(OF_SEQUENCES_CDS)
-    threads:
-        1
-    params:
-        in_folder = TIDY
-    log:
-        ORTHOFINDER + "extract_cds.log"
-    benchmark:
-        ORTHOFINDER + "extract_cds.bmk"
-    conda:
-        "orthofinder.yml"
-    shell:
+            "{output} pep && "
         "python src/extract_orthogroups.py "
             "{input.orthogroups} "
             "{params.in_folder} cds "
-            "{output} cds "
+            "{output} cds) "
         "2> {log} 1>&2"
 
 
 rule orthofinder:
     input:
-        OF_SEQUENCES_PEP,
-        OF_SEQUENCES_CDS
+        OF_SEQUENCES

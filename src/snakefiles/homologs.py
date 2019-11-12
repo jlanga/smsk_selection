@@ -1,6 +1,6 @@
 rule homologs_round1_mafft:
     input:
-        OF_SEQUENCES_PEP + "{orthogroup_id}.pep"
+        OF_SEQUENCES + "{orthogroup_id}.pep"
     output:
         HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep"
     log:
@@ -39,7 +39,7 @@ rule homologs_round1_trimal_pep:
 
 rule homologs_round1_trimal_cds:
     input:
-        cds_raw = OF_SEQUENCES_CDS + "{orthogroup_id}.cds",
+        cds_raw = OF_SEQUENCES + "{orthogroup_id}.cds",
         pep_aligned = HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep"
     output: HOMOLOGS_R1 + "{orthogroup_id}.trimal.cds"
     threads: 1
@@ -208,13 +208,13 @@ rule homologs_round1_to_fasta:
 
 def aggregate_homologs_round1_files(wildcards):
 
-    checkpoint_cds = checkpoints.orthofinder_sequences_cds.get(**wildcards).output[0]
+    checkpoint_cds = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
     files_cds = expand(
         HOMOLOGS_R1 + "{i}.final.cds",
         i=glob_wildcards(os.path.join(checkpoint_cds, "{i}.cds")).i
     )
 
-    checkpoint_pep = checkpoints.orthofinder_sequences_pep.get(**wildcards).output[0]
+    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
     files_pep = expand(
         HOMOLOGS_R1 + "{i}.final.pep",
         i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
@@ -268,7 +268,7 @@ rule homologs_round2_trimal_pep:
 
 rule homologs_round2_trimal_cds:
     input:
-        cds_raw = OF_SEQUENCES_CDS + "{orthogroup_id}.cds",
+        cds_raw = OF_SEQUENCES + "{orthogroup_id}.cds",
         pep_aligned = HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep"
     output: HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds"
     threads: 1
@@ -445,13 +445,13 @@ rule homologs_round2_to_fasta:
 
 def aggregate_homologs_round2_files(wildcards):
 
-    checkpoint_cds = checkpoints.orthofinder_sequences_cds.get(**wildcards).output[0]
+    checkpoint_cds = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
     files_cds = expand(
         HOMOLOGS_R2 + "{i}.final.cds",
         i=glob_wildcards(os.path.join(checkpoint_cds, "{i}.cds")).i
     )
 
-    checkpoint_pep = checkpoints.orthofinder_sequences_pep.get(**wildcards).output[0]
+    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
     files_pep = expand(
         HOMOLOGS_R2 + "{i}.final.pep",
         i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
