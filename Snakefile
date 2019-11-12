@@ -17,18 +17,18 @@ N_SPECIES = len(SPECIES)
 
 snakefiles = "src/snakefiles/"
 
-include: snakefiles + "folders.py"
-include: snakefiles + "clean.py"
-include: snakefiles + "generic.py"
-include: snakefiles + "raw.py"
-include: snakefiles + "download.py"
-include: snakefiles + "db.py"
-include: snakefiles + "busco.py"
-include: snakefiles + "transdecoder.py"
-include: snakefiles + "cdhit.py"
-include: snakefiles + "tidy.py"
-include: snakefiles + "orthofinder.py"
-include: snakefiles + "homologs.py"
+include: snakefiles + "folders.smk"
+include: snakefiles + "clean.smk"
+include: snakefiles + "generic.smk"
+include: snakefiles + "raw.smk"
+include: snakefiles + "download.smk"
+include: snakefiles + "db.smk"
+include: snakefiles + "busco.smk"
+include: snakefiles + "transdecoder.smk"
+include: snakefiles + "cdhit.smk"
+include: snakefiles + "tidy.smk"
+include: snakefiles + "orthofinder.smk"
+include: snakefiles + "homologs.smk"
 
 rule all:
     input:
