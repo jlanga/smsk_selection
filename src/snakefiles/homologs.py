@@ -3,8 +3,6 @@ rule homologs_round1_mafft:
         OF_SEQUENCES_PEP + "{orthogroup_id}.pep"
     output:
         HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep"
-    threads:
-        1
     log:
         HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep.log"
     benchmark:
@@ -12,13 +10,14 @@ rule homologs_round1_mafft:
     conda:
         "homologs.yml"
     shell:
-        "mafft "
-            "--genafpair "
-            "--thread {threads} "
-            "--maxiterate 1000 "
-            "{input} "
-        "> {output} "
-        "2> {log}"
+        """
+        if [ -s {input} ]; then
+            mafft --genafpair --maxiterate 1000 {input} > {output} 2> {log}
+        else
+            touch {output} 2> {log}
+        fi
+        """
+
 
 
 
@@ -27,14 +26,15 @@ rule homologs_round1_trimal_pep:
     output: HOMOLOGS_R1 + "{orthogroup_id}.trimal.pep"
     log: HOMOLOGS_R1 + "{orthogroup_id}.trimal.log"
     benchmark: HOMOLOGS_R1 + "{orthogroup_id}.trimal.bmk"
-    threads: 1
     conda: "homologs.yml"
     shell:
-        "trimal "
-            "-in {input} "
-            "-out {output} "
-            "-automated1 "
-        "2> {log} 1>&2"
+        """
+        if [ -s {input} ]; then
+            trimal -in {input} -out {output} -automated1 2> {log} 1>&2
+        else
+            touch {output} 2> {log} 1>&2
+        fi
+        """
 
 
 rule homologs_round1_trimal_cds:
@@ -47,11 +47,17 @@ rule homologs_round1_trimal_cds:
     benchmark: HOMOLOGS_R1 + "{orthogroup_id}.trimal.cds.bmk"
     conda: "homologs.yml"
     shell:
-        "trimal "
-            "-in {input.pep_aligned} "
-            "-backtrans {input.cds_raw} "
-            "-out {output} "
-        "2> {log} 1>&2"
+        """
+        if [ -s {input.cds_raw} ] && [ -s {input.pep_aligned} ]; then
+            trimal \
+                -in {input.pep_aligned} \
+                -backtrans {input.cds_raw} \
+                -out {output} \
+            2> {log} 1>&2
+        else
+            touch {output} 2> {log} 1>&2
+        fi
+        """
 
 
 rule homologs_round1_modeltestng:
@@ -66,12 +72,18 @@ rule homologs_round1_modeltestng:
     benchmark: HOMOLOGS_R1 + "{orthogroup_id}.modeltest-ng.bmk"
     conda: "homologs.yml"
     shell:
-        "modeltest-ng "
-            "--datatype aa "
-            "--input {input} "
-            "--template raxml "
-            "--out {params.prefix}"
-        "2> /dev/null 1>&2"
+        """
+        if [ -s {input} ]; then
+            modeltest-ng \
+                --datatype aa \
+                --input {input} \
+                --template raxml \
+                --out {params.prefix} \
+            2> /dev/null 1>&2
+        else
+            touch {output.ckp} {output.out} {output.tree}
+        fi
+        """
 
 
 rule homologs_round1_raxmlng:
@@ -92,18 +104,22 @@ rule homologs_round1_raxmlng:
     conda: "homologs.yml"
     shell:
         """
-        MODEL=$(\
-            grep raxml-ng {input.model_file} \
-            | tail -1 \
-            | grep -Po "model [A-Z0-9\+\-]+" \
-            | sed 's/^model //g' \
-        )
-
-        (raxml-ng \
-            --msa {input.alignment} \
-            --model $MODEL \
-            --prefix {params.prefix} || true) \
-        2> /dev/null 1>&2
+        if [ -s {input.alignment} ] && \
+            [ -s {input.model_file} ] && \
+            [ $(grep -c ^">" {input.alignment}) -ge 4 ]
+        then
+            MODEL=$(\
+                grep raxml-ng {input.model_file} \
+                | tail -1 \
+                | grep -Po "model [A-Z0-9\+\-]+" \
+                | sed 's/^model //g' \
+            )
+            raxml-ng \
+                --msa {input.alignment} \
+                --model $MODEL \
+                --prefix {params.prefix} \
+            2> /dev/null 1>&2
+        fi
         """
 
 
@@ -218,74 +234,88 @@ rule homologs_round1:
 rule homologs_round2_mafft:
     input: HOMOLOGS_R1 + "{orthogroup_id}.final.pep"
     output: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep"
-    threads: 1
     log: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep.log"
     benchmark: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep.bmk"
     conda: "homologs.yml"
     shell:
-        "mafft "
-            "--genafpair "
-            "--thread {threads} "
-            "--maxiterate 1000 "
-            "{input} "
-        "> {output} "
-        "2> {log}"
-
+        """
+        if [ -s {input} ]
+        then
+            mafft --genafpair --maxiterate 1000 {input} > {output} 2> {log}
+        else
+            touch {output} 2> {log} 1>&2
+        fi
+        """
 
 
 rule homologs_round2_trimal_pep:
     input: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep"
-    output: touch(HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep")
+    output: HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep"
     log: HOMOLOGS_R2 + "{orthogroup_id}.trimal.log"
     benchmark: HOMOLOGS_R2 + "{orthogroup_id}.trimal.bmk"
     threads: 1
     conda: "homologs.yml"
     shell:
-        "(trimal "
-            "-in {input} "
-            "-out {output} "
-            "-automated1 "
-        "|| true) "
-        "2> {log} 1>&2"
+        """
+        if [ -s {input} ]
+        then
+            trimal -in {input} -out {output} -automated1 2> {log} 1>&2
+        else
+            touch {output}
+        fi
+        """
 
 
 rule homologs_round2_trimal_cds:
     input:
         cds_raw = OF_SEQUENCES_CDS + "{orthogroup_id}.cds",
         pep_aligned = HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep"
-    output: touch(HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds")
+    output: HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds"
     threads: 1
     log: HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds.log"
     benchmark: HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds.bmk"
     conda: "homologs.yml"
     shell:
-        "(trimal "
-            "-in {input.pep_aligned} "
-            "-backtrans {input.cds_raw} "
-            "-out {output} "
-        "|| true) "
-        "2> {log} 1>&2"
+        """
+        if [ -s {input.cds_raw} ] && \
+            [ -s {input.pep_aligned} ]
+        then
+            trimal \
+                -in {input.pep_aligned} \
+                -backtrans {input.cds_raw} \
+                -out {output} \
+            2> {log} 1>&2
+        else
+            touch {output}
+        fi
+        """
 
 
 rule homologs_round2_modeltestng:
     input: HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep"
     output:
-        ckp = touch(HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.ckp"),
-        out = touch(HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.out"),
-        tree = touch(HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.tree")
+        ckp = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.ckp",
+        out = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.out",
+        tree = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.tree"
     params:
         prefix = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng"
     threads: 1
     benchmark: HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.bmk"
     conda: "homologs.yml"
     shell:
-        "(modeltest-ng "
-            "--datatype aa "
-            "--input {input} "
-            "--template raxml "
-            "--out {params.prefix} "
-        "|| true) "
-        "2> /dev/null 1>&2"
+        """
+        if [ -s {input} ]
+        then
+            modeltest-ng \
+                --datatype aa \
+                --input {input} \
+                --template raxml \
+                --out {params.prefix} \
+            2> /dev/null 1>&2
+        else
+            touch {output}
+        fi
+        """
 
 
 rule homologs_round2_raxmlng:
@@ -293,11 +323,11 @@ rule homologs_round2_raxmlng:
         alignment = HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep",
         model_file = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.out"
     output:
-        best_model = touch(HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestModel"),
-        best_tree = touch(HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestTree"),
-        ml_trees = touch(HOMOLOGS_R2 + "{orthogroup_id}.raxml.mlTrees"),
-        rba = touch(HOMOLOGS_R2 + "{orthogroup_id}.raxml.rba"),
-        start_tree = touch(HOMOLOGS_R2 + "{orthogroup_id}.raxml.startTree")
+        best_model = HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestModel",
+        best_tree = HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestTree",
+        ml_trees = HOMOLOGS_R2 + "{orthogroup_id}.raxml.mlTrees",
+        rba = HOMOLOGS_R2 + "{orthogroup_id}.raxml.rba",
+        start_tree = HOMOLOGS_R2 + "{orthogroup_id}.raxml.startTree"
     params:
         prefix = HOMOLOGS_R2 + "{orthogroup_id}"
     threads: 1
@@ -306,7 +336,9 @@ rule homologs_round2_raxmlng:
     conda: "homologs.yml"
     shell:
         """
-        if [ -s {input.model_file} ]
+        if [ -s {input.alignment} ] && \
+            [ -s {input.model_file} ] && \
+            [ $(grep -c ^">" {input.alignment}) -ge 4 ]
         then
             MODEL=$(\
                 grep raxml-ng {input.model_file} \
@@ -319,6 +351,8 @@ rule homologs_round2_raxmlng:
                 --model $MODEL \
                 --prefix {params.prefix} \
             2> /dev/null 1>&2
+        else
+            touch {output}
         fi
         """
 
