@@ -5,3 +5,4 @@ results/*
 data/db/*
 data/downloads/*
 .vscode
+src/pdc/*.pyc
