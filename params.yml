@@ -20,10 +20,15 @@ orthofinder:
     msa_program: mafft
     tree_program: fasttree
 
-
-orthogroups:
-    extract_orthogroups:
-        minimum: 2
+homologs:
+    trim_tips:
+        relative_cutoff: 0.2
+        absolute_cutoff: 0.4
+    mask_tips:
+        mask_paraphyletic: "y"
+    cut_internal_long_branches:
+        internal_branch_cutoff: 0.5
+        minimum_taxa: 3
 
 fastcodeml:
     maximizer: 22

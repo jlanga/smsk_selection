@@ -28,7 +28,7 @@ include: snakefiles + "transdecoder.py"
 include: snakefiles + "cdhit.py"
 include: snakefiles + "tidy.py"
 include: snakefiles + "orthofinder.py"
-#include: snakefiles + "homologs.py"
+include: snakefiles + "homologs.py"
 
 rule all:
     input:
