@@ -134,7 +134,7 @@ rule homologs_round1_trim_tips:
     benchmark: HOMOLOGS_R1 + "{orthogroup_id}.trimmed_tips.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/phylogenomic_dataset_construction/scripts/trim_tips.py "
+        "(python2 src/pdc/trim_tips.py "
             "{input} "
             "{output} "
             "{params.relative_cutoff} "
@@ -154,7 +154,7 @@ rule homologs_round1_mask_tips_by_taxon_id:
     benchmark: HOMOLOGS_R1 + "{orthogroup_id}.masked_tips.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/phylogenomic_dataset_construction/scripts/mask_tips_by_taxonID_transcripts.py "
+        "(python2 src/pdc/mask_tips_by_taxonID_transcripts.py "
             "{input.trimmed_tree} "
             "{output} "
             "{input.alignment} "
@@ -175,7 +175,7 @@ rule homologs_round1_cut_internal_long_branches:
     benchmark: HOMOLOGS_R1 + "{orthogroup_id}.cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/phylogenomic_dataset_construction/scripts/cut_long_internal_branches.py "
+        "(python2 src/pdc/cut_long_internal_branches.py "
             "{input.masked_tree} "
             "{output} "
             "{params.internal_branch_cutoff} "
@@ -368,7 +368,7 @@ rule homologs_round2_trim_tips:
     benchmark: HOMOLOGS_R2 + "{orthogroup_id}.trimmed_tips.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/phylogenomic_dataset_construction/scripts/trim_tips.py "
+        "(python2 src/pdc/trim_tips.py "
             "{input} "
             "{output} "
             "{params.relative_cutoff} "
@@ -389,7 +389,7 @@ rule homologs_round2_mask_tips_by_taxon_id:
     benchmark: HOMOLOGS_R2 + "{orthogroup_id}.masked_tips.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/phylogenomic_dataset_construction/scripts/mask_tips_by_taxonID_transcripts.py "
+        "(python2 src/pdc/mask_tips_by_taxonID_transcripts.py "
             "{input.trimmed_tree} "
             "{output} "
             "{input.alignment} "
@@ -411,7 +411,7 @@ rule homologs_round2_cut_internal_long_branches:
     benchmark: HOMOLOGS_R2 + "{orthogroup_id}.cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/phylogenomic_dataset_construction/scripts/cut_long_internal_branches.py "
+        "(python2 src/pdc/cut_long_internal_branches.py "
             "{input.masked_tree} "
             "{output} "
             "{params.internal_branch_cutoff} "
