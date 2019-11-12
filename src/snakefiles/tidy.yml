@@ -1,0 +1,8 @@
+# Environment to tidy up sequences
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - seqtk
