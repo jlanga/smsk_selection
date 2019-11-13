@@ -1,7 +1,7 @@
 rule tidy_pep:
     input: CDHIT + "{species}.pep"
     output: TIDY + "{species}.pep"
-    params: "{species}_"
+    params: "{species}@"
     conda: "tidy.yml"
     shell:
         """
@@ -14,7 +14,7 @@ rule tidy_pep:
 rule tidy_cds:
     input: CDHIT + "{species}.cds"
     output: TIDY + "{species}.cds"
-    params: "{species}_"
+    params: "{species}@"
     conda: "tidy.yml"
     shell:
         """

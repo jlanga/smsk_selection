@@ -29,6 +29,8 @@ homologs:
     cut_internal_long_branches:
         internal_branch_cutoff: 0.5
         minimum_taxa: 3
+    root_to_tip:
+        minimum_ingroup_taxa: 3
 
 fastcodeml:
     maximizer: 22

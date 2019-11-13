@@ -464,9 +464,64 @@ rule homologs_round2:
          aggregate_homologs_round2_files
 
 
-
+rule homologs_taxon_file:
+    output:HOMOLOGS + "taxon_code_file.tsv"
+    log: HOMOLOGS + "taxon_code_file.tsv.log"
+    benchmark: HOMOLOGS + "taxon_code_file.tsv.bmk"
+    run:
+        samples.reset_index()[["inout", "species"]].to_csv(
+            path_or_buf=output[0],
+            sep="\t",
+            header=False,
+            index=False
+        )
 
 # rule homologs_filter_1to1_orthologs:
 # rule homologs_prune_paralogs_mi:
 # rule homologs_prune_paralogs_mo:
-# rule homologs_prune_paralogs_mt:
+
+def aggregate_homologs_round2_files(wildcards):
+
+    checkpoint_cds = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
+    files_cds = expand(
+        HOMOLOGS_R2 + "{i}.final.cds",
+        i=glob_wildcards(os.path.join(checkpoint_cds, "{i}.cds")).i
+    )
+
+    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
+    files_pep = expand(
+        HOMOLOGS_R2 + "{i}.final.pep",
+        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
+    )
+    return files_cds + files_pep
+
+def aggregate_homologs_rt_files(wildcards):
+    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
+    trees = expand(
+        HOMOLOGS_R2 + "{i}.final.nwk",
+        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
+    )
+    return trees
+
+
+checkpoint homologs_prune_paralogs_rt:
+    input:
+        trees = aggregate_homologs_rt_files,
+        taxon_code_file = HOMOLOGS + "taxon_code_file.tsv"
+    output:
+        folder = directory(HOMOLOGS_RT)
+    params:
+        in_dir = HOMOLOGS_R2,
+        in_file_ending = ".final.nwk",
+        minimum_ingroup_taxa = params["homologs"]["root_to_tip"]["minimum_ingroup_taxa"]
+    log: HOMOLOGS + "prune_paralogs_rt.log"
+    benchmark: HOMOLOGS + "prune_paralogs_rt.bmk"
+    conda: "homologs.yml"
+    shell:
+        "python2 src/pdc/prune_paralogs_RT.py "
+            "{params.in_dir} "
+            "{params.in_file_ending} "
+            "{output.folder} "
+            "{params.minimum_ingroup_taxa} "
+            "{input.taxon_code_file} "
+        "2> {log} 1>&2"

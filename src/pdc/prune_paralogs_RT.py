@@ -35,9 +35,13 @@ def RT(homoDIR,tree_file_eneding,outDIR,min_ingroup_taxa,taxon_code_file_file):
 	print "Outgroups:",OUTGROUPS
 	
 	for treefile in os.listdir(homoDIR):
-		if not treefile.endswith(tree_file_eneding): continue
+		if not treefile.endswith(tree_file_eneding):
+			continue
+		if os.stat(homoDIR + treefile).st_size == 0:
+			continue
 		with open(homoDIR+treefile,"r") as infile:
 			 intree = newick3.parse(infile.readline())
+
 		curroot = intree
 		all_names = tree_utils.get_front_names(curroot)
 		num_tips = len(all_names)
@@ -93,4 +97,3 @@ if __name__ == "__main__":
 	
 	homoTreeDIR,tree_file_ending,outDIR,min_ingroup_taxa,taxon_code_file=sys.argv[1:]
 	RT(homoTreeDIR,tree_file_ending,outDIR,min_ingroup_taxa,taxon_code_file)
-
