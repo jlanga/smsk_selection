@@ -21,7 +21,7 @@ def raxml_bs(DIR,cleaned,num_cores,seqtype,replicates=100):
 	if not os.path.exists(tree) and not os.path.exists(raw_tree):
 		# raxml crashes if input file starts with . 
 		infasta = cleaned if DIR == "./" else DIR+cleaned
-		cmd = ["raxmlHPC-PTHREADS","-T",str(num_cores),\
+		cmd = ["raxmlHPC-PTHREADS-AVX2","-T",str(num_cores),\
 			   "-f","a","-x","12345","-#",str(replicates),\
 			   "-p","12345","-s",infasta,"-n",cleaned ,"-m",model]
 		print(" ".join(cmd))
