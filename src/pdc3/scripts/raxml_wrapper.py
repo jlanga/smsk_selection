@@ -23,12 +23,12 @@ def raxml(DIR,cleaned,num_cores,seqtype):
 	if not os.path.exists(tree) and not os.path.exists(raw_tree):
 		# raxml crashes if input file starts with . 
 		infasta = cleaned if DIR == "./" else DIR+cleaned
-		cmd = ["raxml","-T",str(num_cores),"-p","12345","-s",\
+		cmd = ["raxmlHPC-PTHREADS","-T",str(num_cores),"-p","12345","-s",\
 			   infasta,"-n",cleaned,"-m",model]
 		print(" ".join(cmd))
 		p = subprocess.Popen(cmd,stdout=subprocess.PIPE)
 		out = p.communicate()
-		assert p.returncode == 0,"Error raxml"+out[0]
+		assert p.returncode == 0,"Error raxml"+out[0].decode()
 	try:
 		os.rename(raw_tree,tree)
 		os.remove("RAxML_info."+cleaned)

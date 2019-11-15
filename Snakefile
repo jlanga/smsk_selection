@@ -46,6 +46,7 @@ rule all:
         # ),
         #OF_GROUPS + "Orthogroups.csv",
         # arules.orthofinder.input,
-        OF_SEQUENCES,
+        # OF_SEQUENCES,
         # rules.homologs_round1.input,  # not working
         # rules.homologs_round2.input  # not working
+        rules.homologs_rt.input

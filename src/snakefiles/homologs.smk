@@ -45,7 +45,7 @@ rule homologs_round1_fasta_to_tree:
             {params.in_dir} \
             {threads} \
             aa \
-            y \
+            n \
         2> {log} 1>&2
         """
 
@@ -164,7 +164,7 @@ rule homologs_round2_fasta_to_tree:
             {params.in_dir} \
             {threads} \
             aa \
-            y \
+            n \
         2> {log} 1>&2
         """
 
