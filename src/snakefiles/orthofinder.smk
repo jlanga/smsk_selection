@@ -254,6 +254,24 @@ checkpoint orthofinder_sequences:
         "2> {log} 1>&2"
 
 
+def aggregate_orthofinder_pep(wildcards):
+    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
+    files_pep = expand(
+        OF_SEQUENCES + "{i}.pep",
+        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
+    )
+    return files_pep
+
+def aggregate_orthofinder_cds(wildcards):
+    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
+    files_cds = expand(
+        OF_SEQUENCES + "{i}.cds",
+        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.cds")).i
+    )
+    return files_cds
+
+
 rule orthofinder:
     input:
-        OF_SEQUENCES
+        aggregate_orthofinder_pep,
+        aggregate_orthofinder_cds

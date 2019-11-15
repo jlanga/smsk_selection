@@ -3,11 +3,12 @@
 channels:
     - conda-forge
     - bioconda
+    - smirarab
     - defaults
 dependencies:
-    - python=2.7
+    - python=3
     - mafft
     - trimal
-    - raxml-ng
-    - modeltest-ng
-    - biopython
+    - raxml
+    - treeshrink
+    - pasta

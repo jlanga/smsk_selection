@@ -45,7 +45,7 @@ rule all:
         #     extension="pep cds".split()
         # ),
         #OF_GROUPS + "Orthogroups.csv",
-        rules.orthofinder.input,
+        # arules.orthofinder.input,
         OF_SEQUENCES,
         # rules.homologs_round1.input,  # not working
         # rules.homologs_round2.input  # not working

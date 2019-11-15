@@ -41,7 +41,8 @@ do_pylint_snakefiles() {
 do_pylint_python() {
 
     pylint --version
-    pylint src/*.py
+    pylint src \
+        --ignore=src/pdc3/scripts,src/phyx-1.01/src
 
 }
 

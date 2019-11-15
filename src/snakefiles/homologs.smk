@@ -1,527 +1,328 @@
-rule homologs_round1_mafft:
+rule homologs_merge_pep:
+    input: aggregate_orthofinder_pep
+    output: HOMOLOGS + "all.pep"
+    shell: "cat {input} > {output}"
+
+
+rule homologs_merge_cds:
+    input: aggregate_orthofinder_cds
+    output: HOMOLOGS + "all.cds"
+    shell: "cat {input} > {output}"
+
+
+rule homologs_round1_prepare:
     input:
         OF_SEQUENCES + "{orthogroup_id}.pep"
     output:
-        HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep"
-    log:
-        HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep.log"
-    benchmark:
-        HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep.bmk"
-    conda:
-        "homologs.yml"
+        HOMOLOGS_R1 + "{orthogroup_id}.fa"
     shell:
-        """
-        if [ -s {input} ]; then
-            mafft --genafpair --maxiterate 1000 {input} > {output} 2> {log}
-        else
-            touch {output} 2> {log}
-        fi
-        """
+        "ln -s $(readlink -f {input}) $(readlink -f {output})"
 
 
+def aggregate_homologs_round1_prepare(wildcards):
+    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
+    files_pep = expand(
+        HOMOLOGS_R1 + "{i}.fa",
+        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
+    )
+    return files_pep
 
 
-rule homologs_round1_trimal_pep:
-    input: HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep"
-    output: HOMOLOGS_R1 + "{orthogroup_id}.trimal.pep"
-    log: HOMOLOGS_R1 + "{orthogroup_id}.trimal.log"
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.trimal.bmk"
-    conda: "homologs.yml"
-    shell:
-        """
-        if [ -s {input} ]; then
-            trimal -in {input} -out {output} -automated1 2> {log} 1>&2
-        else
-            touch {output} 2> {log} 1>&2
-        fi
-        """
-
-
-rule homologs_round1_trimal_cds:
-    input:
-        cds_raw = OF_SEQUENCES + "{orthogroup_id}.cds",
-        pep_aligned = HOMOLOGS_R1 + "{orthogroup_id}.mafft.pep"
-    output: HOMOLOGS_R1 + "{orthogroup_id}.trimal.cds"
-    threads: 1
-    log: HOMOLOGS_R1 + "{orthogroup_id}.trimal.cds.log"
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.trimal.cds.bmk"
-    conda: "homologs.yml"
-    shell:
-        """
-        if [ -s {input.cds_raw} ] && [ -s {input.pep_aligned} ]; then
-            trimal \
-                -in {input.pep_aligned} \
-                -backtrans {input.cds_raw} \
-                -out {output} \
-            2> {log} 1>&2
-        else
-            touch {output} 2> {log} 1>&2
-        fi
-        """
-
-
-rule homologs_round1_modeltestng:
-    input: HOMOLOGS_R1 + "{orthogroup_id}.trimal.pep"
+rule homologs_round1_fasta_to_tree:
+    input: aggregate_homologs_round1_prepare
     output:
-        ckp = HOMOLOGS_R1 + "{orthogroup_id}.modeltest-ng.ckp",
-        out = HOMOLOGS_R1 + "{orthogroup_id}.modeltest-ng.out",
-        tree = HOMOLOGS_R1 + "{orthogroup_id}.modeltest-ng.tree"
+        touch(HOMOLOGS + "round1_fasta_to_tree.ok")
     params:
-        prefix = HOMOLOGS_R1 + "{orthogroup_id}.modeltest-ng"
-    threads: 1
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.modeltest-ng.bmk"
+        in_dir = HOMOLOGS_R1
+    log: HOMOLOGS + "round1_fasta_to_tree.log"
+    benchmark: HOMOLOGS + "round1_fasta_to_tree.bmk"
+    threads: 32
     conda: "homologs.yml"
     shell:
         """
-        if [ -s {input} ]; then
-            modeltest-ng \
-                --datatype aa \
-                --input {input} \
-                --template raxml \
-                --out {params.prefix} \
-            2> /dev/null 1>&2
-        else
-            touch {output.ckp} {output.out} {output.tree}
-        fi
+        PATH="bin:$PATH"
+        python src/pdc3/scripts/fasta_to_tree_pxclsq.py \
+            {params.in_dir} \
+            {threads} \
+            aa \
+            y \
+        2> {log} 1>&2
         """
 
-
-rule homologs_round1_raxmlng:
-    input:
-        alignment = HOMOLOGS_R1 + "{orthogroup_id}.trimal.pep",
-        model_file = HOMOLOGS_R1 + "{orthogroup_id}.modeltest-ng.out"
-    output:
-        best_model = touch(HOMOLOGS_R1 + "{orthogroup_id}.raxml.bestModel"),
-        best_tree = touch(HOMOLOGS_R1 + "{orthogroup_id}.raxml.bestTree"),
-        ml_trees = touch(HOMOLOGS_R1 + "{orthogroup_id}.raxml.mlTrees"),
-        rba = touch(HOMOLOGS_R1 + "{orthogroup_id}.raxml.rba"),
-        start_tree = touch(HOMOLOGS_R1 + "{orthogroup_id}.raxml.startTree")
+rule homologs_round1_treeshrink:
+    input: HOMOLOGS + "round1_fasta_to_tree.ok"
+    output: touch(HOMOLOGS + "round1_treeshrink.ok")
+    log: HOMOLOGS + "round1_treeshrink.log"
+    benchmark: HOMOLOGS + "round1_treeshrink.bmk"
+    threads: 32
     params:
-        prefix = HOMOLOGS_R1 + "{orthogroup_id}"
-    threads: 1
-    log: HOMOLOGS_R1 + "{orthogroup_id}.raxml.log"
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.raxml.bmk"
+        in_dir = HOMOLOGS_R1,
+        quantile = 0.05
     conda: "homologs.yml"
     shell:
         """
-        if [ -s {input.alignment} ] && \
-            [ -s {input.model_file} ] && \
-            [ $(grep -c ^">" {input.alignment}) -ge 4 ]
-        then
-            MODEL=$(\
-                grep raxml-ng {input.model_file} \
-                | tail -1 \
-                | grep -Po "model [A-Z0-9\+\-]+" \
-                | sed 's/^model //g' \
-            )
-            raxml-ng \
-                --msa {input.alignment} \
-                --model $MODEL \
-                --prefix {params.prefix} \
-            2> /dev/null 1>&2
-        fi
+        PATH="bin:$PATH"
+        python src/pdc3/scripts/tree_shrink_wrapper.py \
+            {params.in_dir} \
+            .tre \
+            {params.quantile} \
+            {params.in_dir} \
+        2> {log} 1>&2
         """
-
-
-rule homologs_round1_trim_tips:
-    input: HOMOLOGS_R1 + "{orthogroup_id}.raxml.bestTree"
-    output: touch(HOMOLOGS_R1 + "{orthogroup_id}.trimmed_tips.nwk")
-    params:
-        relative_cutoff = params["homologs"]["trim_tips"]["relative_cutoff"],
-        absolute_cutoff = params["homologs"]["trim_tips"]["absolute_cutoff"]
-    threads: 1
-    log: HOMOLOGS_R1 + "{orthogroup_id}.trimmed_tips.log"
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.trimmed_tips.bmk"
-    conda: "homologs.yml"
-    shell:
-        "(python2 src/pdc/trim_tips.py "
-            "{input} "
-            "{output} "
-            "{params.relative_cutoff} "
-            "{params.absolute_cutoff} || true)"
-        "2> {log} 1>&2"
 
 
 rule homologs_round1_mask_tips_by_taxon_id:
-    input:
-        trimmed_tree = HOMOLOGS_R1 + "{orthogroup_id}.trimmed_tips.nwk",
-        alignment = HOMOLOGS_R1 + "{orthogroup_id}.trimal.pep"
-    output: touch(HOMOLOGS_R1 + "{orthogroup_id}.masked_tips.nwk")
+    input: HOMOLOGS + "round1_treeshrink.ok"
+    output: touch(HOMOLOGS + "round1_mask_tips_by_taxon_id.ok")
     params:
+        in_dir = HOMOLOGS_R1,
         mask_tips = params["homologs"]["mask_tips"]["mask_paraphyletic"]
     threads: 1
-    log: HOMOLOGS_R1 + "{orthogroup_id}.masked_tips.log",
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.masked_tips.bmk"
+    log: HOMOLOGS + "round1_mask_tips_by_taxon_id.log",
+    benchmark: HOMOLOGS + "round1_mask_tips_by_taxon_id.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/pdc/mask_tips_by_taxonID_transcripts.py "
-            "{input.trimmed_tree} "
-            "{output} "
-            "{input.alignment} "
-            "{params.mask_tips} || true)"
+        "python src/pdc3/scripts/mask_tips_by_taxonID_transcripts.py "
+            "{params.in_dir} "
+            "{params.in_dir} "
+            "{params.mask_tips} "
         "2> {log} 1>&2"
 
 
 rule homologs_round1_cut_internal_long_branches:
-    input:
-        masked_tree = HOMOLOGS_R1 + "{orthogroup_id}.masked_tips.nwk",
-        original_tree = HOMOLOGS_R1 + "{orthogroup_id}.raxml.bestTree",
-    output: touch(HOMOLOGS_R1 + "{orthogroup_id}.final.nwk")
+    input: HOMOLOGS + "round1_mask_tips_by_taxon_id.ok"
+    output: touch(HOMOLOGS + "round1_cut_internal_long_branches.ok")
     params:
+        in_dir = HOMOLOGS_R1,
         internal_branch_cutoff = params["homologs"]["cut_internal_long_branches"]["internal_branch_cutoff"],
         minimum_taxa = params["homologs"]["cut_internal_long_branches"]["minimum_taxa"]
     threads: 1
-    log: HOMOLOGS_R1 + "{orthogroup_id}.cut_internal_long_branches.log"
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.cut_internal_long_branches.bmk"
+    log: HOMOLOGS + "round1_cut_internal_long_branches.log"
+    benchmark: HOMOLOGS + "homologs_round1_cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/pdc/cut_long_internal_branches.py "
-            "{input.masked_tree} "
-            "{output} "
+        "python src/pdc3/scripts/cut_long_internal_branches.py "
+            "{params.in_dir} "
+            ".mm "
             "{params.internal_branch_cutoff} "
             "{params.minimum_taxa} "
-            "{input.original_tree} || true)"
+            "{params.in_dir} "
         "2> {log} 1>&2"
 
 
-rule homologs_round1_to_fasta:
+rule homologs_round1_write_fasta_files_from_trees:
     input:
-        tree = HOMOLOGS_R1 + "{orthogroup_id}.final.nwk",
-        cds = HOMOLOGS_R1 + "{orthogroup_id}.trimal.cds",
-        pep = HOMOLOGS_R1 + "{orthogroup_id}.trimal.pep"
+        fasta = HOMOLOGS + "all.pep",
+        ok = HOMOLOGS + "round1_cut_internal_long_branches.ok"
     output:
-        cds = HOMOLOGS_R1 + "{orthogroup_id}.final.cds",
-        pep = HOMOLOGS_R1 + "{orthogroup_id}.final.pep"
-    threads: 1
-    log:  HOMOLOGS_R1 + "{orthogroup_id}.to_fasta.log"
-    benchmark: HOMOLOGS_R1 + "{orthogroup_id}.to_fasta.bmk"
+        touch(HOMOLOGS + "round1_write_fasta_files_from_trees.ok")
+    params:
+        indir = HOMOLOGS_R1,
+        outdir = HOMOLOGS_R2
+    log: HOMOLOGS + "round1_write_fasta_files_from_trees.log"
+    benchmark: HOMOLOGS + "round1_write_fasta_files_from_trees.bmk"
     conda: "homologs.yml"
     shell:
-        "python2 src/newick_to_fasta.py "
-            "{input.tree} "
-            "{input.cds} "
-            "{input.pep} "
-            "{output.cds} "
-            "{output.pep} "
+        "python src/pdc3/scripts/write_fasta_files_from_trees.py "
+            "{input.fasta} "
+            "{params.indir} "
+            ".subtree "
+            "{params.indir} "
         "2> {log} 1>&2"
-
-
-def aggregate_homologs_round1_files(wildcards):
-
-    checkpoint_cds = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_cds = expand(
-        HOMOLOGS_R1 + "{i}.final.cds",
-        i=glob_wildcards(os.path.join(checkpoint_cds, "{i}.cds")).i
-    )
-
-    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_pep = expand(
-        HOMOLOGS_R1 + "{i}.final.pep",
-        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
-    )
-    return files_cds + files_pep
 
 
 rule homologs_round1:
     input:
-         aggregate_homologs_round1_files
+        rules.homologs_round1_write_fasta_files_from_trees.output
 
 
 ################################################################################
 # ROUND 2
 ################################################################################
 
-rule homologs_round2_mafft:
-    input: HOMOLOGS_R1 + "{orthogroup_id}.final.pep"
-    output: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep"
-    log: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep.log"
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep.bmk"
-    conda: "homologs.yml"
+rule homologs_round2_prepare:
+    input: HOMOLOGS + "round1_write_fasta_files_from_trees.ok"
+    output: touch(HOMOLOGS + "round2_prepare.ok")
     shell:
-        """
-        if [ -s {input} ]
-        then
-            mafft --genafpair --maxiterate 1000 {input} > {output} 2> {log}
-        else
-            touch {output} 2> {log} 1>&2
-        fi
-        """
+        "mkdir -p {HOMOLOGS_R2}; "
+        "ln $(readlink -f {HOMOLOGS_R1}/*rr.fa) {HOMOLOGS_R2}"
 
-
-rule homologs_round2_trimal_pep:
-    input: HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep"
-    output: HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep"
-    log: HOMOLOGS_R2 + "{orthogroup_id}.trimal.log"
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.trimal.bmk"
-    threads: 1
-    conda: "homologs.yml"
-    shell:
-        """
-        if [ -s {input} ]
-        then
-            trimal -in {input} -out {output} -automated1 2> {log} 1>&2
-        else
-            touch {output}
-        fi
-        """
-
-
-rule homologs_round2_trimal_cds:
-    input:
-        cds_raw = OF_SEQUENCES + "{orthogroup_id}.cds",
-        pep_aligned = HOMOLOGS_R2 + "{orthogroup_id}.mafft.pep"
-    output: HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds"
-    threads: 1
-    log: HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds.log"
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds.bmk"
-    conda: "homologs.yml"
-    shell:
-        """
-        if [ -s {input.cds_raw} ] && \
-            [ -s {input.pep_aligned} ]
-        then
-            trimal \
-                -in {input.pep_aligned} \
-                -backtrans {input.cds_raw} \
-                -out {output} \
-            2> {log} 1>&2
-        else
-            touch {output}
-        fi
-        """
-
-
-rule homologs_round2_modeltestng:
-    input: HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep"
+rule homologs_round2_fasta_to_tree:
+    input: HOMOLOGS + "round2_prepare.ok"
     output:
-        ckp = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.ckp",
-        out = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.out",
-        tree = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.tree"
+        touch(HOMOLOGS + "round2_fasta_to_tree.ok")
     params:
-        prefix = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng"
-    threads: 1
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.bmk"
+        in_dir = HOMOLOGS_R2
+    log: HOMOLOGS + "round2_fasta_to_tree.log"
+    benchmark: HOMOLOGS + "round2_fasta_to_tree.bmk"
+    threads: 32
     conda: "homologs.yml"
     shell:
         """
-        if [ -s {input} ]
-        then
-            modeltest-ng \
-                --datatype aa \
-                --input {input} \
-                --template raxml \
-                --out {params.prefix} \
-            2> /dev/null 1>&2
-        else
-            touch {output}
-        fi
+        PATH="bin:$PATH"
+        python src/pdc3/scripts/fasta_to_tree_pxclsq.py \
+            {params.in_dir} \
+            {threads} \
+            aa \
+            y \
+        2> {log} 1>&2
         """
 
-
-rule homologs_round2_raxmlng:
-    input:
-        alignment = HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep",
-        model_file = HOMOLOGS_R2 + "{orthogroup_id}.modeltest-ng.out"
-    output:
-        best_model = HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestModel",
-        best_tree = HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestTree",
-        ml_trees = HOMOLOGS_R2 + "{orthogroup_id}.raxml.mlTrees",
-        rba = HOMOLOGS_R2 + "{orthogroup_id}.raxml.rba",
-        start_tree = HOMOLOGS_R2 + "{orthogroup_id}.raxml.startTree"
+rule homologs_round2_treeshrink:
+    input: HOMOLOGS + "round2_fasta_to_tree.ok"
+    output: touch(HOMOLOGS + "round2_treeshrink.ok")
+    log: HOMOLOGS + "round2_treeshrink.log"
+    benchmark: HOMOLOGS + "round2_treeshrink.bmk"
+    threads: 32
     params:
-        prefix = HOMOLOGS_R2 + "{orthogroup_id}"
-    threads: 1
-    log: HOMOLOGS_R2 + "{orthogroup_id}.raxml.log"
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.raxml.bmk"
+        in_dir = HOMOLOGS_R2,
+        quantile = 0.05
     conda: "homologs.yml"
     shell:
         """
-        if [ -s {input.alignment} ] && \
-            [ -s {input.model_file} ] && \
-            [ $(grep -c ^">" {input.alignment}) -ge 4 ]
-        then
-            MODEL=$(\
-                grep raxml-ng {input.model_file} \
-                | tail -1 \
-                | grep -Po "model [A-Z0-9\+\-]+" \
-                | sed 's/^model //g' \
-            )
-            raxml-ng \
-                --msa {input.alignment} \
-                --model $MODEL \
-                --prefix {params.prefix} \
-            2> /dev/null 1>&2
-        else
-            touch {output}
-        fi
+        PATH="bin:$PATH"
+        python src/pdc3/scripts/tree_shrink_wrapper.py \
+            {params.in_dir} \
+            .tre \
+            {params.quantile} \
+            {params.in_dir} \
+        2> {log} 1>&2
         """
-
-
-rule homologs_round2_trim_tips:
-    input: HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestTree"
-    output: touch(HOMOLOGS_R2 + "{orthogroup_id}.trimmed_tips.nwk")
-    params:
-        relative_cutoff = params["homologs"]["trim_tips"]["relative_cutoff"],
-        absolute_cutoff = params["homologs"]["trim_tips"]["absolute_cutoff"]
-    threads: 1
-    log: HOMOLOGS_R2 + "{orthogroup_id}.trimmed_tips.log"
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.trimmed_tips.bmk"
-    conda: "homologs.yml"
-    shell:
-        "(python2 src/pdc/trim_tips.py "
-            "{input} "
-            "{output} "
-            "{params.relative_cutoff} "
-            "{params.absolute_cutoff} "
-        "|| true) "
-        "2> {log} 1>&2"
 
 
 rule homologs_round2_mask_tips_by_taxon_id:
-    input:
-        trimmed_tree = HOMOLOGS_R2 + "{orthogroup_id}.trimmed_tips.nwk",
-        alignment = HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep"
-    output: touch(HOMOLOGS_R2 + "{orthogroup_id}.masked_tips.nwk")
+    input: HOMOLOGS + "round2_treeshrink.ok"
+    output: touch(HOMOLOGS + "round2_mask_tips_by_taxon_id.ok")
     params:
+        in_dir = HOMOLOGS_R2,
         mask_tips = params["homologs"]["mask_tips"]["mask_paraphyletic"]
     threads: 1
-    log: HOMOLOGS_R2 + "{orthogroup_id}.masked_tips.log",
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.masked_tips.bmk"
+    log: HOMOLOGS + "round2_mask_tips_by_taxon_id.log",
+    benchmark: HOMOLOGS + "round2_mask_tips_by_taxon_id.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/pdc/mask_tips_by_taxonID_transcripts.py "
-            "{input.trimmed_tree} "
-            "{output} "
-            "{input.alignment} "
+        "python src/pdc3/scripts/mask_tips_by_taxonID_transcripts.py "
+            "{params.in_dir} "
+            "{params.in_dir} "
             "{params.mask_tips} "
-        "|| true) "
         "2> {log} 1>&2"
 
 
 rule homologs_round2_cut_internal_long_branches:
-    input:
-        masked_tree = HOMOLOGS_R2 + "{orthogroup_id}.masked_tips.nwk",
-        original_tree = HOMOLOGS_R2 + "{orthogroup_id}.raxml.bestTree",
-    output: touch(HOMOLOGS_R2 + "{orthogroup_id}.final.nwk")
+    input: HOMOLOGS + "round2_mask_tips_by_taxon_id.ok"
+    output: touch(HOMOLOGS + "round2_cut_internal_long_branches.ok")
     params:
+        in_dir = HOMOLOGS_R2,
         internal_branch_cutoff = params["homologs"]["cut_internal_long_branches"]["internal_branch_cutoff"],
         minimum_taxa = params["homologs"]["cut_internal_long_branches"]["minimum_taxa"]
     threads: 1
-    log: HOMOLOGS_R2 + "{orthogroup_id}.cut_internal_long_branches.log"
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.cut_internal_long_branches.bmk"
+    log: HOMOLOGS + "round2_cut_internal_long_branches.log"
+    benchmark: HOMOLOGS + "homologs_round2_cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "(python2 src/pdc/cut_long_internal_branches.py "
-            "{input.masked_tree} "
-            "{output} "
+        "python src/pdc3/scripts/cut_long_internal_branches.py "
+            "{params.in_dir} "
+            ".mm "
             "{params.internal_branch_cutoff} "
             "{params.minimum_taxa} "
-            "{input.original_tree} "
-        "|| true) "
+            "{params.in_dir} "
         "2> {log} 1>&2"
 
 
-rule homologs_round2_to_fasta:
+checkpoint homologs_round2_write_fasta_files_from_trees:
     input:
-        tree = HOMOLOGS_R2 + "{orthogroup_id}.final.nwk",
-        cds = HOMOLOGS_R2 + "{orthogroup_id}.trimal.cds",
-        pep = HOMOLOGS_R2 + "{orthogroup_id}.trimal.pep"
+        fasta = HOMOLOGS + "all.pep",
+        ok = HOMOLOGS + "round2_cut_internal_long_branches.ok"
     output:
-        cds = HOMOLOGS_R2 + "{orthogroup_id}.final.cds",
-        pep = HOMOLOGS_R2 + "{orthogroup_id}.final.pep"
-    threads: 1
-    log:  HOMOLOGS_R2 + "{orthogroup_id}.to_fasta.log"
-    benchmark: HOMOLOGS_R2 + "{orthogroup_id}.to_fasta.bmk"
+        touch(HOMOLOGS + "round2_write_fasta_files_from_trees.ok")
+    params:
+        indir = HOMOLOGS_R2,
+        outdir = HOMOLOGS_R2
+    log: HOMOLOGS + "round2_write_fasta_files_from_trees.log"
+    benchmark: HOMOLOGS + "round2_write_fasta_files_from_trees.bmk"
     conda: "homologs.yml"
     shell:
-        "python2 src/newick_to_fasta.py "
-            "{input.tree} "
-            "{input.cds} "
-            "{input.pep} "
-            "{output.cds} "
-            "{output.pep} "
+        "python src/pdc3/scripts/write_fasta_files_from_trees.py "
+            "{input.fasta} "
+            "{params.indir} "
+            ".subtree "
+            "{params.indir} "
         "2> {log} 1>&2"
-
-
-def aggregate_homologs_round2_files(wildcards):
-
-    checkpoint_cds = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_cds = expand(
-        HOMOLOGS_R2 + "{i}.final.cds",
-        i=glob_wildcards(os.path.join(checkpoint_cds, "{i}.cds")).i
-    )
-
-    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_pep = expand(
-        HOMOLOGS_R2 + "{i}.final.pep",
-        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
-    )
-    return files_cds + files_pep
 
 
 rule homologs_round2:
     input:
-         aggregate_homologs_round2_files
+        rules.homologs_round2_write_fasta_files_from_trees.output
 
-
-rule homologs_taxon_file:
-    output:HOMOLOGS + "taxon_code_file.tsv"
-    log: HOMOLOGS + "taxon_code_file.tsv.log"
-    benchmark: HOMOLOGS + "taxon_code_file.tsv.bmk"
-    run:
-        samples.reset_index()[["inout", "species"]].to_csv(
-            path_or_buf=output[0],
+def write_inout(samples, output):
+    samples\
+        .reset_index()\
+        [["inout", "species"]]\
+        .to_csv(
+            path_or_buf=output,
             sep="\t",
             header=False,
             index=False
         )
 
-# rule homologs_filter_1to1_orthologs:
-# rule homologs_prune_paralogs_mi:
-# rule homologs_prune_paralogs_mo:
 
-def aggregate_homologs_round2_files(wildcards):
+rule homologs_create_taxa_inout:
+    output: HOMOLOGS + "in_out.tsv"
+    log: HOMOLOGS + "in_out.log"
+    benchmark: HOMOLOGS + "in_out.bmk"
+    run:
+        samples\
+            .reset_index()\
+            [["inout", "species"]]\
+            .to_csv(
+                path_or_buf=output[0],
+                sep='\t',
+                index=False,
+                header=False
+            )
 
-    checkpoint_cds = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_cds = expand(
-        HOMOLOGS_R2 + "{i}.final.cds",
-        i=glob_wildcards(os.path.join(checkpoint_cds, "{i}.cds")).i
-    )
-
-    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_pep = expand(
-        HOMOLOGS_R2 + "{i}.final.pep",
-        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
-    )
-    return files_cds + files_pep
-
-def aggregate_homologs_rt_files(wildcards):
-    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    trees = expand(
-        HOMOLOGS_R2 + "{i}.final.nwk",
-        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
-    )
-    return trees
-
-
-checkpoint homologs_prune_paralogs_rt:
-    input:
-        trees = aggregate_homologs_rt_files,
-        taxon_code_file = HOMOLOGS + "taxon_code_file.tsv"
-    output:
-        folder = directory(HOMOLOGS_RT)
+rule homologs_prepare_rt:
+    input: rules.homologs_round2.input
+    output: touch(HOMOLOGS + "prepare_rt.ok")
     params:
         in_dir = HOMOLOGS_R2,
-        in_file_ending = ".final.nwk",
+        out_dir = HOMOLOGS_RT
+    log: HOMOLOGS + "prepare_rt.log"
+    benchmark: HOMOLOGS + "prepare_rt.bmk"
+    shell:
+        """
+        mkdir -p {params.out_dir}
+        ln {params.in_dir}/*.tre {params.out_dir}
+        """
+
+
+rule homologs_prune_paralogs_rt:
+    input:
+        tsv = HOMOLOGS + "in_out.tsv",
+        ok = HOMOLOGS + "prepare_rt.ok"
+    output:
+        ok = touch(HOMOLOGS + "prune_paralogs_rt.ok")
+    params:
+        in_dir = HOMOLOGS_R2,
+        tree_ending = ".tre",
+        out_dir = HOMOLOGS_RT,
         minimum_ingroup_taxa = params["homologs"]["root_to_tip"]["minimum_ingroup_taxa"]
     log: HOMOLOGS + "prune_paralogs_rt.log"
     benchmark: HOMOLOGS + "prune_paralogs_rt.bmk"
     conda: "homologs.yml"
     shell:
-        "python2 src/pdc/prune_paralogs_RT.py "
-            "{params.in_dir} "
-            "{params.in_file_ending} "
-            "{output.folder} "
-            "{params.minimum_ingroup_taxa} "
-            "{input.taxon_code_file} "
-        "2> {log} 1>&2"
+        """
+        python src/pdc3/scripts/prune_paralogs_RT.py \
+            {params.in_dir} \
+            {params.tree_ending} \
+            {params.out_dir} \
+            {params.minimum_ingroup_taxa} \
+            {input.tsv} \
+        2> {log} 1>&2
+        """
+
+rule homologs_rt:
+    input: HOMOLOGS + "prune_paralogs_rt.ok"
+
+
+
