@@ -9,6 +9,16 @@ addons:
         - build-essential
         - git
         - curl
+        - autotools-dev
+        - autoconf
+        - automake
+        - cmake
+        - libtool
+        - liblapack-dev
+        - libatlas-cpp-0.6-dev
+        - libnlopt-dev
+        - libnlopt0
+        - libarmadillo-dev
 
 cache:
     timeout: 1000
@@ -42,9 +52,14 @@ install: |
     conda config --add channels defaults
     conda config --add channels conda-forge
     conda config --add channels bioconda
-    conda install --quiet --yes --channel bioconda snakemake=5.3.0
+    conda install --quiet --yes --channel bioconda snakemake=5.7.4
     snakemake --use-conda --create-envs-only
     conda clean --all --yes
+    mkdir -p bin/
+    pushd src/phyx-1.01/src
+    ./configure
+    make -j4
+    cp px* ../../../bin/
 
 script: |
     echo $PATH
