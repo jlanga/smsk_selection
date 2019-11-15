@@ -60,6 +60,7 @@ install: |
     ./configure
     make -j4
     cp px* ../../../bin/
+    popd
 
 script: |
     echo $PATH
