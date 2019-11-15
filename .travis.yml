@@ -58,7 +58,7 @@ install: |
     mkdir -p bin/
     pushd src/phyx-1.01/src
     ./configure
-    make -j4
+    make
     cp px* ../../../bin/
     popd
 
