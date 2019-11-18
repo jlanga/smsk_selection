@@ -6,3 +6,4 @@ channels:
     - defaults
 dependencies:
     - busco=3.0.2=py36_8
+    - wget
