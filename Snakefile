@@ -28,5 +28,4 @@ include: snakefiles + "homologs.smk"
 
 rule all:
     input:
-        rules.orthofinder.input,
-        rules.homologs_round1_treeshrink.output
+        rules.homologs_rt.output
