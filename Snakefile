@@ -28,4 +28,4 @@ include: snakefiles + "homologs.smk"
 
 rule all:
     input:
-        rules.homologs_rt.output
+        rules.homologs_rt.input
