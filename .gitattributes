@@ -1,0 +1,8 @@
+data/transcriptomes/gmor.cds filter=lfs diff=lfs merge=lfs -text
+data/transcriptomes/trur.cds filter=lfs diff=lfs merge=lfs -text
+data/transcriptomes/amex.cds filter=lfs diff=lfs merge=lfs -text
+data/transcriptomes/drer.cds filter=lfs diff=lfs merge=lfs -text
+data/transcriptomes/trur.pep filter=lfs diff=lfs merge=lfs -text
+data/transcriptomes/amex.pep filter=lfs diff=lfs merge=lfs -text
+data/transcriptomes/drer.pep filter=lfs diff=lfs merge=lfs -text
+data/transcriptomes/gmor.pep filter=lfs diff=lfs merge=lfs -text
