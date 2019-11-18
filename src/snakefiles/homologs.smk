@@ -287,17 +287,6 @@ rule homologs_round2:
     input:
         rules.homologs_round2_write_fasta_files_from_trees.output
 
-def write_inout(samples, output):
-    samples\
-        .reset_index()\
-        [["inout", "species"]]\
-        .to_csv(
-            path_or_buf=output,
-            sep="\t",
-            header=False,
-            index=False
-        )
-
 
 rule homologs_create_taxa_inout:
     output: HOMOLOGS + "in_out.tsv"
