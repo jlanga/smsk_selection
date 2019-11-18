@@ -27,7 +27,7 @@ rule busco_run:
     output: directory(BUSCO + "{species}_{database}")
     log: BUSCO + "{species}_{database}.log"
     benchmark: BUSCO + "{species}_{database}.bmk"
-    threads: 4
+    threads: 1
     params:
         output_tag = "{species}_{database}"
     conda: "busco.yml"
