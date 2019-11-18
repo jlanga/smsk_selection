@@ -5,7 +5,6 @@ cd-hit:
 
 orthofinder:
     blastp_evalue: 0.001
-    number_of_chunks: 1
     mcl_inflation: 1.5
     msa_program: mafft
     tree_program: fasttree

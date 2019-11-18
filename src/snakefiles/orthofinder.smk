@@ -1,5 +1,3 @@
-CHUNKS_ORTHO = params["orthofinder"]["number_of_chunks"]
-
 rule orthofinder_parse_ids:
     """
     Remove the comments from fasta
