@@ -25,7 +25,16 @@ def trim(inDIR,tree_file_ending,q,outDIR):
 		if i.endswith(tree_file_ending):
 			print(i)
 			filecount += 1
-			cmd= ["run_treeshrink.py","-t", inDIR+i ,"-c","-m per-gene", "-q "+str(q), "-o",outDIR+i+".ts_dir"]
+			#cmd= ["run_treeshrink.py","-t", inDIR+i ,"-c","-m per-gene", "-q "+str(q), "-o",outDIR+i+".ts_dir"]
+			cmd = [
+				"run_treeshrink.py", 
+					"-t", inDIR+i ,
+					"-c",
+					"-m", "per-gene",
+					"-q ", str(q),
+					"-o", outDIR+i+".ts_dir"
+			]
+
 			print((" ".join(cmd)))
 			os.system(" ".join(cmd))
 			

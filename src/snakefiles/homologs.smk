@@ -1,78 +1,114 @@
-rule homologs_merge_pep:
-    input: aggregate_orthofinder_pep
-    output: HOMOLOGS + "all.pep"
-    shell: "cat {input} > {output}"
-
-
-rule homologs_merge_cds:
-    input: aggregate_orthofinder_cds
+rule homologs_join_cds:
+    input: expand(CDHIT + "{species}.cds", species=SPECIES)
     output: HOMOLOGS + "all.cds"
-    shell: "cat {input} > {output}"
-
-
-rule homologs_round1_prepare:
-    input:
-        OF_SEQUENCES + "{orthogroup_id}.pep"
-    output:
-        HOMOLOGS_R1 + "{orthogroup_id}.fa"
-    shell:
-        "ln -s $(readlink -f {input}) $(readlink -f {output})"
-
-
-def aggregate_homologs_round1_prepare(wildcards):
-    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_pep = expand(
-        HOMOLOGS_R1 + "{i}.fa",
-        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
-    )
-    return files_pep
-
-
-rule homologs_round1_fasta_to_tree:
-    input: aggregate_homologs_round1_prepare
-    output:
-        touch(HOMOLOGS + "round1_fasta_to_tree.ok")
-    params:
-        in_dir = HOMOLOGS_R1
-    log: HOMOLOGS + "round1_fasta_to_tree.log"
-    benchmark: HOMOLOGS + "round1_fasta_to_tree.bmk"
-    threads: 32
     conda: "homologs.yml"
     shell:
         """
-        PATH="bin:$PATH"
-        python src/pdc3/scripts/fasta_to_tree_pxclsq.py \
-            {params.in_dir} \
-            {threads} \
-            aa \
-            n \
-        2> {log} 1>&2
+        cat /dev/null > {output}
+
+        for file in {input}; do
+            species=$(basename $file | sed "s/.cds//")
+            seqtk seq $file \
+            | cut -f 1 -d " " \
+            | paste - - \
+            | sed "s/^>/>$species@/" \
+            | tr "\t" "\n" \
+            >> {output}
+        done
         """
 
+rule homologs_join_pep:
+    input: expand(CDHIT + "{species}.pep", species=SPECIES)
+    output: HOMOLOGS + "all.pep"
+    conda: "homologs.yml"
+    shell:
+        """
+        cat /dev/null > {output}
+
+        for file in {input}; do
+            species=$(basename $file | sed "s/.pep//")
+            seqtk seq $file \
+            | cut -f 1 -d " " \
+            | paste - - \
+            | sed "s/^>/>$species@/" \
+            | tr "\t" "\n" \
+            >> {output}
+        done
+        """
+
+rule homologs_round1_prepare_msa:
+    """
+    Transform _ into @, and store it in .aln-cln
+    """
+    input: ORTHOFINDER + "msa"
+    output: touch(HOMOLOGS + "round1_prepare_msa.ok")
+    shell: 
+        # """
+        # mkdir -p {HOMOLOGS_R1}
+        # find {input}/ -type f -name "OG*.fa" -exec \
+        # bash -c 'sed "s/_/@/" $1 > {HOMOLOGS_R1}/${{1##*/.fa}}.aln-cln' _ {{}} \;
+        # """
+        """
+        mkdir -p {HOMOLOGS_R1}
+
+        find {input}/ -type f -name "OG*.fa" -exec \
+        bash -c 'sed "s/_/@/" $1 > {HOMOLOGS_R1}/$(basename $1 .fa).aln-cln' _ {{}} \;
+        """
+
+# def aggregate_homologs_round1_prepare(wildcards):
+#     checkpoint_trees = checkpoints.orthofinder.get(**wildcards).input[0]
+#     trees = expand(
+#         ORTHOFINDER + "resolved_gene_trees/{i}.txt",
+#         i=glob_wildcards(os.path.join(checkpoint_trees, "{i}.txt")).i
+#     )
+#     return trees
+
+
+
+rule homologs_round1_prepare_trees:
+    input: ORTHOFINDER + "gene_trees"
+    output: touch(HOMOLOGS + "round1_prepare.ok")
+    conda: "homologs.yml"
+    shell:
+        """
+        python src/correct_tree_leaf_names.py {input} .txt {HOMOLOGS_R1} .nwk
+
+        find {HOMOLOGS_R1} -type f -name "OG*_tree.nwk" -exec \
+            bash -c 'mv $1 ${{1%_*}}.nwk' _ {{}} \;
+        """
+
+
+
+
 rule homologs_round1_treeshrink:
-    input: HOMOLOGS + "round1_fasta_to_tree.ok"
+    input:
+        HOMOLOGS + "round1_prepare.ok",
+        HOMOLOGS + "round1_prepare_msa.ok"
     output: touch(HOMOLOGS + "round1_treeshrink.ok")
     log: HOMOLOGS + "round1_treeshrink.log"
     benchmark: HOMOLOGS + "round1_treeshrink.bmk"
     threads: 32
     params:
-        in_dir = HOMOLOGS_R1,
         quantile = 0.05
     conda: "homologs.yml"
     shell:
         """
         PATH="bin:$PATH"
         python src/pdc3/scripts/tree_shrink_wrapper.py \
-            {params.in_dir} \
-            .tre \
+            {HOMOLOGS_R1} \
+            .nwk \
             {params.quantile} \
-            {params.in_dir} \
+            {HOMOLOGS_R1} \
         2> {log} 1>&2
+
+        find {HOMOLOGS_R1} -name "OG*.ts.tt" -type f -exec \
+            bash -c 'mv $1 ${{1%_*}}.ts.tt' _ {{}} \;
         """
 
 
 rule homologs_round1_mask_tips_by_taxon_id:
-    input: HOMOLOGS + "round1_treeshrink.ok"
+    input:
+        HOMOLOGS + "round1_treeshrink.ok",
     output: touch(HOMOLOGS + "round1_mask_tips_by_taxon_id.ok")
     params:
         in_dir = HOMOLOGS_R1,
@@ -147,6 +183,7 @@ rule homologs_round2_prepare:
         "mkdir -p {HOMOLOGS_R2}; "
         "ln $(readlink -f {HOMOLOGS_R1}/*rr.fa) {HOMOLOGS_R2}"
 
+
 rule homologs_round2_fasta_to_tree:
     input: HOMOLOGS + "round2_prepare.ok"
     output:
@@ -188,6 +225,9 @@ rule homologs_round2_treeshrink:
             {params.in_dir} \
         2> {log} 1>&2
         """
+        # find {HOMOLOGS_R1} -name "OG*.ts.tt" -type f -exec \
+        #     bash -c 'mv $1 ${{1%_*} }.ts.tt' _ {{}} \;
+        # """
 
 
 rule homologs_round2_mask_tips_by_taxon_id:

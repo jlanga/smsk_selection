@@ -11,8 +11,9 @@ TIDY = "results/tidy/"
 
 ORTHOFINDER = "results/orthofinder/"
 OF_SEARCH = ORTHOFINDER + "search/"
-OF_GROUPS = ORTHOFINDER + "groups/"
-OF_SEQUENCES = ORTHOFINDER + "sequences/"
+OF_GROUPS = ORTHOFINDER + "OrthoFinder/Results_groups/"
+OF_TREES = ORTHOFINDER + "OrthoFinder/Results_trees/"
+OF_ORTHOLOGUES = ORTHOFINDER + "OrthoFinder/Results_orthologues/"
 
 HOMOLOGS = "results/homologs/"
 HOMOLOGS_R1 = HOMOLOGS + "round1/"

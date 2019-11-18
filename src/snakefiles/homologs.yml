@@ -12,3 +12,6 @@ dependencies:
     - raxml
     - treeshrink
     - pasta
+    - seqtk
+    - biopython
+    - parallel

@@ -32,21 +32,5 @@ include: snakefiles + "homologs.smk"
 
 rule all:
     input:
-        # DOWNLOAD + "uniref90.fa.gz",
-        # DOWNLOAD + "swissprot.fa.gz",
-        # DOWNLOAD + "pfama.hmm.gz",
-        # expand(
-        #     TRANSDECODER + "{species}.pep",
-        #     species=species
-        # ),
-        # expand(
-        #     TAG + "{species}.{extension}",
-        #     species=species,
-        #     extension="pep cds".split()
-        # ),
-        #OF_GROUPS + "Orthogroups.csv",
-        # arules.orthofinder.input,
-        # OF_SEQUENCES,
-        # rules.homologs_round1.input,  # not working
-        # rules.homologs_round2.input  # not working
-        rules.homologs_rt.input
+        rules.orthofinder.input,
+        rules.homologs_round1_treeshrink.output

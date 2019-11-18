@@ -10,7 +10,7 @@ channels:
     - bioconda
     - defaults
 dependencies:
-    - orthofinder=2.2.7
+    - orthofinder=2.3.3
     - pandas=0.21.0
     - numpy=1.15.0
     - biopython

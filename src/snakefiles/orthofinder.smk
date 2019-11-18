@@ -1,55 +1,50 @@
 CHUNKS_ORTHO = params["orthofinder"]["number_of_chunks"]
 
-rule orthofinder_search_parse_ids:
+rule orthofinder_parse_ids:
     """
-    Parse the input transcriptomes, add the species to the identifier and remove
-    the comments
+    Remove the comments from fasta
     """
-    input: TIDY + "{species}.pep"
-    output: OF_SEARCH + "{species}.fasta"
+    input: CDHIT + "{species}.pep"
+    output: ORTHOFINDER + "{species}.fasta"
     shell:
-        """
-        < {input} \
-        cut -f 1 -d \" \" \
-        > {output}
-        """
+        "cut -f 1 -d \" \" < {input} > {output}"
 
 
-rule orthofinder_search_link_all:
+rule orthofinder_link_all:
     input:
         fastas = expand(
-            OF_SEARCH + "{species}.fasta",
+            ORTHOFINDER + "{species}.fasta",
             species=SPECIES
         )
 
 
-rule orthofinder_search_prepare:
+rule orthofinder_prepare:
     """
     Split fasta files, rename species and sequences and prepare blast databases.
     """
     input:
         fastas = expand(
-            OF_SEARCH + "{species}.fasta",
+            ORTHOFINDER + "{species}.fasta",
             species=SPECIES
         )
     output:
         txt = touch(ORTHOFINDER + "prepare.txt"),
         fastas = expand(
-            OF_SEARCH + "Species{species_number}.fa",
+            ORTHOFINDER + "Species{species_number}.fa",
             species_number=[x for x in range(0, N_SPECIES)]
         ),
         db = expand(
-            OF_SEARCH + "diamondDBSpecies{database_number}.dmnd",
+            ORTHOFINDER + "diamondDBSpecies{database_number}.dmnd",
             database_number=[x for x in range(0, N_SPECIES)]
         )
     params:
-        fasta_dir = OF_SEARCH,
-        temp_dir1 = OF_SEARCH + "Results_*",
-        temp_dir2 = OF_SEARCH + "Results_*/WorkingDirectory/"
+        fasta_dir = ORTHOFINDER,
+        temp_dir1 = ORTHOFINDER + "OrthoFinder/",
+        temp_dir2 = ORTHOFINDER + "OrthoFinder/Results_prepare/WorkingDirectory/"
     log:
-        OF_SEARCH + "prepare.log"
+        ORTHOFINDER + "prepare.log"
     benchmark:
-        OF_SEARCH + "prepare.json"
+        ORTHOFINDER + "prepare.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -58,6 +53,7 @@ rule orthofinder_search_prepare:
             --fasta {params.fasta_dir} \
             --search diamond \
             --only-prepare \
+            --name prepare \
         2> {log} 1>&2
 
         mv {params.temp_dir2}/* {params.fasta_dir}/
@@ -65,25 +61,25 @@ rule orthofinder_search_prepare:
         """
 
 
-rule orthofinder_search_split:
+rule orthofinder_blastp_split:
     """
     Split the headers from transdecoder_longest_orfs into multiple files
     """
     input:
-        fai = ancient(OF_SEARCH + "Species{species_number}.fa.fai")
+        fai = ancient(ORTHOFINDER + "Species{species_number}.fa.fai")
     output:
         expand(
-            OF_SEARCH + "{{species_number}}/chunks/ids_{chunk_id}.tsv",
+            ORTHOFINDER + "{{species_number}}/chunks/ids_{chunk_id}.tsv",
             chunk_id=['{0:05d}'.format(x) for x in range(0, CHUNKS_ORTHO)]
         )
     params:
-        folder = OF_SEARCH,
+        folder = ORTHOFINDER,
         number_of_chunks = CHUNKS_ORTHO,
         species = "{species_number}"
     log:
-        OF_SEARCH + "{species_number}/split.log"
+        ORTHOFINDER + "{species_number}/split.log"
     benchmark:
-        OF_SEARCH + "{species_number}/split.json"
+        ORTHOFINDER + "{species_number}/split.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -98,21 +94,21 @@ rule orthofinder_search_split:
 
 
 
-rule orthofinder_search_blastp:
+rule orthofinder_blastp:
     """
     Run blastp of each chunk
     """
     input:
-        fasta = OF_SEARCH + "Species{species_number}.fa",
-        fai   = ancient(OF_SEARCH + "Species{species_number}.fa.fai"),
-        chunk = OF_SEARCH + "{species_number}/chunks/ids_{chunk_id}.tsv",
-        db    = OF_SEARCH + "diamondDBSpecies{database_number}.dmnd",
+        fasta = ORTHOFINDER + "Species{species_number}.fa",
+        fai   = ancient(ORTHOFINDER + "Species{species_number}.fa.fai"),
+        chunk = ORTHOFINDER + "{species_number}/chunks/ids_{chunk_id}.tsv",
+        db    = ORTHOFINDER + "diamondDBSpecies{database_number}.dmnd",
     output:
-        tsv = OF_SEARCH + "{species_number}/{database_number}/blastp_{chunk_id}.tsv"
+        tsv = ORTHOFINDER + "{species_number}/{database_number}/blastp_{chunk_id}.tsv"
     log:
-        OF_SEARCH + "{species_number}/{database_number}/blastp_{chunk_id}.log"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_{chunk_id}.log"
     benchmark:
-        OF_SEARCH + "{species_number}/{database_number}/blastp_{chunk_id}.json"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_{chunk_id}.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -128,21 +124,21 @@ rule orthofinder_search_blastp:
 
 
 
-rule orthofinder_search_blastp_merge:
+rule orthofinder_blastp_merge:
     """
     Merge results from the different blastps
     """
     input:
         expand(
-            OF_SEARCH + "{{species_number}}/{{database_number}}/blastp_{chunk_id}.tsv",
+            ORTHOFINDER + "{{species_number}}/{{database_number}}/blastp_{chunk_id}.tsv",
             chunk_id = ['{0:05d}'.format(x) for x in range(0, CHUNKS_ORTHO)]
         )
     output:
-        tsv = OF_SEARCH + "Blast{species_number}_{database_number}.txt"
+        tsv = ORTHOFINDER + "Blast{species_number}_{database_number}.txt"
     log:
-        OF_SEARCH + "{species_number}/{database_number}/blastp_merge.log"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_merge.log"
     benchmark:
-        OF_SEARCH + "{species_number}/{database_number}/blastp_merge.json"
+        ORTHOFINDER + "{species_number}/{database_number}/blastp_merge.json"
     conda:
         "orthofinder.yml"
     shell:
@@ -155,44 +151,18 @@ rule orthofinder_groups:
     """
     input:
         tsv = expand(
-            OF_SEARCH + "Blast{database_number}_{species_number}.txt",
+            ORTHOFINDER + "Blast{database_number}_{species_number}.txt",
             species_number = [x for x in range(0,N_SPECIES)],
             database_number = [x for x in range(0,N_SPECIES)]
         )
     output:
-        clusters_inflation = OF_GROUPS + "clusters_OrthoFinder_v2.2.7_I1.5.txt",
-        clusters_pairs = OF_GROUPS + "clusters_OrthoFinder_v2.2.7_I1.5.txt_id_pairs.txt",
-        graph = OF_GROUPS + "OrthoFinder_v2.2.7_graph.txt",
-        ortho_csv = OF_GROUPS + "Orthogroups.csv",
-        gene_count = OF_GROUPS + "Orthogroups.GeneCount.csv",
-        species_overlaps = OF_GROUPS + "Orthogroups_SpeciesOverlaps.csv",
-        ortho_txt = OF_GROUPS + "Orthogroups.txt",
-        unassigned = protected(OF_GROUPS + "Orthogroups_UnassignedGenes.csv"),
-        single_copy = protected(OF_GROUPS + "SingleCopyOrthogroups.txt"),
-        statistics_overall = protected(OF_GROUPS + "Statistics_Overall.csv"),
-        statistics_species = protected(OF_GROUPS + "Statistics_PerSpecies.csv")
-    params:
-        fasta_dir = OF_SEARCH,
-        inflation = params["orthofinder"]["mcl_inflation"],
-        cluster_json = OF_SEARCH + "cluster.json",
-        cluster_log = OF_SEARCH + "cluster.log",
-        clusters_inflation = OF_SEARCH + "clusters_OrthoFinder_v2.2.7_I1.5.txt",
-        clusters_pairs = OF_SEARCH + "clusters_OrthoFinder_v2.2.7_I1.5.txt_id_pairs.txt",
-        graph = OF_SEARCH + "OrthoFinder_v2.2.7_graph.txt",
-        ortho_csv = OF_SEARCH + "Orthogroups.csv",
-        gene_count = OF_SEARCH + "Orthogroups.GeneCount.csv",
-        species_overlaps = OF_SEARCH + "Orthogroups_SpeciesOverlaps.csv",
-        ortho_txt = OF_SEARCH + "Orthogroups.txt",
-        unassigned = OF_SEARCH + "Orthogroups_UnassignedGenes.csv",
-        single_copy = OF_SEARCH + "SingleCopyOrthogroups.txt",
-        statistics_overall = OF_SEARCH + "Statistics_Overall.csv",
-        statistics_species = OF_SEARCH + "Statistics_PerSpecies.csv"
+        folder = directory(ORTHOFINDER + "groups/")
     threads:
         8 # There is no reason to go beyond this value
     log:
-        OF_GROUPS + "groups.log"
+        ORTHOFINDER + "groups.log"
     benchmark:
-        OF_GROUPS + "groups.json"
+        ORTHOFINDER + "groups.bmk"
     conda:
         "orthofinder.yml"
     shell:
@@ -200,78 +170,65 @@ rule orthofinder_groups:
         orthofinder \
             --algthreads {threads} \
             --inflation 1.5 \
-            --blast {params.fasta_dir} \
+            --blast {ORTHOFINDER} \
             --only-groups \
+            --name groups \
         2> {log} 1>&2
 
-
-        mv {params.clusters_inflation} {output.clusters_inflation}
-        mv {params.clusters_pairs} {output.clusters_pairs}
-        mv {params.graph} {output.graph}
-        mv {params.ortho_csv} {output.ortho_csv}
-        mv {params.gene_count} {output.gene_count}
-        mv {params.species_overlaps} {output.species_overlaps}
-        mv {params.ortho_txt} {output.ortho_txt}
-        mv {params.unassigned} {output.unassigned}
-        mv {params.single_copy} {output.single_copy}
-        mv {params.statistics_overall} {output.statistics_overall}
-        mv {params.statistics_species} {output.statistics_species}
+        ln --symbolic --relative {OF_GROUPS} {output.folder}
         """
 
 
-checkpoint orthofinder_sequences:
-    input:
-        expand(
-            TIDY + "{species}.pep",
-            species=SPECIES
-        ),
-        expand(
-            TIDY + "{species}.cds",
-            species=SPECIES
-        ),
-        orthogroups = OF_GROUPS + "Orthogroups.csv"
-    output:
-        directory(OF_SEQUENCES)
-    threads:
-        1
+rule orthofinder_trees:
+    input: ORTHOFINDER + "groups/"
+    output: 
+        msa = directory(ORTHOFINDER + "msa"),
+        trees = directory(ORTHOFINDER + "gene_trees")
     params:
-        in_folder = TIDY
-    log:
-        ORTHOFINDER + "sequences_pep.log"
-    benchmark:
-        ORTHOFINDER + "sequences_pep.bmk"
-    conda:
-        "orthofinder.yml"
+        trees_results = OF_TREES,
+        msa = OF_TREES + "MultipleSequenceAlignments",
+        trees = OF_TREES + "Gene_Trees"
+    threads: 32
+    log: ORTHOFINDER + "trees.log"
+    benchmark: ORTHOFINDER + "trees.bmk"
+    conda: "orthofinder.yml"
     shell:
-        "(python src/extract_orthogroups.py "
-            "{input.orthogroups} "
-            "{params.in_folder} pep "
-            "{output} pep && "
-        "python src/extract_orthogroups.py "
-            "{input.orthogroups} "
-            "{params.in_folder} cds "
-            "{output} cds) "
-        "2> {log} 1>&2"
+        """
+        orthofinder \
+            --only-trees \
+            --algthreads 4 \
+            --from-groups {OF_GROUPS} \
+            --method msa \
+            --threads {threads} \
+            --name trees \
+        2> {log} 1>&2
+
+        ln --symbolic --relative --force {params.trees} {output.trees}
+        ln --symbolic --relative --force {params.msa} {output.msa}
+        """
 
 
-def aggregate_orthofinder_pep(wildcards):
-    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_pep = expand(
-        OF_SEQUENCES + "{i}.pep",
-        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.pep")).i
-    )
-    return files_pep
+checkpoint orthofinder_orthologues:
+    input:
+        ORTHOFINDER + "msa",
+        ORTHOFINDER + "gene_trees"
+    output: directory(ORTHOFINDER + "resolved_gene_trees")
+    params: OF_ORTHOLOGUES + "Resolved_Gene_Trees/"
+    log: ORTHOFINDER + "orthologues.bmk"
+    benchmark: ORTHOFINDER + "orthologues.bmk"
+    threads: 32
+    conda: "orthofinder.yml"
+    shell:
+        """
+        orthofinder \
+            --algthreads 4 \
+            --threads {threads} \
+            --from-trees {OF_TREES} \
+            --name orthologues \
+        2> {log} 1>&2
 
-def aggregate_orthofinder_cds(wildcards):
-    checkpoint_pep = checkpoints.orthofinder_sequences.get(**wildcards).output[0]
-    files_cds = expand(
-        OF_SEQUENCES + "{i}.cds",
-        i=glob_wildcards(os.path.join(checkpoint_pep, "{i}.cds")).i
-    )
-    return files_cds
-
+        ln --symbolic --force --relative {params} {output}
+        """
 
 rule orthofinder:
-    input:
-        aggregate_orthofinder_pep,
-        aggregate_orthofinder_cds
+    input: ORTHOFINDER + "resolved_gene_trees"
