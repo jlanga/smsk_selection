@@ -28,4 +28,5 @@ include: snakefiles + "homologs.smk"
 
 rule all:
     input:
+        rules.busco.input,
         rules.homologs_rt.input
