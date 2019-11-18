@@ -43,25 +43,12 @@ rule homologs_round1_prepare_msa:
     input: ORTHOFINDER + "msa"
     output: touch(HOMOLOGS + "round1_prepare_msa.ok")
     shell: 
-        # """
-        # mkdir -p {HOMOLOGS_R1}
-        # find {input}/ -type f -name "OG*.fa" -exec \
-        # bash -c 'sed "s/_/@/" $1 > {HOMOLOGS_R1}/${{1##*/.fa}}.aln-cln' _ {{}} \;
-        # """
         """
         mkdir -p {HOMOLOGS_R1}
 
         find {input}/ -type f -name "OG*.fa" -exec \
         bash -c 'sed "s/_/@/" $1 > {HOMOLOGS_R1}/$(basename $1 .fa).aln-cln' _ {{}} \;
         """
-
-# def aggregate_homologs_round1_prepare(wildcards):
-#     checkpoint_trees = checkpoints.orthofinder.get(**wildcards).input[0]
-#     trees = expand(
-#         ORTHOFINDER + "resolved_gene_trees/{i}.txt",
-#         i=glob_wildcards(os.path.join(checkpoint_trees, "{i}.txt")).i
-#     )
-#     return trees
 
 
 
@@ -203,6 +190,8 @@ rule homologs_round2_fasta_to_tree:
             aa \
             n \
         2> {log} 1>&2
+
+        rm -rf phyx.log
         """
 
 rule homologs_round2_treeshrink:
@@ -225,9 +214,6 @@ rule homologs_round2_treeshrink:
             {params.in_dir} \
         2> {log} 1>&2
         """
-        # find {HOMOLOGS_R1} -name "OG*.ts.tt" -type f -exec \
-        #     bash -c 'mv $1 ${{1%_*} }.ts.tt' _ {{}} \;
-        # """
 
 
 rule homologs_round2_mask_tips_by_taxon_id:
