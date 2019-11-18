@@ -1,5 +1,5 @@
 rule cdhit_pep:
-    input: TRANSDECODER + "{species}.pep"
+    input: RAW + "{species}.pep"
     output: CDHIT + "{species}.pep"
     threads: 1
     benchmark: CDHIT + "{species}.cdhit.bmk"
@@ -19,7 +19,7 @@ rule cdhit_pep:
 
 rule cdhit_filter_cds:
     input:
-        cds = TRANSDECODER + "{species}.cds",
+        cds = RAW + "{species}.cds",
         fai = CDHIT + "{species}.pep.fai"
     output:
         cds = CDHIT + "{species}.cds"
