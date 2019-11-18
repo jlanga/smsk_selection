@@ -1,17 +1,7 @@
 # Snakemake parameter configuration file
 ---
-transdecoder:
-    chunks: 1  # Same for blastx and hmmscan
-    blastp:
-        database: swissprot  # or uniref90
-        evalue: 1e-5
-        max_target_seqs: 1
-    hmmscan:
-    predict:
-
 cd-hit:
     threshold: 0.995  # Identity threshold to merge proteins
-
 
 orthofinder:
     blastp_evalue: 0.001
