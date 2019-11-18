@@ -1,3 +1,8 @@
+INTERNAL_BRANCH_CUTOFF = params["homologs"]["cut_internal_long_branches"]["internal_branch_cutoff"],
+MINIMUM_TAXA = params["homologs"]["cut_internal_long_branches"]["minimum_taxa"]
+MASK_PARAPHYLETIC_TIPS = params["homologs"]["mask_tips"]["mask_paraphyletic"]
+MINIMUM_INGROUP_TAXA = params["homologs"]["root_to_tip"]["minimum_ingroup_taxa"]
+
 rule homologs_join_cds:
     input: expand(CDHIT + "{species}.cds", species=SPECIES)
     output: HOMOLOGS + "all.cds"
@@ -90,6 +95,8 @@ rule homologs_round1_treeshrink:
 
         find {HOMOLOGS_R1} -name "OG*.ts.tt" -type f -exec \
             bash -c 'mv $1 ${{1%_*}}.ts.tt' _ {{}} \;
+
+        rm -rf phyx.logfile
         """
 
 
@@ -99,7 +106,7 @@ rule homologs_round1_mask_tips_by_taxon_id:
     output: touch(HOMOLOGS + "round1_mask_tips_by_taxon_id.ok")
     params:
         in_dir = HOMOLOGS_R1,
-        mask_tips = params["homologs"]["mask_tips"]["mask_paraphyletic"]
+        mask_tips = MASK_PARAPHYLETIC_TIPS
     threads: 1
     log: HOMOLOGS + "round1_mask_tips_by_taxon_id.log",
     benchmark: HOMOLOGS + "round1_mask_tips_by_taxon_id.bmk"
@@ -117,8 +124,8 @@ rule homologs_round1_cut_internal_long_branches:
     output: touch(HOMOLOGS + "round1_cut_internal_long_branches.ok")
     params:
         in_dir = HOMOLOGS_R1,
-        internal_branch_cutoff = params["homologs"]["cut_internal_long_branches"]["internal_branch_cutoff"],
-        minimum_taxa = params["homologs"]["cut_internal_long_branches"]["minimum_taxa"]
+        internal_branch_cutoff = INTERNAL_BRANCH_CUTOFF,
+        minimum_taxa = MINIMUM_TAXA
     threads: 1
     log: HOMOLOGS + "round1_cut_internal_long_branches.log"
     benchmark: HOMOLOGS + "homologs_round1_cut_internal_long_branches.bmk"
@@ -190,8 +197,6 @@ rule homologs_round2_fasta_to_tree:
             aa \
             n \
         2> {log} 1>&2
-
-        rm -rf phyx.log
         """
 
 rule homologs_round2_treeshrink:
@@ -213,6 +218,8 @@ rule homologs_round2_treeshrink:
             {params.quantile} \
             {params.in_dir} \
         2> {log} 1>&2
+
+        rm -rf phyx.logfile
         """
 
 
@@ -221,7 +228,7 @@ rule homologs_round2_mask_tips_by_taxon_id:
     output: touch(HOMOLOGS + "round2_mask_tips_by_taxon_id.ok")
     params:
         in_dir = HOMOLOGS_R2,
-        mask_tips = params["homologs"]["mask_tips"]["mask_paraphyletic"]
+        mask_tips = MASK_PARAPHYLETIC_TIPS
     threads: 1
     log: HOMOLOGS + "round2_mask_tips_by_taxon_id.log",
     benchmark: HOMOLOGS + "round2_mask_tips_by_taxon_id.bmk"
@@ -239,8 +246,8 @@ rule homologs_round2_cut_internal_long_branches:
     output: touch(HOMOLOGS + "round2_cut_internal_long_branches.ok")
     params:
         in_dir = HOMOLOGS_R2,
-        internal_branch_cutoff = params["homologs"]["cut_internal_long_branches"]["internal_branch_cutoff"],
-        minimum_taxa = params["homologs"]["cut_internal_long_branches"]["minimum_taxa"]
+        internal_branch_cutoff = INTERNAL_BRANCH_CUTOFF,
+        minimum_taxa = MINIMUM_TAXA
     threads: 1
     log: HOMOLOGS + "round2_cut_internal_long_branches.log"
     benchmark: HOMOLOGS + "homologs_round2_cut_internal_long_branches.bmk"
@@ -332,7 +339,7 @@ rule homologs_prune_paralogs_rt:
         in_dir = HOMOLOGS_R2,
         tree_ending = ".tre",
         out_dir = HOMOLOGS_RT,
-        minimum_ingroup_taxa = params["homologs"]["root_to_tip"]["minimum_ingroup_taxa"]
+        minimum_ingroup_taxa = MINIMUM_INGROUP_TAXA
     log: HOMOLOGS + "prune_paralogs_rt.log"
     benchmark: HOMOLOGS + "prune_paralogs_rt.bmk"
     conda: "homologs.yml"
