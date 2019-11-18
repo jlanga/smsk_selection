@@ -52,3 +52,5 @@ rule busco:
             species=SPECIES,
             database=features["busco_species"]
         )
+    shell:
+        "rm -rf tmp"
