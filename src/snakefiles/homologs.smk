@@ -262,7 +262,7 @@ rule homologs_round2_cut_internal_long_branches:
         "2> {log} 1>&2"
 
 
-checkpoint homologs_round2_write_fasta_files_from_trees:
+rule homologs_round2_write_fasta_files_from_trees:
     input:
         fasta = HOMOLOGS + "all.pep",
         ok = HOMOLOGS + "round2_cut_internal_long_branches.ok"

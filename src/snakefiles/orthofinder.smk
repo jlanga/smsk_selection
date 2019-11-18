@@ -74,7 +74,7 @@ rule orthofinder_trees:
         """
 
 
-checkpoint orthofinder_orthologues:
+rule orthofinder_orthologues:
     input:
         ORTHOFINDER + "msa",
         ORTHOFINDER + "gene_trees"
