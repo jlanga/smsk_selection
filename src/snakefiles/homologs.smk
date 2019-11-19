@@ -79,7 +79,7 @@ rule homologs_round1_treeshrink:
     output: touch(HOMOLOGS + "round1_treeshrink.ok")
     log: HOMOLOGS + "round1_treeshrink.log"
     benchmark: HOMOLOGS + "round1_treeshrink.bmk"
-    threads: 32
+    threads: MAX_THREADS
     params:
         quantile = 0.05
     conda: "homologs.yml"
@@ -101,8 +101,7 @@ rule homologs_round1_treeshrink:
 
 
 rule homologs_round1_mask_tips_by_taxon_id:
-    input:
-        HOMOLOGS + "round1_treeshrink.ok",
+    input: HOMOLOGS + "round1_treeshrink.ok",
     output: touch(HOMOLOGS + "round1_mask_tips_by_taxon_id.ok")
     params:
         in_dir = HOMOLOGS_R1,
@@ -186,7 +185,7 @@ rule homologs_round2_fasta_to_tree:
         in_dir = HOMOLOGS_R2
     log: HOMOLOGS + "round2_fasta_to_tree.log"
     benchmark: HOMOLOGS + "round2_fasta_to_tree.bmk"
-    threads: 32
+    threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
@@ -204,7 +203,7 @@ rule homologs_round2_treeshrink:
     output: touch(HOMOLOGS + "round2_treeshrink.ok")
     log: HOMOLOGS + "round2_treeshrink.log"
     benchmark: HOMOLOGS + "round2_treeshrink.bmk"
-    threads: 32
+    threads: MAX_THREADS
     params:
         in_dir = HOMOLOGS_R2,
         quantile = 0.05

@@ -26,7 +26,7 @@ rule orthofinder_groups:
             species=SPECIES
         )
     output: folder = directory(ORTHOFINDER + "groups/")
-    threads: 32
+    threads: MAX_THREADS
     log: ORTHOFINDER + "groups.log"
     benchmark: ORTHOFINDER + "groups.bmk"
     conda: "orthofinder.yml"
@@ -54,7 +54,7 @@ rule orthofinder_trees:
         trees_results = OF_TREES,
         msa = OF_TREES + "MultipleSequenceAlignments",
         trees = OF_TREES + "Gene_Trees"
-    threads: 32
+    threads: MAX_THREADS
     log: ORTHOFINDER + "trees.log"
     benchmark: ORTHOFINDER + "trees.bmk"
     conda: "orthofinder.yml"
@@ -82,12 +82,12 @@ rule orthofinder_orthologues:
     params: OF_ORTHOLOGUES + "Resolved_Gene_Trees/"
     log: ORTHOFINDER + "orthologues.bmk"
     benchmark: ORTHOFINDER + "orthologues.bmk"
-    threads: 32
+    threads: MAX_THREADS
     conda: "orthofinder.yml"
     shell:
         """
         orthofinder \
-            --algthreads 4 \
+            --algthreads {threads} \
             --threads {threads} \
             --from-trees {OF_TREES} \
             --name orthologues \

@@ -15,6 +15,8 @@ singularity: "docker://continuumio/miniconda3:4.4.10"
 SPECIES = samples.index.tolist()
 N_SPECIES = len(SPECIES)
 
+MAX_THREADS = params["max_threads"]
+
 snakefiles = "src/snakefiles/"
 
 include: snakefiles + "folders.smk"

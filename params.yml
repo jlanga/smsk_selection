@@ -1,5 +1,7 @@
 # Snakemake parameter configuration file
 ---
+max_threads: 24
+
 cd-hit:
     threshold: 0.995  # Identity threshold to merge proteins
 
