@@ -45,12 +45,33 @@ rule busco_run:
         """
 
 
+rule busco_multiqc:
+    input:
+        expand(
+            BUSCO + "{species}_{database}",
+            species=SPECIES,
+            database=features["busco_species"]
+        ),
+    output: BUSCO + "BUSCO_multiqc_report.html"
+    log: BUSCO + "BUSCO_multiqc_report.log"
+    benchmark: BUSCO + "BUSCO_multiqc_report.bmk"
+    conda: "busco.yml"
+    shell:
+        "multiqc "
+            "--title BUSCO "
+            "--module busco "
+            "--outdir {BUSCO} "
+            "{BUSCO} "
+        "2> {log} 1>&2"
+
+
 rule busco:
     input:
         expand(
             BUSCO + "{species}_{database}",
             species=SPECIES,
             database=features["busco_species"]
-        )
+        ),
+        BUSCO + "BUSCO_multiqc_report.html"
     shell:
         "rm -rf tmp"
