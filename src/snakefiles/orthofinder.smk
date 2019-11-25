@@ -80,7 +80,7 @@ rule orthofinder_orthologues:
         ORTHOFINDER + "gene_trees"
     output: directory(ORTHOFINDER + "resolved_gene_trees")
     params: OF_ORTHOLOGUES + "Resolved_Gene_Trees/"
-    log: ORTHOFINDER + "orthologues.bmk"
+    log: ORTHOFINDER + "orthologues.log"
     benchmark: ORTHOFINDER + "orthologues.bmk"
     threads: MAX_THREADS
     conda: "orthofinder.yml"
