@@ -73,4 +73,5 @@ before_cache: |
     conda clean --all --yes
     rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
 
-after_failure:
+after_failure: |
+    cat results/orthofinder/groups.log
