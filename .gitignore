@@ -5,4 +5,5 @@ results/*
 data/db/*
 data/downloads/*
 .vscode
-src/pdc/*.pyc
+src/pdc3/scripts/*.pyc
+src/pdc3/scripts/__pycache__/
