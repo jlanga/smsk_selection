@@ -22,22 +22,22 @@ rule busco_extract:
 
 rule busco_run:
     input:
-        cds = RAW + "{species}.cds",
+        fasta = RAW + "{species}.pep",
         db_folder = rules.busco_extract.output[0]
     output: directory(BUSCO + "{species}_{database}")
     log: BUSCO + "{species}_{database}.log"
     benchmark: BUSCO + "{species}_{database}.bmk"
-    threads: 1
+    threads: 4
     params:
         output_tag = "{species}_{database}"
     conda: "busco.yml"
     shell:
         """
         run_busco \
-            --in {input.cds} \
+            --in {input.fasta} \
             --out {params.output_tag} \
             --lineage_path {input.db_folder} \
-            --mode tran \
+            --mode prot \
             --cpu {threads} \
         2> {log} 1>&2
 
