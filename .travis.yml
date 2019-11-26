@@ -66,12 +66,11 @@ script: |
     echo $PATH
     python --version
     export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
-    snakemake --use-conda --jobs 2
+    snakemake --use-conda --jobs 2 --show-failed-logs
 
 before_cache: |
     # snakemake --cleanup-conda
     conda clean --all --yes
     rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
 
-after_failure: |
-    cat results/orthofinder/groups.log
+after_failure:
