@@ -368,12 +368,6 @@ rule homologs_refine1_trees_to_fasta:
 
 
 rule homologs_refine1:
-    """
-    
-    TODO: rename orthogroups
-    """
-    
-    
     input: HOMOLOGS + "refine1_trees_to_fasta.ok"
     output: touch(HOMOLOGS + "refine1.ok")
     threads: MAX_THREADS
@@ -389,17 +383,41 @@ rule homologs_refine1:
         2> {log} 1>&2
         """
 
-# rule homologs_refine2_prepare:
-#     input: HOMOLOGS + "refine1.ok"
-#     output:
-#         touch(HOMOLOGS + "refine1_trees_to_fasta.ok"),
-#         directory(HOMOLOGS_REFINE1)
-#     log:
-#     benchmark:
-#     conda: "homologs.yml"
-#     shell:
-#         """"""
+
+rule homologs_refine2_prepare:
+    input: HOMOLOGS + "refine1.ok"
+    output:
+        touch(HOMOLOGS + "refine2_prepare.ok"),
+        directory(HOMOLOGS_REFINE2)
+    shell:
+        """
+        mkdir -p {HOMOLOGS_REFINE2}
+
+        find {HOMOLOGS_REFINE1} -type f -name "*.maxalign.fa" \
+        | parallel -j 1 basename {{}} .maxalign.fa \
+        | parallel \
+            ln --symbolic --relative \
+                {HOMOLOGS_REFINE1}{{}}.maxalign.fa \
+                {HOMOLOGS_REFINE2}{{}}.fa 
+        """
+
+
+rule homologs_refine2:
+    input: HOMOLOGS + "refine2_prepare.ok"
+    output: touch(HOMOLOGS + "refine2.ok")
+    threads: MAX_THREADS
+    log: HOMOLOGS + "refine2.log"
+    benchmark: HOMOLOGS + "refine2.bmk"
+    conda: "homologs.yml"
+    shell:
+        """
+        python src/refine_alignments.py \
+            {HOMOLOGS_REFINE2} \
+            .fa \
+            {threads} \
+        2> {log} 1>&2
+        """
 
 
 rule homologs:
-    input: HOMOLOGS + "refine1.ok"
+    input: HOMOLOGS + "refine2.ok"

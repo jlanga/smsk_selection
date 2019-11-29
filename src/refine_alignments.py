@@ -126,13 +126,16 @@ def run_pipeline(filename_in):
         format="clustal"
     )
     msa_hq = keep_columns(msa, hq_scores)
+
     highly_occupied_columns = get_highly_occupied_columns(msa_hq, 0.5)
     msa_vhq = keep_columns(msa_hq, highly_occupied_columns)
+
     AlignIO.write(
         alignments=msa_vhq,
         handle=f"{output_folder}/{orthogroup_id}.tcoffee.fa",
         format="fasta"
     )
+
     run_max_align(
         filename_in=f"{output_folder}/{orthogroup_id}.tcoffee.fa",
         filename_out=f"{output_folder}/{orthogroup_id}.maxalign.fa"
