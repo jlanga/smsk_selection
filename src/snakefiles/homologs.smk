@@ -368,6 +368,12 @@ rule homologs_refine1_trees_to_fasta:
 
 
 rule homologs_refine1:
+    """
+    
+    TODO: rename orthogroups
+    """
+    
+    
     input: HOMOLOGS + "refine1_trees_to_fasta.ok"
     output: touch(HOMOLOGS + "refine1.ok")
     threads: MAX_THREADS
@@ -380,6 +386,18 @@ rule homologs_refine1:
             "--jobs {threads} "
             "python src/refine_alignments.py "
         "2> {log} 1>&2"
+
+
+# rule homologs_refine2_prepare:
+#     input: HOMOLOGS + "refine1.ok"
+#     output:
+#         touch(HOMOLOGS + "refine1_trees_to_fasta.ok"),
+#         directory(HOMOLOGS_REFINE1)
+#     log:
+#     benchmark:
+#     conda: "homologs.yml"
+#     shell:
+#         """"""
 
 
 rule homologs:
