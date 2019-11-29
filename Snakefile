@@ -31,4 +31,4 @@ include: snakefiles + "homologs.smk"
 rule all:
     input:
         rules.busco.input,
-        rules.homologs_refine1.output
+        rules.homologs.input
