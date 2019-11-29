@@ -58,7 +58,7 @@ rule homologs_round1_prepare_msa:
 
 
 rule homologs_round1_prepare_trees:
-    input: ORTHOFINDER + "gene_trees"
+    input: ORTHOFINDER + "resolved_gene_trees"
     output: touch(HOMOLOGS + "round1_prepare.ok")
     conda: "homologs.yml"
     shell:
@@ -346,4 +346,41 @@ rule homologs_rt:
     input: HOMOLOGS + "prune_paralogs_rt.ok"
 
 
+rule homologs_refine1_trees_to_fasta:
+    input: 
+        fasta = HOMOLOGS + "all.pep",
+        ok = HOMOLOGS + "prune_paralogs_rt.ok"
+    output: 
+        touch(HOMOLOGS + "refine1_trees_to_fasta.ok"),
+        directory(HOMOLOGS_REFINE1)
+    params:
+        indir = HOMOLOGS_RT
+    log: HOMOLOGS + "refine1_trees_to_fasta.log"
+    benchmark: HOMOLOGS + "refine1_trees_to_fasta.bmk"
+    conda: "homologs.yml"
+    shell:
+        "python src/pdc3/scripts/write_fasta_files_from_trees.py "
+            "{input.fasta} "
+            "{params.indir} "
+            ".tre "
+            "{output[1]} "
+        "2> {log} 1>&2"
 
+
+rule homologs_refine1:
+    input: HOMOLOGS + "refine1_trees_to_fasta.ok"
+    output: touch(HOMOLOGS + "refine1.ok")
+    threads: MAX_THREADS
+    log: HOMOLOGS + "refine1.log"
+    benchmark: HOMOLOGS + "refine2.bmk"
+    conda: "homologs.yml"
+    shell:
+        "ls -1 {HOMOLOGS_REFINE1}/*.fa | sort "
+        "| parallel "
+            "--jobs {threads} "
+            "python src/refine_alignments.py "
+        "2> {log} 1>&2"
+
+
+rule homologs:
+    input: HOMOLOGS + "refine1.ok"

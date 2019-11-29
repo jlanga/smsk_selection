@@ -15,3 +15,5 @@ dependencies:
     - seqtk
     - biopython
     - parallel
+    - kalign2=2.04
+    - t_coffee
