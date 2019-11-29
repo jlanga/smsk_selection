@@ -378,7 +378,7 @@ rule homologs_refine1:
     output: touch(HOMOLOGS + "refine1.ok")
     threads: MAX_THREADS
     log: HOMOLOGS + "refine1.log"
-    benchmark: HOMOLOGS + "refine2.bmk"
+    benchmark: HOMOLOGS + "refine1.bmk"
     conda: "homologs.yml"
     shell:
         """

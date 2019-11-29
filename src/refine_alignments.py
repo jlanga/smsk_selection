@@ -138,6 +138,8 @@ def run_pipeline(filename_in):
         filename_out=f"{output_folder}/{orthogroup_id}.maxalign.fa"
     )
 
+    os.remove(f"{orthogroup_id}.dnd")
+
 
 if __name__ == '__main__':
 
@@ -155,6 +157,7 @@ if __name__ == '__main__':
     if not IN_DIR.endswith("/"):
         IN_DIR += "/"
 
+    # Generator with files. In real cases can be too big
     IN_FILES = (
         f"{IN_DIR}/{in_file}"
         for in_file in os.listdir(IN_DIR)
