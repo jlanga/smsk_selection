@@ -381,12 +381,13 @@ rule homologs_refine1:
     benchmark: HOMOLOGS + "refine2.bmk"
     conda: "homologs.yml"
     shell:
-        "ls -1 {HOMOLOGS_REFINE1}/*.fa | sort "
-        "| parallel "
-            "--jobs {threads} "
-            "python src/refine_alignments.py "
-        "2> {log} 1>&2"
-
+        """
+        python src/refine_alignments.py \
+            {HOMOLOGS_REFINE1} \
+            .fa \
+            {threads} \
+        2> {log} 1>&2
+        """
 
 # rule homologs_refine2_prepare:
 #     input: HOMOLOGS + "refine1.ok"

@@ -9,6 +9,7 @@ alignments:
 
 import os
 import sys
+import multiprocessing as mp
 
 from Bio import AlignIO
 
@@ -139,4 +140,28 @@ def run_pipeline(filename_in):
 
 
 if __name__ == '__main__':
-    run_pipeline(sys.argv[1])
+
+    if len(sys.argv) != 4:
+        sys.stderr.write(
+            "ERROR: Incorrect number of parameters: \n" + \
+            "python refine_alignments.py indir in_extension num_cores\n"
+        )
+        exit(1)
+
+    IN_DIR = sys.argv[1]
+    IN_EXT = sys.argv[2]
+    NUM_CPUS = int(sys.argv[3])
+
+    if not IN_DIR.endswith("/"):
+        IN_DIR += "/"
+
+    IN_FILES = (
+        f"{IN_DIR}/{in_file}"
+        for in_file in os.listdir(IN_DIR)
+        if in_file.endswith(IN_EXT)
+    )
+
+    POOL = mp.Pool(NUM_CPUS)
+    POOL.map(run_pipeline, IN_FILES)
+    POOL.close()
+    POOL.join()
