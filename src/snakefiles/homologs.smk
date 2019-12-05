@@ -58,6 +58,10 @@ rule homologs_round1_prepare_msa:
 
 
 rule homologs_round1_prepare_trees:
+    """
+    Puts the trees in the input folder into the output one, while correcting the
+    leaf names for the scripts in pdc3
+    """
     input: ORTHOFINDER + "resolved_gene_trees"
     output: touch(HOMOLOGS + "round1_prepare.ok")
     conda: "homologs.yml"
@@ -70,9 +74,12 @@ rule homologs_round1_prepare_trees:
         """
 
 
-
-
 rule homologs_round1_treeshrink:
+    """
+    Run treeshrink in every tree.
+
+    Rename from *.ts.tt to 
+    """
     input:
         HOMOLOGS + "round1_prepare.ok",
         HOMOLOGS + "round1_prepare_msa.ok"
@@ -96,11 +103,16 @@ rule homologs_round1_treeshrink:
         find {HOMOLOGS_R1} -name "OG*.ts.tt" -type f -exec \
             bash -c 'mv $1 ${{1%_*}}.ts.tt' _ {{}} \;
 
+        find {HOMOLOGS_R1} -name "OG*_RS_*.txt" -delete
+
         rm -rf phyx.logfile
         """
 
 
 rule homologs_round1_mask_tips_by_taxon_id:
+    """
+    Result: OG[0-9]+_[0-9]+.subtree
+    """    
     input: HOMOLOGS + "round1_treeshrink.ok",
     output: touch(HOMOLOGS + "round1_mask_tips_by_taxon_id.ok")
     params:
@@ -119,6 +131,9 @@ rule homologs_round1_mask_tips_by_taxon_id:
 
 
 rule homologs_round1_cut_internal_long_branches:
+    """
+    Result:
+    """
     input: HOMOLOGS + "round1_mask_tips_by_taxon_id.ok"
     output: touch(HOMOLOGS + "round1_cut_internal_long_branches.ok")
     params:
@@ -140,6 +155,9 @@ rule homologs_round1_cut_internal_long_branches:
 
 
 rule homologs_round1_write_fasta_files_from_trees:
+    """
+    results: OG\đ+_\d+rr.fa
+    """
     input:
         fasta = HOMOLOGS + "all.pep",
         ok = HOMOLOGS + "round1_cut_internal_long_branches.ok"
