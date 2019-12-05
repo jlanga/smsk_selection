@@ -77,7 +77,8 @@ rule homologs_round1_prepare_trees:
 rule homologs_round1_treeshrink:
     """
     Run treeshrink in every tree.
-
+    Input: .nwk
+    Output: *.ts.tt
     Rename from *.ts.tt to 
     """
     input:
@@ -112,7 +113,7 @@ rule homologs_round1_treeshrink:
 
 rule homologs_round1_mask_tips_by_taxon_id:
     """
-    Result: OG[0-9]+_[0-9]+.subtree
+    Result:
     """    
     input: HOMOLOGS + "round1_treeshrink.ok",
     output: touch(HOMOLOGS + "round1_mask_tips_by_taxon_id.ok")
@@ -133,7 +134,7 @@ rule homologs_round1_mask_tips_by_taxon_id:
 
 rule homologs_round1_cut_internal_long_branches:
     """
-    Result:
+    Result: OG\d+_\d
     """
     input: HOMOLOGS + "round1_mask_tips_by_taxon_id.ok"
     output: touch(HOMOLOGS + "round1_cut_internal_long_branches.ok")
@@ -171,12 +172,17 @@ rule homologs_round1_write_fasta_files_from_trees:
     benchmark: HOMOLOGS + "round1_write_fasta_files_from_trees.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc3/scripts/write_fasta_files_from_trees.py "
-            "{input.fasta} "
-            "{params.indir} "
-            ".subtree "
-            "{params.indir} "
-        "2> {log} 1>&2"
+        """
+        python src/pdc3/scripts/write_fasta_files_from_trees.py \
+            {input.fasta} \
+            {params.indir} \
+            .subtree \
+            {params.indir} \
+        2> {log} 1>&2
+
+        find {HOMOLOGS_R1} -name "OG*rr.fa" -type f -exec \
+            bash -c 'mv $1 ${{1%rr.fa}}.fa' _ {{}} \;
+        """
 
 
 rule homologs_round1:
@@ -193,7 +199,7 @@ rule homologs_round2_prepare:
     output: touch(HOMOLOGS + "round2_prepare.ok")
     shell:
         "mkdir -p {HOMOLOGS_R2}; "
-        "ln $(readlink -f {HOMOLOGS_R1}/*rr.fa) {HOMOLOGS_R2}"
+        "ln $(readlink -f {HOMOLOGS_R1}/*.fa) {HOMOLOGS_R2}"
 
 
 rule homologs_round2_fasta_to_tree:
@@ -215,6 +221,9 @@ rule homologs_round2_fasta_to_tree:
             aa \
             n \
         2> {log} 1>&2
+
+        find {HOMOLOGS_R2} -name "OG*_RS_*.txt" -delete
+        rename.ul .raxml.tre .tre {HOMOLOGS_R2}/OG*.raxml.tre
         """
 
 rule homologs_round2_treeshrink:
@@ -237,6 +246,11 @@ rule homologs_round2_treeshrink:
             {params.in_dir} \
             {threads} \
         2> {log} 1>&2
+
+        find {HOMOLOGS_R2} -name "OG*.ts.tt" -type f -exec \
+            bash -c 'mv $1 ${{1%_*}}.ts.tt' _ {{}} \;
+
+        find {HOMOLOGS_R2} -name "OG*_RS_*.txt" -delete
 
         rm -rf phyx.logfile
         """
@@ -294,12 +308,17 @@ rule homologs_round2_write_fasta_files_from_trees:
     benchmark: HOMOLOGS + "round2_write_fasta_files_from_trees.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc3/scripts/write_fasta_files_from_trees.py "
-            "{input.fasta} "
-            "{params.indir} "
-            ".subtree "
-            "{params.indir} "
-        "2> {log} 1>&2"
+        """
+        python src/pdc3/scripts/write_fasta_files_from_trees.py \
+            {input.fasta} \
+            {params.indir} \
+            .subtree \
+            {params.indir} \
+        2> {log} 1>&2
+
+        find {HOMOLOGS_R2} -name "OG*rr.fa" -type f -exec \
+            bash -c 'mv $1 ${{1%rr.fa}}.fa' _ {{}} \;
+        """
 
 
 rule homologs_round2:
@@ -322,34 +341,34 @@ rule homologs_create_taxa_inout:
                 header=False
             )
 
-rule homologs_prepare_rt:
+rule homologs_rt_prepare:
     input: rules.homologs_round2.input
-    output: touch(HOMOLOGS + "prepare_rt.ok")
+    output: touch(HOMOLOGS + "rt_prepare.ok")
     params:
         in_dir = HOMOLOGS_R2,
         out_dir = HOMOLOGS_RT
-    log: HOMOLOGS + "prepare_rt.log"
-    benchmark: HOMOLOGS + "prepare_rt.bmk"
+    log: HOMOLOGS + "rt_prepare.log"
+    benchmark: HOMOLOGS + "rt_prepare.bmk"
     shell:
         """
         mkdir -p {params.out_dir}
-        ln {params.in_dir}/*.tre {params.out_dir}
+        ln {params.in_dir}/*.subtree {params.out_dir}
         """
 
 
-rule homologs_prune_paralogs_rt:
+rule homologs_rt_prune_paralogs:
     input:
         tsv = HOMOLOGS + "in_out.tsv",
-        ok = HOMOLOGS + "prepare_rt.ok"
+        ok = HOMOLOGS + "rt_prepare.ok"
     output:
-        ok = touch(HOMOLOGS + "prune_paralogs_rt.ok")
+        ok = touch(HOMOLOGS + "rt_prune_paralogs.ok")
     params:
         in_dir = HOMOLOGS_R2,
-        tree_ending = ".tre",
+        tree_ending = ".subtree",
         out_dir = HOMOLOGS_RT,
         minimum_ingroup_taxa = MINIMUM_INGROUP_TAXA
-    log: HOMOLOGS + "prune_paralogs_rt.log"
-    benchmark: HOMOLOGS + "prune_paralogs_rt.bmk"
+    log: HOMOLOGS + "rt_prune_paralogs.log"
+    benchmark: HOMOLOGS + "rt_prune_paralogs.bmk"
     conda: "homologs.yml"
     shell:
         """
@@ -363,13 +382,13 @@ rule homologs_prune_paralogs_rt:
         """
 
 rule homologs_rt:
-    input: HOMOLOGS + "prune_paralogs_rt.ok"
+    input: HOMOLOGS + "rt_prune_paralogs.ok"
 
 
 rule homologs_refine1_trees_to_fasta:
     input: 
         fasta = HOMOLOGS + "all.pep",
-        ok = HOMOLOGS + "prune_paralogs_rt.ok"
+        ok = HOMOLOGS + "rt_prune_paralogs.ok"
     output: 
         touch(HOMOLOGS + "refine1_trees_to_fasta.ok"),
         directory(HOMOLOGS_REFINE1)
@@ -379,12 +398,16 @@ rule homologs_refine1_trees_to_fasta:
     benchmark: HOMOLOGS + "refine1_trees_to_fasta.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc3/scripts/write_fasta_files_from_trees.py "
-            "{input.fasta} "
-            "{params.indir} "
-            ".tre "
-            "{output[1]} "
-        "2> {log} 1>&2"
+        """
+        python src/pdc3/scripts/write_fasta_files_from_trees.py \
+            {input.fasta} \
+            {params.indir} \
+            .tre \
+            {output[1]} \
+        2> {log} 1>&2
+
+        rename.ul rr.fa .fa {HOMOLOGS_REFINE1}/OG*rr.fa
+        """
 
 
 rule homologs_refine1:
