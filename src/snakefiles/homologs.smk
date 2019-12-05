@@ -98,6 +98,7 @@ rule homologs_round1_treeshrink:
             .nwk \
             {params.quantile} \
             {HOMOLOGS_R1} \
+            {threads} \
         2> {log} 1>&2
 
         find {HOMOLOGS_R1} -name "OG*.ts.tt" -type f -exec \
@@ -142,7 +143,7 @@ rule homologs_round1_cut_internal_long_branches:
         minimum_taxa = MINIMUM_TAXA
     threads: 1
     log: HOMOLOGS + "round1_cut_internal_long_branches.log"
-    benchmark: HOMOLOGS + "homologs_round1_cut_internal_long_branches.bmk"
+    benchmark: HOMOLOGS + "round1_cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
         "python src/pdc3/scripts/cut_long_internal_branches.py "
@@ -234,6 +235,7 @@ rule homologs_round2_treeshrink:
             .tre \
             {params.quantile} \
             {params.in_dir} \
+            {threads} \
         2> {log} 1>&2
 
         rm -rf phyx.logfile

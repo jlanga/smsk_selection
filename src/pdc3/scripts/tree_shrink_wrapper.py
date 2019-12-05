@@ -8,8 +8,9 @@ Phyx (pxrr) must be installed and on path
 
 
 import sys, os, shutil
+import multiprocessing as mp
 
-def trim(inDIR,tree_file_ending,q,outDIR):
+def trim(inDIR,tree_file_ending,q,outDIR, num_cores):
 
 	if os.path.isabs(inDIR) == False: inDIR = os.path.abspath(inDIR)
 	if inDIR[-1] != "/": inDIR += "/"
@@ -20,7 +21,10 @@ def trim(inDIR,tree_file_ending,q,outDIR):
 	
 	filecount = 0
 	
+	pool = mp.Pool(num_cores)
+
 	#runs treeshrink
+	treeshrink_commands = []
 	for i in os.listdir(inDIR):
 		if i.endswith(tree_file_ending):
 			print(i)
@@ -34,10 +38,13 @@ def trim(inDIR,tree_file_ending,q,outDIR):
 					"-q ", str(q),
 					"-o", outDIR+i+".ts_dir"
 			]
-
-			print((" ".join(cmd)))
-			os.system(" ".join(cmd))
-			
+			treeshrink_commands.append(" ".join(cmd))
+			# print((" ".join(cmd)))
+			# os.system(" ".join(cmd))
+	# print(treeshrink_commands)
+	pool.map(os.system, treeshrink_commands)
+	pool.close()
+	pool.join()
 			
 	#go into each TS folder and change extension from 'tree_file_ending' to ts
 	
@@ -90,9 +97,10 @@ def trim(inDIR,tree_file_ending,q,outDIR):
 			
 			
 if __name__ == "__main__":
-	if len(sys.argv) != 5:
-		print("python tree_shrink_wrapper.py inDIR tree_file_ending quantile outDIR")
+	if len(sys.argv) != 6:
+		print("python tree_shrink_wrapper.py inDIR tree_file_ending quantile outDIR cores")
 		sys.exit(0)
 
-	inDIR,tree_file_ending,q,outDIR = sys.argv[1:]
-	trim(inDIR,tree_file_ending,q,outDIR)
+	inDIR,tree_file_ending,q,outDIR, cores = sys.argv[1:]
+	cores = int(cores)
+	trim(inDIR,tree_file_ending,q,outDIR, cores)
