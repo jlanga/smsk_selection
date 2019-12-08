@@ -102,11 +102,6 @@ rule homologs_round1_treeshrink:
             {threads} \
         2> {log} 1>&2
 
-        find {HOMOLOGS_R1} -name "OG*.ts.tt" -type f -exec \
-            bash -c 'mv $1 ${{1%_*}}.ts.tt' _ {{}} \;
-
-        find {HOMOLOGS_R1} -name "OG*_RS_*.txt" -delete
-
         rm -rf phyx.logfile
         """
 
@@ -246,11 +241,6 @@ rule homologs_round2_treeshrink:
             {params.in_dir} \
             {threads} \
         2> {log} 1>&2
-
-        find {HOMOLOGS_R2} -name "OG*.ts.tt" -type f -exec \
-            bash -c 'mv $1 ${{1%_*}}.ts.tt' _ {{}} \;
-
-        find {HOMOLOGS_R2} -name "OG*_RS_*.txt" -delete
 
         rm -rf phyx.logfile
         """
