@@ -134,6 +134,8 @@ rule homologs_round1_fasta_to_tree:
 
         find {HOMOLOGS_R1} -name "OG*_RS_*.txt" -delete
         rename.ul .raxml.tre .tre {HOMOLOGS_R1}/OG*.raxml.tre
+
+        rm phyx.logfile
         """
 
 
@@ -272,6 +274,8 @@ rule homologs_round2_fasta_to_tree:
 
         find {HOMOLOGS_R2} -name "OG*_RS_*.txt" -delete
         rename.ul .raxml.tre .tre {HOMOLOGS_R2}/OG*.raxml.tre
+
+        rm phyx.logfile
         """
 
 rule homologs_round2_trim_tips:
