@@ -69,7 +69,7 @@ script: |
     snakemake --use-conda --jobs 2 --show-failed-logs
 
 before_cache: |
-    # snakemake --cleanup-conda
+    snakemake --cleanup-conda
     conda clean --all --yes
     rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
 
