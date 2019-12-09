@@ -67,7 +67,7 @@ rule homologs_round1_prepare_trees:
     conda: "homologs.yml"
     shell:
         """
-        python src/correct_tree_leaf_names.py {input} .txt {HOMOLOGS_R1} .nwk
+        python2.7 src/correct_tree_leaf_names.py {input} .txt {HOMOLOGS_R1} .nwk
 
         find {HOMOLOGS_R1} -type f -name "OG*_tree.nwk" -exec \
             bash -c 'mv $1 ${{1%_*}}.nwk' _ {{}} \;
@@ -94,7 +94,7 @@ rule homologs_round1_prepare_trees:
 #     shell:
 #         """
 #         PATH="bin:$PATH"
-#         python src/pdc2/scripts/tree_shrink_wrapper.py \
+#         python2.7 src/pdc2/scripts/tree_shrink_wrapper.py \
 #             {HOMOLOGS_R1} \
 #             .nwk \
 #             {params.quantile} \
@@ -118,7 +118,7 @@ rule homologs_round1_trim_tips:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc2/scripts/trim_tips.py \
+        python2.7 src/pdc2/scripts/trim_tips.py \
             {HOMOLOGS_R1} \
             .nwk \
             {params.relative_cutoff} \
@@ -141,7 +141,7 @@ rule homologs_round1_mask_tips_by_taxon_id:
     benchmark: HOMOLOGS + "round1_mask_tips_by_taxon_id.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc2/scripts/mask_tips_by_taxonID_transcripts.py "
+        "python2.7 src/pdc2/scripts/mask_tips_by_taxonID_transcripts.py "
             "{params.in_dir} "
             "{params.in_dir} "
             "{params.mask_tips} "
@@ -163,7 +163,7 @@ rule homologs_round1_cut_internal_long_branches:
     benchmark: HOMOLOGS + "round1_cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc2/scripts/cut_long_internal_branches.py "
+        "python2.7 src/pdc2/scripts/cut_long_internal_branches.py "
             "{params.in_dir} "
             ".mm "
             "{params.internal_branch_cutoff} "
@@ -189,7 +189,7 @@ rule homologs_round1_write_fasta_files_from_trees:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc2/scripts/write_fasta_files_from_trees.py \
+        python2.7 src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
             .subtree \
@@ -231,7 +231,7 @@ rule homologs_round2_fasta_to_tree:
     shell:
         """
         PATH="bin:$PATH"
-        python src/pdc2/scripts/fasta_to_tree_pxclsq.py \
+        python2.7 src/pdc2/scripts/fasta_to_tree_pxclsq.py \
             {params.in_dir} \
             {threads} \
             aa \
@@ -255,7 +255,7 @@ rule homologs_round2_trim_tips:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc2/scripts/trim_tips.py \
+        python2.7 src/pdc2/scripts/trim_tips.py \
             {HOMOLOGS_R2} \
             .tre \
             {params.relative_cutoff} \
@@ -275,7 +275,7 @@ rule homologs_round2_mask_tips_by_taxon_id:
     benchmark: HOMOLOGS + "round2_mask_tips_by_taxon_id.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc2/scripts/mask_tips_by_taxonID_transcripts.py "
+        "python2.7 src/pdc2/scripts/mask_tips_by_taxonID_transcripts.py "
             "{params.in_dir} "
             "{params.in_dir} "
             "{params.mask_tips} "
@@ -294,7 +294,7 @@ rule homologs_round2_cut_internal_long_branches:
     benchmark: HOMOLOGS + "homologs_round2_cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc2/scripts/cut_long_internal_branches.py "
+        "python2.7 src/pdc2/scripts/cut_long_internal_branches.py "
             "{params.in_dir} "
             ".mm "
             "{params.internal_branch_cutoff} "
@@ -317,7 +317,7 @@ rule homologs_round2_write_fasta_files_from_trees:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc2/scripts/write_fasta_files_from_trees.py \
+        python2.7 src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
             .subtree \
@@ -380,7 +380,7 @@ rule homologs_rt_prune_paralogs:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc2/scripts/prune_paralogs_RT.py \
+        python2.7 src/pdc2/scripts/prune_paralogs_RT.py \
             {params.in_dir} \
             {params.tree_ending} \
             {params.out_dir} \
@@ -407,7 +407,7 @@ rule homologs_refine1_trees_to_fasta:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc2/scripts/write_fasta_files_from_trees.py \
+        python2.7 src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
             .tre \
@@ -427,7 +427,7 @@ rule homologs_refine1:
     conda: "homologs.yml"
     shell:
         """
-        python2 src/refine_alignments2.py \
+        python2.7 src/refine_alignments2.py \
             {HOMOLOGS_REFINE1} \
             .fa \
             {threads} \
@@ -440,6 +440,7 @@ rule homologs_refine2_prepare:
     output:
         touch(HOMOLOGS + "refine2_prepare.ok"),
         directory(HOMOLOGS_REFINE2)
+    conda: "homologs.yml"
     shell:
         """
         mkdir -p {HOMOLOGS_REFINE2}
@@ -462,7 +463,7 @@ rule homologs_refine2:
     conda: "homologs.yml"
     shell:
         """
-        python src/refine_alignments2.py \
+        python2.7 src/refine_alignments2.py \
             {HOMOLOGS_REFINE2} \
             .fa \
             {threads} \
