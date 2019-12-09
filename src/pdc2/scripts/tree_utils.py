@@ -41,10 +41,9 @@ def remove_kink(node,curroot):
 	"""
 	if node == curroot and curroot.nchildren == 2:
 		#move the root away to an adjacent none-tip
-		if curroot.children[0].istip:  #the other child is not tip
-			curroot = phylo3.reroot(curroot, curroot.children[1])
-		else:
-			curroot = phylo3.reroot(curroot, curroot.children[0])
+		if curroot.children[0].istip: #the other child is not tip
+			curroot = phylo3.reroot(curroot,curroot.children[1])
+		else: curroot = phylo3.reroot(curroot,curroot.children[0])
 	#---node---< all nodes should have one child only now
 	length = node.length + (node.children[0]).length
 	par = node.parent
@@ -54,7 +53,7 @@ def remove_kink(node,curroot):
 	par.remove_child(kink)
 	par.add_child(node)
 	node.length = length
-	return node, curroot
+	return node,curroot
 
 def pass_boot_filter(node,min_ave_boot):
 	"""check whether the average bootstrap value pass a cutoff"""
@@ -67,7 +66,7 @@ def pass_boot_filter(node,min_ave_boot):
 	if count == 0: #extracted clades with only two tips
 		return True
 	boot_average = total / float(count)
-	print(boot_average)
+	print boot_average
 	return boot_average >= float(min_ave_boot)
 
 def get_ortho_from_rooted_inclade(inclade):

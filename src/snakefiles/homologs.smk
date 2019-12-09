@@ -60,9 +60,9 @@ rule homologs_round1_prepare_msa:
 rule homologs_round1_prepare_trees:
     """
     Puts the trees in the input folder into the output one, while correcting the
-    leaf names for the scripts in pdc3
+    leaf names for the scripts in pdc2
     """
-    input: ORTHOFINDER + "resolved_gene_trees"
+    input: ORTHOFINDER + "gene_trees"
     output: touch(HOMOLOGS + "round1_prepare.ok")
     conda: "homologs.yml"
     shell:
@@ -74,35 +74,56 @@ rule homologs_round1_prepare_trees:
         """
 
 
-rule homologs_round1_treeshrink:
-    """
-    Run treeshrink in every tree.
-    Input: .nwk
-    Output: *.ts.tt
-    Rename from *.ts.tt to 
-    """
+# rule homologs_round1_treeshrink:
+#     """
+#     Run treeshrink in every tree.
+#     Input: .nwk
+#     Output: *.ts.tt
+#     Rename from *.ts.tt to 
+#     """
+#     input:
+#         HOMOLOGS + "round1_prepare.ok",
+#         HOMOLOGS + "round1_prepare_msa.ok"
+#     output: touch(HOMOLOGS + "round1_treeshrink.ok")
+#     log: HOMOLOGS + "round1_treeshrink.log"
+#     benchmark: HOMOLOGS + "round1_treeshrink.bmk"
+#     threads: MAX_THREADS
+#     params:
+#         quantile = 0.05
+#     conda: "homologs.yml"
+#     shell:
+#         """
+#         PATH="bin:$PATH"
+#         python src/pdc2/scripts/tree_shrink_wrapper.py \
+#             {HOMOLOGS_R1} \
+#             .nwk \
+#             {params.quantile} \
+#             {HOMOLOGS_R1} \
+#             {threads} \
+#         2> {log} 1>&2
+#         rm -rf phyx.logfile
+#         """
+
+rule homologs_round1_trim_tips:
+    """Trim tips via the old method"""
     input:
         HOMOLOGS + "round1_prepare.ok",
         HOMOLOGS + "round1_prepare_msa.ok"
-    output: touch(HOMOLOGS + "round1_treeshrink.ok")
-    log: HOMOLOGS + "round1_treeshrink.log"
-    benchmark: HOMOLOGS + "round1_treeshrink.bmk"
-    threads: MAX_THREADS
+    output: touch(HOMOLOGS + "round1_trim_tips.ok")
+    log: HOMOLOGS + "round1_trim_tips.log"
+    benchmark: HOMOLOGS + "round1_trim_tips.bmk"
     params:
-        quantile = 0.05
+        relative_cutoff=params["homologs"]["trim_tips"]["relative_cutoff"],
+        absolute_cutoff=params["homologs"]["trim_tips"]["absolute_cutoff"]
     conda: "homologs.yml"
     shell:
         """
-        PATH="bin:$PATH"
-        python src/pdc3/scripts/tree_shrink_wrapper.py \
+        python src/pdc2/scripts/trim_tips.py \
             {HOMOLOGS_R1} \
             .nwk \
-            {params.quantile} \
-            {HOMOLOGS_R1} \
-            {threads} \
+            {params.relative_cutoff} \
+            {params.absolute_cutoff} \
         2> {log} 1>&2
-
-        rm -rf phyx.logfile
         """
 
 
@@ -110,7 +131,7 @@ rule homologs_round1_mask_tips_by_taxon_id:
     """
     Result:
     """    
-    input: HOMOLOGS + "round1_treeshrink.ok",
+    input: HOMOLOGS + "round1_trim_tips.ok",
     output: touch(HOMOLOGS + "round1_mask_tips_by_taxon_id.ok")
     params:
         in_dir = HOMOLOGS_R1,
@@ -120,7 +141,7 @@ rule homologs_round1_mask_tips_by_taxon_id:
     benchmark: HOMOLOGS + "round1_mask_tips_by_taxon_id.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc3/scripts/mask_tips_by_taxonID_transcripts.py "
+        "python src/pdc2/scripts/mask_tips_by_taxonID_transcripts.py "
             "{params.in_dir} "
             "{params.in_dir} "
             "{params.mask_tips} "
@@ -142,7 +163,7 @@ rule homologs_round1_cut_internal_long_branches:
     benchmark: HOMOLOGS + "round1_cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc3/scripts/cut_long_internal_branches.py "
+        "python src/pdc2/scripts/cut_long_internal_branches.py "
             "{params.in_dir} "
             ".mm "
             "{params.internal_branch_cutoff} "
@@ -168,7 +189,7 @@ rule homologs_round1_write_fasta_files_from_trees:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc3/scripts/write_fasta_files_from_trees.py \
+        python src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
             .subtree \
@@ -210,7 +231,7 @@ rule homologs_round2_fasta_to_tree:
     shell:
         """
         PATH="bin:$PATH"
-        python src/pdc3/scripts/fasta_to_tree_pxclsq.py \
+        python src/pdc2/scripts/fasta_to_tree_pxclsq.py \
             {params.in_dir} \
             {threads} \
             aa \
@@ -221,33 +242,30 @@ rule homologs_round2_fasta_to_tree:
         rename.ul .raxml.tre .tre {HOMOLOGS_R2}/OG*.raxml.tre
         """
 
-rule homologs_round2_treeshrink:
-    input: HOMOLOGS + "round2_fasta_to_tree.ok"
-    output: touch(HOMOLOGS + "round2_treeshrink.ok")
-    log: HOMOLOGS + "round2_treeshrink.log"
-    benchmark: HOMOLOGS + "round2_treeshrink.bmk"
-    threads: MAX_THREADS
+rule homologs_round2_trim_tips:
+    """Trim tips via the old method"""
+    input:
+        HOMOLOGS + "round2_fasta_to_tree.ok"
+    output: touch(HOMOLOGS + "round2_trim_tips.ok")
+    log: HOMOLOGS + "round2_trim_tips.log"
+    benchmark: HOMOLOGS + "round2_trim_tips.bmk"
     params:
-        in_dir = HOMOLOGS_R2,
-        quantile = 0.05
+        relative_cutoff=params["homologs"]["trim_tips"]["relative_cutoff"],
+        absolute_cutoff=params["homologs"]["trim_tips"]["absolute_cutoff"]
     conda: "homologs.yml"
     shell:
         """
-        PATH="bin:$PATH"
-        python src/pdc3/scripts/tree_shrink_wrapper.py \
-            {params.in_dir} \
+        python src/pdc2/scripts/trim_tips.py \
+            {HOMOLOGS_R2} \
             .tre \
-            {params.quantile} \
-            {params.in_dir} \
-            {threads} \
+            {params.relative_cutoff} \
+            {params.absolute_cutoff} \
         2> {log} 1>&2
-
-        rm -rf phyx.logfile
         """
 
 
 rule homologs_round2_mask_tips_by_taxon_id:
-    input: HOMOLOGS + "round2_treeshrink.ok"
+    input: HOMOLOGS + "round2_trim_tips.ok"
     output: touch(HOMOLOGS + "round2_mask_tips_by_taxon_id.ok")
     params:
         in_dir = HOMOLOGS_R2,
@@ -257,7 +275,7 @@ rule homologs_round2_mask_tips_by_taxon_id:
     benchmark: HOMOLOGS + "round2_mask_tips_by_taxon_id.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc3/scripts/mask_tips_by_taxonID_transcripts.py "
+        "python src/pdc2/scripts/mask_tips_by_taxonID_transcripts.py "
             "{params.in_dir} "
             "{params.in_dir} "
             "{params.mask_tips} "
@@ -276,7 +294,7 @@ rule homologs_round2_cut_internal_long_branches:
     benchmark: HOMOLOGS + "homologs_round2_cut_internal_long_branches.bmk"
     conda: "homologs.yml"
     shell:
-        "python src/pdc3/scripts/cut_long_internal_branches.py "
+        "python src/pdc2/scripts/cut_long_internal_branches.py "
             "{params.in_dir} "
             ".mm "
             "{params.internal_branch_cutoff} "
@@ -299,7 +317,7 @@ rule homologs_round2_write_fasta_files_from_trees:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc3/scripts/write_fasta_files_from_trees.py \
+        python src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
             .subtree \
@@ -362,7 +380,7 @@ rule homologs_rt_prune_paralogs:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc3/scripts/prune_paralogs_RT.py \
+        python src/pdc2/scripts/prune_paralogs_RT.py \
             {params.in_dir} \
             {params.tree_ending} \
             {params.out_dir} \
@@ -389,7 +407,7 @@ rule homologs_refine1_trees_to_fasta:
     conda: "homologs.yml"
     shell:
         """
-        python src/pdc3/scripts/write_fasta_files_from_trees.py \
+        python src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
             .tre \
@@ -409,7 +427,7 @@ rule homologs_refine1:
     conda: "homologs.yml"
     shell:
         """
-        python src/refine_alignments.py \
+        python2 src/refine_alignments2.py \
             {HOMOLOGS_REFINE1} \
             .fa \
             {threads} \
@@ -444,7 +462,7 @@ rule homologs_refine2:
     conda: "homologs.yml"
     shell:
         """
-        python src/refine_alignments.py \
+        python src/refine_alignments2.py \
             {HOMOLOGS_REFINE2} \
             .fa \
             {threads} \

@@ -13,8 +13,8 @@ orthofinder:
 
 homologs:
     trim_tips:
-        relative_cutoff: 0.2
-        absolute_cutoff: 0.4
+        relative_cutoff: 10
+        absolute_cutoff: 2
     mask_tips:
         mask_paraphyletic: "y"
     cut_internal_long_branches:

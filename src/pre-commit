@@ -42,7 +42,7 @@ do_pylint_python() {
 
     pylint --version
     pylint src \
-        --ignore=src/pdc3/scripts,src/phyx-1.01/src
+        --ignore=src/pdc3/scripts,src/phyx-1.01/src,src/pdc2/scripts
 
 }
 

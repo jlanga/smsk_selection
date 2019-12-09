@@ -17,24 +17,27 @@ def run_tcoffee_mcoffee(filename_in, filename_out):
     """Run t_coffee with the methods in `methods"""
     methods = ["muscle_msa", "mafftgins_msa", "t_coffee_msa", "kalign_msa"]
     methods_str = " ".join(methods)
-    command = f"t_coffee " + \
-        f"{filename_in} " + \
-        f"-method {methods_str} " + \
-        f"-output=aln " + \
-        f"-outfile {filename_out} " + \
-        f"2>&1"
+    command = (
+        "t_coffee "  + filename_in + " "
+        "-method " + methods_str + " "
+        "-output=aln "
+        "-outfile " + filename_out + " "
+        "2>&1"
+    )
     sys.stderr.write(command)
     os.system(command)
 
 
 def run_tcoffee_eval(filename_in, filename_out):
     """Run t_coffee in eval mode"""
-    command = f"t_coffee " + \
-        f"-infile {filename_in} " + \
-        "-evaluate " + \
-        "-output=score_ascii " + \
-        f"-outfile {filename_out} " + \
+    command = (
+        "t_coffee "
+        "-infile " + filename_in + " "
+        "-evaluate "
+        "-output=score_ascii "
+        "-outfile " + filename_out + " "
         "2>&1"
+    )
     sys.stderr.write(command)
     os.system(command)
 
@@ -99,7 +102,7 @@ def get_highly_occupied_columns(msa, min_ratio=0.5):
 def run_max_align(filename_in, filename_out):
     """Execute maxalign"""
     maxalign = "perl src/maxalign.pl"
-    command = f"{maxalign} -p {filename_in} > {filename_out}"
+    command = maxalign + " -p " + filename_in + " > " + filename_out
     sys.stderr.write(command)
     os.system(command)
 
@@ -111,18 +114,18 @@ def run_pipeline(filename_in):
 
     run_tcoffee_mcoffee(
         filename_in=filename_in,
-        filename_out=f"{output_folder}/{orthogroup_id}.aln"
+        filename_out=output_folder + "/" + orthogroup_id + ".aln"
     )
 
     run_tcoffee_eval(
-        filename_in=f"{output_folder}/{orthogroup_id}.aln",
-        filename_out=f"{output_folder}/{orthogroup_id}.cons"
+        filename_in=output_folder + "/" + orthogroup_id + ".aln",
+        filename_out=output_folder + "/" + orthogroup_id + ".cons"
     )
 
-    scores = parse_scores(filename=f"{output_folder}/{orthogroup_id}.cons")
+    scores = parse_scores(filename=output_folder + "/" + orthogroup_id + ".cons")
     hq_scores = get_high_score_columns(scores, 9)
     msa = AlignIO.read(
-        handle=f"{output_folder}/{orthogroup_id}.aln",
+        handle=output_folder + "/" + orthogroup_id + ".aln",
         format="clustal"
     )
     msa_hq = keep_columns(msa, hq_scores)
@@ -132,16 +135,16 @@ def run_pipeline(filename_in):
 
     AlignIO.write(
         alignments=msa_vhq,
-        handle=f"{output_folder}/{orthogroup_id}.tcoffee.fa",
+        handle=output_folder + "/" + orthogroup_id + ".tcoffee.fa",
         format="fasta"
     )
 
     run_max_align(
-        filename_in=f"{output_folder}/{orthogroup_id}.tcoffee.fa",
-        filename_out=f"{output_folder}/{orthogroup_id}.maxalign.fa"
+        filename_in=output_folder + "/" + orthogroup_id + ".tcoffee.fa",
+        filename_out=output_folder + "/" + orthogroup_id + ".maxalign.fa"
     )
 
-    os.remove(f"{orthogroup_id}.dnd")
+    os.remove(orthogroup_id + ".dnd")
 
 
 if __name__ == '__main__':
@@ -162,7 +165,7 @@ if __name__ == '__main__':
 
     # Generator with files. In real cases can be too big
     IN_FILES = (
-        f"{IN_DIR}/{in_file}"
+        IN_DIR + in_file
         for in_file in os.listdir(IN_DIR)
         if in_file.endswith(IN_EXT)
     )

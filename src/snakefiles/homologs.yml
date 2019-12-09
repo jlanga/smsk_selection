@@ -6,11 +6,11 @@ channels:
     - smirarab
     - defaults
 dependencies:
-    - python=3
+    - python=2.7
     - mafft
     - trimal
     - raxml
-    - treeshrink
+    # - treeshrink
     - pasta
     - seqtk
     - biopython
