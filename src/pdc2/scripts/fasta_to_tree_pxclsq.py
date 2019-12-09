@@ -33,8 +33,10 @@ def fasta_to_tree(DIR,fasta,num_cores,seqtype,num_seq_cutoff=NUM_SEQ_CUTOFF):
 	"""
 	if DIR[-1] != "/": DIR += "/"
 	seqcount, maxlen = get_fasta_size(DIR+fasta)
-	assert seqcount >= 4, "Less than four sequences in "+DIR+fasta
+	# assert seqcount >= 4, "Less than four sequences in "+DIR+fasta
 	print fasta,seqcount,"sequences"
+	if seqcount < 4:
+		return
 	if seqcount >= NUM_SEQ_CUTOFF: # large cluster
 		print "running pasta"
 		alignment = pasta(DIR,fasta,num_cores,seqtype)

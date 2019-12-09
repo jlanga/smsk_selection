@@ -25,7 +25,7 @@ rule orthofinder_groups:
             ORTHOFINDER + "{species}.fasta",
             species=SPECIES
         )
-    output: folder = directory(ORTHOFINDER + "groups/")
+    output: touch(ORTHOFINDER + "groups.ok")
     threads: MAX_THREADS
     log: ORTHOFINDER + "groups.log"
     benchmark: ORTHOFINDER + "groups.bmk"
@@ -40,20 +40,13 @@ rule orthofinder_groups:
             --only-groups \
             --name groups \
         2> {log} 1>&2
-
-        ln --symbolic --relative {OF_GROUPS} {output.folder}
-        """
+      """
 
 
 rule orthofinder_trees:
-    input: ORTHOFINDER + "groups/"
-    output: 
-        msa = directory(ORTHOFINDER + "msa"),
-        trees = directory(ORTHOFINDER + "gene_trees")
-    params:
-        trees_results = OF_TREES,
-        msa = OF_TREES + "MultipleSequenceAlignments",
-        trees = OF_TREES + "Gene_Trees"
+    input: ORTHOFINDER + "groups.ok"
+    output: touch(ORTHOFINDER + "trees.ok")
+    params: OF_GROUPS
     threads: MAX_THREADS
     log: ORTHOFINDER + "trees.log"
     benchmark: ORTHOFINDER + "trees.bmk"
@@ -63,23 +56,18 @@ rule orthofinder_trees:
         orthofinder \
             --only-trees \
             --algthreads 4 \
-            --from-groups {OF_GROUPS} \
+            --from-groups {params} \
             --method msa \
             --threads {threads} \
             --name trees \
         2> {log} 1>&2
-
-        ln --symbolic --relative --force {params.trees} {output.trees}
-        ln --symbolic --relative --force {params.msa} {output.msa}
         """
 
 
 rule orthofinder_orthologues:
-    input:
-        ORTHOFINDER + "msa",
-        ORTHOFINDER + "gene_trees"
-    output: directory(ORTHOFINDER + "resolved_gene_trees")
-    params: OF_ORTHOLOGUES + "Resolved_Gene_Trees/"
+    input: ORTHOFINDER + "trees.ok"
+    output: touch(ORTHOFINDER + "orthologues.ok")
+    params: OF_TREES
     log: ORTHOFINDER + "orthologues.log"
     benchmark: ORTHOFINDER + "orthologues.bmk"
     threads: MAX_THREADS
@@ -89,12 +77,10 @@ rule orthofinder_orthologues:
         orthofinder \
             --algthreads {threads} \
             --threads {threads} \
-            --from-trees {OF_TREES} \
+            --from-trees {params} \
             --name orthologues \
         2> {log} 1>&2
-
-        ln --symbolic --force --relative {params} {output}
         """
 
 rule orthofinder:
-    input: ORTHOFINDER + "resolved_gene_trees"
+    input: ORTHOFINDER + "orthologues.ok"

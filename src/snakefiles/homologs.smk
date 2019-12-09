@@ -41,74 +41,106 @@ rule homologs_join_pep:
         done
         """
 
-rule homologs_round1_prepare_msa:
+
+rule homologs_round1_prepare_sequences:
     """
     Transform _ into @, and store it in .aln-cln
     """
-    input: ORTHOFINDER + "msa"
-    output: touch(HOMOLOGS + "round1_prepare_msa.ok")
-    shell: 
-        """
-        mkdir -p {HOMOLOGS_R1}
-
-        find {input}/ -type f -name "OG*.fa" -exec \
-        bash -c 'sed "s/_/@/" $1 > {HOMOLOGS_R1}/$(basename $1 .fa).aln-cln' _ {{}} \;
-        """
-
-
-
-rule homologs_round1_prepare_trees:
-    """
-    Puts the trees in the input folder into the output one, while correcting the
-    leaf names for the scripts in pdc2
-    """
-    input: ORTHOFINDER + "gene_trees"
+    input:
+        mock = ORTHOFINDER + "orthologues.ok",
+        fasta = HOMOLOGS + "all.pep"
     output: touch(HOMOLOGS + "round1_prepare.ok")
+    params:
+        gene_trees_folder = OF_RESOLVED_GENE_TREES
+    log: HOMOLOGS + "round1_prepare.log"
+    benchmark: HOMOLOGS + "round1_prepare.bmk"
     conda: "homologs.yml"
     shell:
         """
-        python2.7 src/correct_tree_leaf_names.py {input} .txt {HOMOLOGS_R1} .nwk
+        mkdir -p {HOMOLOGS_R1}
 
-        find {HOMOLOGS_R1} -type f -name "OG*_tree.nwk" -exec \
-            bash -c 'mv $1 ${{1%_*}}.nwk' _ {{}} \;
+        # find {params.gene_trees_folder} -type f -name "OG*.fa" -exec \
+        # bash -c 'sed "s/_/@/" $1 > {HOMOLOGS_R1}/$(basename $1 .fa).fa' _ {{}} \; \
+        # 2> {log} 1>&2
+
+        python2 src/correct_tree_leaf_names.py \
+            {params.gene_trees_folder} \
+            _tree.txt \
+            {HOMOLOGS_R1} \
+            .nwk \
+        2>> {log} 1>&2
+
+        python2 src/pdc2/scripts/write_fasta_files_from_trees.py \
+            {input.fasta} \
+            {HOMOLOGS_R1} \
+            .nwk \
+            {HOMOLOGS_R1} \
+        2>> {log} 1>&2
         """
 
 
-# rule homologs_round1_treeshrink:
+# rule homologs_round1_prepare_msa:
 #     """
-#     Run treeshrink in every tree.
-#     Input: .nwk
-#     Output: *.ts.tt
-#     Rename from *.ts.tt to 
+#     Transform _ into @, and store it in .aln-cln
 #     """
-#     input:
-#         HOMOLOGS + "round1_prepare.ok",
-#         HOMOLOGS + "round1_prepare_msa.ok"
-#     output: touch(HOMOLOGS + "round1_treeshrink.ok")
-#     log: HOMOLOGS + "round1_treeshrink.log"
-#     benchmark: HOMOLOGS + "round1_treeshrink.bmk"
-#     threads: MAX_THREADS
-#     params:
-#         quantile = 0.05
+#     input: ORTHOFINDER + "msa"
+#     output: touch(HOMOLOGS + "round1_prepare_msa.ok")
+#     shell: 
+#         """
+#         mkdir -p {HOMOLOGS_R1}
+
+#         find {input}/ -type f -name "OG*.fa" -exec \
+#         bash -c 'sed "s/_/@/" $1 > {HOMOLOGS_R1}/$(basename $1 .fa).aln-cln' _ {{}} \;
+#         """
+
+
+
+# rule homologs_round1_prepare_trees:
+#     """
+#     Puts the trees in the input folder into the output one, while correcting the
+#     leaf names for the scripts in pdc2
+#     """
+#     input: ORTHOFINDER + "gene_trees"
+#     output: touch(HOMOLOGS + "round1_prepare.ok")
 #     conda: "homologs.yml"
 #     shell:
 #         """
-#         PATH="bin:$PATH"
-#         python2.7 src/pdc2/scripts/tree_shrink_wrapper.py \
-#             {HOMOLOGS_R1} \
-#             .nwk \
-#             {params.quantile} \
-#             {HOMOLOGS_R1} \
-#             {threads} \
-#         2> {log} 1>&2
-#         rm -rf phyx.logfile
+#         python2.7 src/correct_tree_leaf_names.py {input} .txt {HOMOLOGS_R1} .nwk
+
+#         find {HOMOLOGS_R1} -type f -name "OG*_tree.nwk" -exec \
+#             bash -c 'mv $1 ${{1%_*}}.nwk' _ {{}} \;
 #         """
+
+
+rule homologs_round1_fasta_to_tree:
+    input: HOMOLOGS + "round1_prepare.ok"
+    output:
+        touch(HOMOLOGS + "round1_fasta_to_tree.ok")
+    params:
+        in_dir = HOMOLOGS_R1
+    log: HOMOLOGS + "round1_fasta_to_tree.log"
+    benchmark: HOMOLOGS + "round1_fasta_to_tree.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        PATH="bin:$PATH"
+        python2.7 src/pdc2/scripts/fasta_to_tree_pxclsq.py \
+            {params.in_dir} \
+            {threads} \
+            aa \
+            n \
+        2> {log} 1>&2
+
+        find {HOMOLOGS_R1} -name "OG*_RS_*.txt" -delete
+        rename.ul .raxml.tre .tre {HOMOLOGS_R1}/OG*.raxml.tre
+        """
+
+
 
 rule homologs_round1_trim_tips:
     """Trim tips via the old method"""
-    input:
-        HOMOLOGS + "round1_prepare.ok",
-        HOMOLOGS + "round1_prepare_msa.ok"
+    input: HOMOLOGS + "round1_fasta_to_tree.ok"
     output: touch(HOMOLOGS + "round1_trim_tips.ok")
     log: HOMOLOGS + "round1_trim_tips.log"
     benchmark: HOMOLOGS + "round1_trim_tips.bmk"
@@ -120,7 +152,7 @@ rule homologs_round1_trim_tips:
         """
         python2.7 src/pdc2/scripts/trim_tips.py \
             {HOMOLOGS_R1} \
-            .nwk \
+            .tre \
             {params.relative_cutoff} \
             {params.absolute_cutoff} \
         2> {log} 1>&2
