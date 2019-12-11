@@ -210,16 +210,11 @@ if __name__ == '__main__':
         for identifier, sequence in SeqIO.FastaIO.SimpleFastaParser(open(CDS, "r"))
     }
 
-    # Generator with files. In real cases can be too big
     IN_FILES = tuple(
         IN_DIR + in_file
         for in_file in os.listdir(IN_DIR)
         if in_file.endswith(IN_EXT)
     )
-
-    # Can't make it parallel because of intermediate files
-    # for file in IN_FILES:
-    #     run_pipeline(file, CDS_DICT, CORES)
 
     PARAMS = zip(
         IN_FILES,
