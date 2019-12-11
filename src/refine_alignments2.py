@@ -12,6 +12,7 @@ import sys
 import multiprocessing as mp
 
 from Bio import AlignIO
+from Bio import SeqIO
 
 def run_tcoffee_mcoffee(filename_in, filename_out):
     """Run t_coffee with the methods in `methods"""
@@ -22,9 +23,10 @@ def run_tcoffee_mcoffee(filename_in, filename_out):
         "-method " + methods_str + " "
         "-output=aln "
         "-outfile " + filename_out + " "
+        "-quiet "
         "2>&1"
     )
-    sys.stderr.write(command)
+    sys.stderr.write(command + "\n")
     os.system(command)
 
 
@@ -36,9 +38,10 @@ def run_tcoffee_eval(filename_in, filename_out):
         "-evaluate "
         "-output=score_ascii "
         "-outfile " + filename_out + " "
+        "-quiet "
         "2>&1"
     )
-    sys.stderr.write(command)
+    sys.stderr.write(command + "\n")
     os.system(command)
 
 
@@ -103,11 +106,32 @@ def run_max_align(filename_in, filename_out):
     """Execute maxalign"""
     maxalign = "perl src/maxalign.pl"
     command = maxalign + " -p " + filename_in + " > " + filename_out
-    sys.stderr.write(command)
+    sys.stderr.write(command + "\n")
     os.system(command)
 
 
-def run_pipeline(filename_in):
+def subset_cds(msa_in, fasta_out, cds_dict):
+    """Slice cds_dict with the sequences in msa_in"""
+    msa = AlignIO.read(msa_in, format="fasta")
+    seq_names = [msa[i].name for i in range(len(msa))]
+    cds_sequences = {name: cds_dict[name] for name in seq_names}
+    with open(fasta_out, "w") as f_in:
+        for name, sequence in cds_sequences.items():
+            f_in.write(">{name}\n{sequence}\n".format(
+                name=name,
+                sequence=sequence
+            ))
+
+
+def run_max_align_cds(filename_in_pep, filename_in_cds, filename_out):
+    """Execute maxalign, returning the cds"""
+    maxalign = "perl src/maxalign.pl"
+    command = maxalign + " -p " + filename_in_pep + " " + filename_in_cds + " > " + filename_out
+    sys.stderr.write(command + "\n")
+    os.system(command)
+
+
+def run_pipeline(filename_in, cds_dict):
     """Run the refinement step per file"""
     orthogroup_id = filename_in.split("/")[-1].split(".")[0]
     output_folder = "/".join(filename_in.split("/")[0:-1])
@@ -141,36 +165,66 @@ def run_pipeline(filename_in):
 
     run_max_align(
         filename_in=output_folder + "/" + orthogroup_id + ".tcoffee.fa",
-        filename_out=output_folder + "/" + orthogroup_id + ".maxalign.fa"
+        filename_out=output_folder + "/" + orthogroup_id + ".maxalign.fa",
+    )
+
+    subset_cds(
+        msa_in=output_folder + "/" + orthogroup_id + ".maxalign.fa",
+        fasta_out=output_folder + "/" + orthogroup_id + ".cds",
+        cds_dict=cds_dict
+    )
+
+    run_max_align_cds(
+        filename_in_pep=output_folder + "/" + orthogroup_id + ".tcoffee.fa",
+        filename_in_cds=output_folder + "/" + orthogroup_id + ".cds",
+        filename_out=output_folder + "/" + orthogroup_id + ".maxalign.cds",
     )
 
     os.remove(orthogroup_id + ".dnd")
 
+def run_pipeline_starmap(params):
+    """Wrapper of run_pipeline to run in parallel"""
+    filename_in, cds_dict = params[0:2]
+    run_pipeline(filename_in, cds_dict)
+
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         sys.stderr.write(
             "ERROR: Incorrect number of parameters: \n" + \
-            "python refine_alignments.py indir in_extension num_cores\n"
+            "python refine_alignments.py indir in_extension all.cds cores\n"
         )
         exit(1)
 
     IN_DIR = sys.argv[1]
     IN_EXT = sys.argv[2]
-    NUM_CPUS = int(sys.argv[3])
+    CDS = sys.argv[3]
+    CORES = int(sys.argv[4])
 
     if not IN_DIR.endswith("/"):
         IN_DIR += "/"
 
+    CDS_DICT = {
+        identifier.split()[0]: sequence
+        for identifier, sequence in SeqIO.FastaIO.SimpleFastaParser(open(CDS, "r"))
+    }
+
     # Generator with files. In real cases can be too big
-    IN_FILES = (
+    IN_FILES = tuple(
         IN_DIR + in_file
         for in_file in os.listdir(IN_DIR)
         if in_file.endswith(IN_EXT)
     )
 
-    POOL = mp.Pool(NUM_CPUS)
-    POOL.map(run_pipeline, IN_FILES)
-    POOL.close()
-    POOL.join()
+    # Can't make it parallel because of intermediate files
+    # for file in IN_FILES:
+    #     run_pipeline(file, CDS_DICT, CORES)
+
+    PARAMS = zip(
+        IN_FILES,
+        (CDS_DICT for i in IN_FILES)
+    )
+    print(PARAMS)
+    POOL = mp.Pool(CORES)
+    POOL.map(run_pipeline_starmap, PARAMS)
