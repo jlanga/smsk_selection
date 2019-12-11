@@ -249,7 +249,7 @@ rule homologs_round2_prepare:
     output: touch(HOMOLOGS + "round2_prepare.ok")
     shell:
         "mkdir -p {HOMOLOGS_R2}; "
-        "ln $(readlink -f {HOMOLOGS_R1}/*.fa) {HOMOLOGS_R2}"
+        "ln $(readlink -f {HOMOLOGS_R1}/*rr_*.fa) {HOMOLOGS_R2}"
 
 
 rule homologs_round2_fasta_to_tree:
@@ -446,26 +446,29 @@ rule homologs_refine1_trees_to_fasta:
         python2.7 src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
-            .tre \
+            .subtree \
             {output[1]} \
         2> {log} 1>&2
 
-        rename.ul rr.fa .fa {HOMOLOGS_REFINE1}/OG*rr.fa
+        #rename.ul rr.fa .fa {HOMOLOGS_REFINE1}/OG*rr.fa
         """
 
 
 rule homologs_refine1:
-    input: HOMOLOGS + "refine1_trees_to_fasta.ok"
+    input: 
+        ok = HOMOLOGS + "refine1_trees_to_fasta.ok",
+        cds = HOMOLOGS + "all.cds"
     output: touch(HOMOLOGS + "refine1.ok")
-    threads: MAX_THREADS
     log: HOMOLOGS + "refine1.log"
     benchmark: HOMOLOGS + "refine1.bmk"
+    threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
         python2.7 src/refine_alignments2.py \
             {HOMOLOGS_REFINE1} \
             .fa \
+            {input.cds} \
             {threads} \
         2> {log} 1>&2
         """
@@ -491,17 +494,20 @@ rule homologs_refine2_prepare:
 
 
 rule homologs_refine2:
-    input: HOMOLOGS + "refine2_prepare.ok"
+    input: 
+        ok = HOMOLOGS + "refine2_prepare.ok",
+        cds = HOMOLOGS + "all.cds"
     output: touch(HOMOLOGS + "refine2.ok")
-    threads: MAX_THREADS
     log: HOMOLOGS + "refine2.log"
     benchmark: HOMOLOGS + "refine2.bmk"
+    threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
         python2.7 src/refine_alignments2.py \
             {HOMOLOGS_REFINE2} \
             .fa \
+            {input.cds} \
             {threads} \
         2> {log} 1>&2
         """
