@@ -4,7 +4,12 @@
 Script to perform MSA with t-coffee and associated tools to obtain high quality
 alignments:
 
-- align with t-coffe: t_coffee_msa mafftgins_msa
+- align with t-coffe: muscle_msa, t_coffee_msa, mafftgins_msa, kalign_msa
+- evaluate alignment
+- keep colums with score = 9 (max)
+- remove columns where there is a gap in at leas 50% of the times
+- run maxalign
+- return return the final msa in aa and nt formats
 """
 
 import os
@@ -46,9 +51,7 @@ def run_tcoffee_eval(filename_in, filename_out):
 
 
 def parse_scores(filename):
-    """
-    Parse the scores from the ascii_results from t_coffee -evaluate
-    """
+    """Parse the scores from the ascii_results from t_coffee -evaluate"""
     scores = []
     with open(filename, "r") as f_in:
         for line in f_in.readlines():
@@ -68,8 +71,9 @@ def keep_columns(msa, columns_to_keep):
 
 
 def get_gappy_columns(msa, threshold=0.5):
-    """Get the column numbers that contain gaps in at least `threshold`
-    proportion"""
+    """
+    Get the column numbers that contain gaps in at least `threshold` proportion
+    """
     columns_to_remove = []
     number_of_sequences = len(msa)
     for column_number in range(msa):
@@ -181,6 +185,7 @@ def run_pipeline(filename_in, cds_dict):
     )
 
     os.remove(orthogroup_id + ".dnd")
+
 
 def run_pipeline_starmap(params):
     """Wrapper of run_pipeline to run in parallel"""
