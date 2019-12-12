@@ -17,6 +17,7 @@ rule homologs_join_cds:
             | cut -f 1 -d " " \
             | paste - - \
             | sed "s/^>/>$species@/" \
+            | sed 's/ENA|[A-Z0-9]*|//' \
             | tr "\t" "\n" \
             >> {output}
         done
@@ -36,6 +37,7 @@ rule homologs_join_pep:
             | cut -f 1 -d " " \
             | paste - - \
             | sed "s/^>/>$species@/" \
+            | sed 's/ENA|[A-Z0-9]*|//' \
             | tr "\t" "\n" \
             >> {output}
         done
