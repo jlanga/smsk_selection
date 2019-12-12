@@ -29,8 +29,6 @@ def get_species_sequences(orthogroups, in_dir, in_ext):
 def assign_sequences_to_orthogroups(dict_of_sequences, orthogroups):
     """Reformat the dict_of_sequences as {orthogroup_id : {seq_id, seq}}
     """
-    orthogroups = ORTHOGROUPS
-
     dict_of_orthogroups = {orthogroup_id: {} for orthogroup_id in orthogroups.index}
 
     for orthogroup_id in orthogroups.index:
