@@ -1,0 +1,11 @@
+# Conda env for tree.smk
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - biopython
+    - python=2.7
+    - raxml-ng
+    - modeltest-ng

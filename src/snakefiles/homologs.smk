@@ -446,7 +446,7 @@ rule homologs_refine1_trees_to_fasta:
         python2.7 src/pdc2/scripts/write_fasta_files_from_trees.py \
             {input.fasta} \
             {params.indir} \
-            .subtree \
+            .tre \
             {output[1]} \
         2> {log} 1>&2
 

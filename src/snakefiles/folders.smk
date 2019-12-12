@@ -21,3 +21,6 @@ HOMOLOGS_R2 = HOMOLOGS + "round2/"
 HOMOLOGS_RT = HOMOLOGS + "root_to_tip/"
 HOMOLOGS_REFINE1 = HOMOLOGS + "refine1/"
 HOMOLOGS_REFINE2 = HOMOLOGS + "refine2/"
+
+TREE = "results/tree/"
+TREE_ALN = TREE + "alignments/"

@@ -27,8 +27,9 @@ include: snakefiles + "busco.smk"
 include: snakefiles + "cdhit.smk"
 include: snakefiles + "orthofinder.smk"
 include: snakefiles + "homologs.smk"
+include: snakefiles + "tree.smk"
 
 rule all:
     input:
         rules.busco.input,
-        rules.homologs.input
+        rules.tree.input
