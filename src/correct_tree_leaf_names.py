@@ -6,14 +6,20 @@
 
 import os
 import sys
+import re
 
 from Bio import Phylo
 
 def correct_tree_leaf_names(filename_in, filename_out):
-    """Correct a single tree"""
+    """Correct a single tree
+    - Replaces the first _ into @: transition between orothofinder and pdc
+    - Removes the ENA|id| since pdc removes it too
+    """
     tree = Phylo.read(filename_in, "newick")
+    ena_regex = re.compile(r'ENA\|[A-Z0-9]*\|')
     for terminal in tree.get_terminals():
         terminal.name = terminal.name.replace("_", "@", 1)
+        terminal.name = ena_regex.sub("", terminal.name)
     Phylo.write(tree, filename_out, "newick")
 
 
