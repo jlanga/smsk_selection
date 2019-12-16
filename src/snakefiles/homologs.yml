@@ -8,12 +8,9 @@ channels:
 dependencies:
     - python=2.7
     - mafft
-    - trimal
-    - raxml
-    # - treeshrink
-    - pasta
     - seqtk
     - biopython
     - parallel
     - kalign2=2.04
     - t_coffee
+    - raxml-ng

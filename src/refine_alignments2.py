@@ -184,7 +184,7 @@ def run_pipeline(filename_in, cds_dict):
         filename_out=output_folder + "/" + orthogroup_id + ".maxalign.cds",
     )
 
-    os.remove(orthogroup_id + ".dnd")
+    #os.remove(orthogroup_id + ".dnd")
 
 
 def run_pipeline_starmap(params):
@@ -225,6 +225,6 @@ if __name__ == '__main__':
         IN_FILES,
         (CDS_DICT for i in IN_FILES)
     )
-    print(PARAMS)
+    #print(PARAMS)
     POOL = mp.Pool(CORES)
     POOL.map(run_pipeline_starmap, PARAMS)

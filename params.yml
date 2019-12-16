@@ -12,6 +12,8 @@ orthofinder:
     tree_program: fasttree
 
 homologs:
+    pxclsq:
+        min_occupancy: 0.1
     trim_tips:
         relative_cutoff: 10
         absolute_cutoff: 2
@@ -22,6 +24,11 @@ homologs:
         minimum_taxa: 3
     root_to_tip:
         minimum_ingroup_taxa: 3
+
+tree:
+    min_occupation: 0.5
+    raxml:
+        bootstrap_replicates: 1000
 
 fastcodeml:
     maximizer: 22

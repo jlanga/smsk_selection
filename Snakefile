@@ -32,4 +32,5 @@ include: snakefiles + "tree.smk"
 rule all:
     input:
         rules.busco.input,
-        rules.tree.input
+        rules.homologs_correct_leafs.output
+        # rules.tree.input
