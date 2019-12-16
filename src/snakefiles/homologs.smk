@@ -75,7 +75,7 @@ rule homologs_round1_tree_to_fasta:
     conda: "homologs.yml"
     shell:
         """
-        bash src/tree_to_fasta.sh \
+        python2 src/tree_to_fasta.py \
             {input.pep} \
             {input.folder} \
             nwk \
@@ -250,7 +250,7 @@ rule homologs_round2_tree_to_fasta:
     conda: "homologs.yml"
     shell:
         """
-        bash src/tree_to_fasta.sh \
+        python2 src/tree_to_fasta.py \
             {input.pep} \
             {input.folder} \
             subtree \
