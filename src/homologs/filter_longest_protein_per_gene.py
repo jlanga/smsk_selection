@@ -15,15 +15,6 @@ if len(sys.argv) != 3:
         """
     )
 
-FASTA_OUT = sys.argv[1]
-FASTA_IN = sys.argv[2]
-
-if FASTA_IN == "-":
-    FASTA_IN = sys.stdin
-
-if FASTA_OUT == "-":
-    FASTA_OUT = sys.stdout
-
 
 def compute_gene_to_longest_protein(protein_dict):
     """Build a dict gene: protein, where protein is the longest protein that
@@ -51,6 +42,12 @@ def compute_gene_to_longest_protein(protein_dict):
 
 
 if __name__ == '__main__':
+
+    FASTA_OUT = sys.argv[1]
+    FASTA_IN = sys.argv[2]
+
+    FASTA_IN = sys.stdin if FASTA_IN == "-" else FASTA_IN
+    FASTA_OUT = sys.stdout if FASTA_OUT == "-" else FASTA_OUT
 
     PROTEIN_DICT = SeqIO.to_dict(SeqIO.parse(handle=FASTA_IN, format="fasta"))
 
