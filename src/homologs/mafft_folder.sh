@@ -13,7 +13,7 @@ mkdir -p "$out_dir"
 
 parallel \
     --jobs "$threads" \
-    mafft --amino --genafpair --maxiterate 1000 {} ">" "$out_dir"/{/.}."$out_ext" \
+    mafft --amino --genafpair --maxiterate 1000 {} ">" "$out_dir/{/.}.$out_ext" \
 ::: "$in_dir"/*."$in_ext"
 
 # Second round of dead processes, this time one by one multithreaded
@@ -25,6 +25,6 @@ find "$out_dir" -name "*.$out_ext" -size 0 \
         --amino \
         --genafpair \
         --maxiterate 1000 \
-        --thread $threads \
-        "$in_dir"/{/.}."$in_ext" \
-    ">" "$out_dir"/{/.}."$out_ext" 
+        --thread "$threads" \
+        "$in_dir/{/.}.$in_ext" \
+    ">" "$out_dir/{/.}.$out_ext" 

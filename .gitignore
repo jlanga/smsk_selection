@@ -7,3 +7,4 @@ data/downloads/*
 .vscode
 src/pdc3/scripts/*.pyc
 src/pdc3/scripts/__pycache__/
+bin/px*

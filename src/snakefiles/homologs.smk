@@ -55,7 +55,7 @@ rule homologs_correct_leafs:
         gene_trees_folder = OF_RESOLVED_GENE_TREES
     shell:
         """
-        python2 src/correct_tree_leaf_names.py \
+        python2 src/homologs/correct_tree_leaf_names.py \
             {params} \
             _tree.txt \
             {output} \
@@ -75,7 +75,7 @@ rule homologs_round1_tree_to_fasta:
     conda: "homologs.yml"
     shell:
         """
-        python2 src/tree_to_fasta.py \
+        python2 src/homologs/tree_to_fasta.py \
             {input.pep} \
             {input.folder} \
             nwk \
@@ -94,7 +94,7 @@ rule homologs_round1_mafft:
     threads: MAX_THREADS
     shell:
         """
-        bash src/mafft_folder.sh \
+        bash src/homologs/mafft_folder.sh \
             {input} \
             fa \
             {output} \
@@ -116,7 +116,7 @@ rule homologs_round1_pxclsq:
         """
         PATH="bin:$PATH"
 
-        bash src/pxclsq_folder.sh \
+        bash src/homologs/pxclsq_folder.sh \
             {input} \
             fa \
             {output} \
@@ -135,7 +135,7 @@ rule homologs_round1_raxmlng:
     threads: MAX_THREADS
     shell:
         """
-        bash src/raxmlng_folder.sh \
+        bash src/homologs/raxmlng_folder.sh \
             {input} \
             fa \
             {output} \
@@ -251,7 +251,7 @@ rule homologs_round2_tree_to_fasta:
     conda: "homologs.yml"
     shell:
         """
-        python2 src/tree_to_fasta.py \
+        python2 src/homologs/tree_to_fasta.py \
             {input.pep} \
             {input.folder} \
             subtree \
@@ -270,7 +270,7 @@ rule homologs_round2_mafft:
     threads: MAX_THREADS
     shell:
         """
-        bash src/mafft_folder.sh \
+        bash src/homologs/mafft_folder.sh \
             {input} \
             fa \
             {output} \
@@ -292,7 +292,7 @@ rule homologs_round2_pxclsq:
         """
         PATH="bin:$PATH"
 
-        bash src/pxclsq_folder.sh \
+        bash src/homologs/pxclsq_folder.sh \
             {input} \
             fa \
             {output} \
@@ -311,7 +311,7 @@ rule homologs_round2_raxmlng:
     threads: MAX_THREADS
     shell:
         """
-        bash src/raxmlng_folder.sh \
+        bash src/homologs/raxmlng_folder.sh \
             {input} \
             fa \
             {output} \
@@ -485,7 +485,7 @@ rule homologs_refine1:
     conda: "homologs.yml"
     shell:
         """
-        bash src/tree_to_fasta.sh \
+        python2.7 src/homologs/tree_to_fasta.py \
             {input.pep} \
             {input.in_dir} \
             tre \
@@ -493,7 +493,7 @@ rule homologs_refine1:
             fa \
         2> {log} 1>&2
 
-        python2.7 src/refine_alignments2.py \
+        python2.7 src/homologs/refine_alignments2.py \
             {HOMOLOGS_REFINE1} \
             fa \
             {input.cds} \
@@ -518,7 +518,7 @@ rule homologs_refine2:
         cp {input.in_dir}/*.maxalign.fa {output}
         rename.ul .maxalign.fa .fa {output}/*.maxalign.fa
 
-        python2.7 src/refine_alignments2.py \
+        python2.7 src/homologs/refine_alignments2.py \
             {HOMOLOGS_REFINE2} \
             fa \
             {input.cds} \

@@ -10,6 +10,10 @@ import os
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 from Bio import Phylo
 
+def fix_dir_path(path):
+    """Add a / at the end if necessary"""
+    return path if path.endswith("/") else path + "/"
+
 
 def get_leafs(filein):
     """Just get the leaf names of a tree"""
@@ -59,18 +63,13 @@ if __name__ == '__main__':
         )
 
     FASTA = sys.argv[1]
-    IN_DIR = sys.argv[2]
+    IN_DIR = fix_dir_path(sys.argv[2])
     IN_EXT = sys.argv[3]
-    OUT_DIR = sys.argv[4]
+    OUT_DIR = fix_dir_path(sys.argv[4])
     OUT_EXT = sys.argv[5]
 
     if not os.path.exists(OUT_DIR):
         os.makedirs(OUT_DIR)
-
-    if not IN_DIR.endswith("/"):
-        IN_DIR += "/"
-    if not OUT_DIR.endswith("/"):
-        OUT_DIR += "/"
 
     FASTA_DICT = fasta_to_dict(FASTA)
 

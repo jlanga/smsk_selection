@@ -58,40 +58,71 @@ rule tree_supermatrix:
         2> {log} 1>&2
         """
 
-# rule tree_phyx_trim_cols:
-#     input: TREE + "supermatrix.fa"
-#     output: TREE + "supermatrix_hq.fa"
-#     log: TREE + "supermatrix_hq.log"
-#     benchmark: TREE + "supermatrix_hq.bmk"
-#     params: params["tree"]["min_occupation"]  # proportion of data that is required to be present
-#     shell:
-#         """
-#         ./bin/pxclsq \
-#             --seqf {input} \
-#             --outf {output} \
-#             --prop {params} \
-#         2> {log} 1>&2
-#         """
+rule tree_phyx_trim_cols:
+    input: TREE + "supermatrix.fa"
+    output: TREE + "supermatrix_hq.fa"
+    log: TREE + "supermatrix_hq.log"
+    benchmark: TREE + "supermatrix_hq.bmk"
+    params: params["tree"]["min_occupation"]  # proportion of data that is required to be present
+    shell:
+        """
+        ./bin/pxclsq \
+            --seqf {input} \
+            --outf {output} \
+            --prop {params} \
+        2> {log} 1>&2
+        """
 
 
 
-# rule tree_modeltest:
-#     input: TREE + "supermatrix.fa"
-#     output: TREE + "supe"
+rule tree_modeltest:
+    input: TREE + "supermatrix_hq.fa"
+    output: TREE + "supermatrix_hq.modeltest-ng.out"
+    params: TREE + "supermatrix_hq.modeltest-ng"
+    benchmark: TREE + "supermatrix_hq.modeltest-ng.bmk"
+    threads: MAX_THREADS
+    conda: "tree.yml"
+    shell:
+        """
+        modeltest-ng \
+            --datatype nt \
+            --input {input} \
+            --output {params} \
+            --processes {threads} \
+            --rngseed 1 \
+        2> /dev/null 1>&2
+        """
 
 
-# rule tree_raxml:
-#     input: TREE + "supermatrix.fa"
-#     output: TREE + "tree_raxml.nwk"
-#     threads: MAX_THREADS
-#     log: TREE + "raxml.log"
-#     benchmark: TREE + "raxml.bmk"
-#     conda: "tree.yml"
-#     shell:
-#         """
-#         raxmlHPC-PTHREADS \
+rule tree_raxmlng:
+    input: 
+        fasta = TREE + "supermatrix_hq.fa",
+        model = TREE + "supermatrix_hq.modeltest-ng.out"
+    output: TREE + "tree_raxml.nwk"
+    log: TREE + "supermatrix_hq.raxmlmg.log"
+    benchmark: TREE + "supermatrix_hq.raxmlmg.bmk"
+    threads: MAX_THREADS
+    params:
+        bootstraps = params["tree"]["raxml"]["bootstrap_replicates"],
+        prefix = TREE + "supermatrix_hq.raxml"
+    conda: "tree.yml"
+    shell:
+        """
+        model=$(grep raxml-ng {input.model} \
+            | tail -1 \
+            | grep -Eo -- '--model [A-Za-z0-9]+' \
+            | cut -f 2 -d " " \
+        )
 
-#         """
+        raxml-ng \
+            --msa {input.fasta} \
+            --model $model \
+            --bootstrap \
+            --bs-trees {params.bootstraps} \
+            --prefix {params.prefix} \
+            --threads {threads} \
+        2> {log}
+        """
 
 
     # """
@@ -106,4 +137,4 @@ rule tree_supermatrix:
     # """
 
 rule tree:
-    input: TREE + "supermatrix.fa"
+    input: rules.tree_raxmlng.output

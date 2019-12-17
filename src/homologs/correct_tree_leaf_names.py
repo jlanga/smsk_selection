@@ -10,6 +10,12 @@ import re
 
 from Bio import Phylo
 
+# from helpers import fix_dir_path
+
+def fix_dir_path(path):
+    """Add a / at the end if necessary"""
+    return path if path.endswith("/") else path + "/"
+
 def correct_tree_leaf_names(filename_in, filename_out):
     """Correct a single tree
     - Replaces the first _ into @: transition between orothofinder and pdc
@@ -28,18 +34,13 @@ if __name__ == '__main__':
     if len(sys.argv) != 5:
         sys.exit("correct_leaf_names.py in_dir .in_ext out_dir .out_ext")
 
-    IN_DIR = sys.argv[1]
+    IN_DIR = fix_dir_path(sys.argv[1])
     IN_EXT = sys.argv[2]
-    OUT_DIR = sys.argv[3]
+    OUT_DIR = fix_dir_path(sys.argv[3])
     OUT_EXT = sys.argv[4]
 
     if not os.path.exists(OUT_DIR):
         os.makedirs(OUT_DIR)
-
-    if not IN_DIR.endswith("/"):
-        IN_DIR += "/"
-    if not OUT_DIR.endswith("/"):
-        OUT_DIR += "/"
 
     for in_file in os.listdir(IN_DIR):
         if in_file.endswith(IN_EXT):
