@@ -11,20 +11,25 @@ threads=$5
 
 mkdir -p "$out_dir"
 
-for filein in "$in_dir"/*."$in_ext" ; do
+#for filein in "$in_dir"/*."$in_ext" ; do
 
-    cluster_id=$(basename -- "$filein" ."$in_ext")
+#    cluster_id=$(basename -- "$filein" ."$in_ext")
 
-    fileout="$out_dir/${cluster_id}.$out_ext"
+#    fileout="$out_dir/${cluster_id}.$out_ext"
 
-    if [[ -f "$fileout" ]] ; then
+#    if [[ -f "$fileout" ]] ; then
 
-        >&2 echo "$fileout exits. Skipping."
-    
-    else
+#        >&2 echo "$fileout exits. Skipping."
 
-        mafft --amino --auto --thread "$threads" "$filein" > "$fileout"
+#    else
 
-    fi
+#        mafft --amino --auto --maxiterate 1000 --thread "$threads" "$filein" > "$fileout"
 
-done
+#    fi
+
+#done
+
+parallel \
+    --jobs "$threads" \
+    mafft --amino --genafpair --maxiterate 1000 {} ">" "$out_dir"/{/.}."$out_ext" \
+::: "$in_dir"/*."$in_ext"

@@ -91,6 +91,7 @@ rule homologs_round1_mafft:
     log: HOMOLOGS_R1 + "mafft.log"
     benchmark: HOMOLOGS_R1 + "mafft.bmk"
     conda: "homologs.yml"
+    threads: MAX_THREADS
     shell:
         """
         bash src/mafft_folder.sh \
@@ -266,6 +267,7 @@ rule homologs_round2_mafft:
     log: HOMOLOGS_R2 + "mafft.log"
     benchmark: HOMOLOGS_R2 + "mafft.bmk"
     conda: "homologs.yml"
+    threads: MAX_THREADS
     shell:
         """
         bash src/mafft_folder.sh \
