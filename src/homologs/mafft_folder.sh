@@ -17,7 +17,11 @@ run_mafft_conditionally() {
     threads=$2
 
     nseq=$(grep -c ^">" "$file")
-    naminoacids=$("BEGIN{min=0} {if (length($2) > min) min=length($2)} END{print min}")
+    naminoacids=$(
+        seqtk seq "$file" \
+        | paste - - \
+        | awk "BEGIN{min=0} {if (length($2) > min) min=length($2)} END{print min}"
+    )
 
     if [[ $nseq -lt 200 ]] && [[ $naminoacids -lt 2000 ]] ; then
 
