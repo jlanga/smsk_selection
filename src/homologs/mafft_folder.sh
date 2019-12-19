@@ -48,8 +48,8 @@ run_mafft_conditionally() {
 export -f run_mafft_conditionally
 
 parallel \
-    --jobs 1 \
-    run_mafft_conditionally {} "$threads" ">" "$out_dir/{/.}.$out_ext" \
+    --jobs "$threads" \
+    run_mafft_conditionally {} 1 ">" "$out_dir/{/.}.$out_ext" \
 ::: "$in_dir"/*."$in_ext"
 
 # # Second round of dead processes, this time one by one multithreaded
