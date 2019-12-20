@@ -83,7 +83,7 @@ conditional_execution () {
 
     n_seqs=$(grep -c ^">" "$file_in")
 
-    if [[ "$n_seqs" -le 1000 ]] ; then
+    if [[ "$n_seqs" -le 500 ]] ; then
 
         raxml_wrapper "$file_in" "$file_out"
     
