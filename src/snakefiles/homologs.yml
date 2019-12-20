@@ -14,3 +14,4 @@ dependencies:
     - kalign2=2.04
     - t_coffee
     - raxml-ng
+    - fasttree

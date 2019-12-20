@@ -135,11 +135,10 @@ rule homologs_round1_raxmlng:
     threads: MAX_THREADS
     shell:
         """
-        bash src/homologs/raxmlng_folder.sh \
+        bash src/homologs/raxmlng_fasttree_folder.sh \
             {input} \
             fa \
             {output} \
-            nwk \
             {threads} \
         2> {log} 1>&2
         """
@@ -311,11 +310,10 @@ rule homologs_round2_raxmlng:
     threads: MAX_THREADS
     shell:
         """
-        bash src/homologs/raxmlng_folder.sh \
+        bash src/homologs/raxmlng_fasttree_folder.sh \
             {input} \
             fa \
             {output} \
-            nwk \
             {threads} \
         2> {log} 1>&2
         """
