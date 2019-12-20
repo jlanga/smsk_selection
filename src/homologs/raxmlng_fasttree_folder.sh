@@ -68,9 +68,9 @@ fasttree_wrapper() {
 
         fasttree \
             -quiet \
-            -intree "$file_in" \
             -wag \
-            -out "$file_out" 
+            -out "$file_out" \
+            "$file_in"
     
     fi 
 }
