@@ -34,6 +34,10 @@ for filein in "$in_dir"/*."$in_ext" ; do
             "$fileout"-pht \
             10 \
         > "$fileout"
+
+        if [[ ! -s "$fileout" ]]; then
+            rm "$fileout"
+        fi
     
         rm "$fileout"-pht
         

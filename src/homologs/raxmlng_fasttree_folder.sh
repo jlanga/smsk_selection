@@ -45,6 +45,7 @@ raxml_wrapper() {
         1>&2
 
         ln "$file_out_raxml" "$file_out"
+        rm "$prefix_out".raxml.{bestModel,log,mlTrees,rba,startTree}
 
     else 
 
@@ -83,7 +84,7 @@ conditional_execution () {
 
     n_seqs=$(grep -c ^">" "$file_in")
 
-    if [[ "$n_seqs" -le 500 ]] ; then
+    if [[ "$n_seqs" -le 200 ]] ; then
 
         raxml_wrapper "$file_in" "$file_out"
     
