@@ -26,10 +26,17 @@ for filein in "$in_dir"/*."$in_ext" ; do
             --aminoacid \
             --prop "$min_occupancy" \
             --seqf "$filein" \
-            --outf "$fileout" \
+            --outf "$fileout"-pht \
             --verbose \
         1>&2
     
+        python2 src/homologs/trim_alignment_by_lengths.py \
+            "$fileout"-pht \
+            10 \
+        > "$fileout"
+    
+        rm "$fileout"-pht
+        
     fi
 
 done
