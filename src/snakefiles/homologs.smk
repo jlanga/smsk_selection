@@ -126,8 +126,26 @@ rule homologs_round1_pxclsq:
         """
 
 
-rule homologs_round1_raxmlng:
+rule homologs_round1_raxmlng_reduced:
     input: HOMOLOGS_R1 + "pxclsq"
+    output: directory(HOMOLOGS_R1 + "raxmlng_reduced")
+    log: HOMOLOGS_R1 + "raxmlng_reduced.log"
+    benchmark: HOMOLOGS_R1 + "raxmlng_reduced.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/raxmlng_reduce_folder.sh \
+            {input} \
+            fa \
+            {output} \
+            fa \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+rule homologs_round1_raxmlng:
+    input: HOMOLOGS_R1 + "raxmlng_reduced"
     output: directory(HOMOLOGS_R1 + "raxmlng")
     log: HOMOLOGS_R1 + "raxmlng.log"
     benchmark: HOMOLOGS_R1 + "raxmlng.bmk"
@@ -301,8 +319,28 @@ rule homologs_round2_pxclsq:
         """
 
 
-rule homologs_round2_raxmlng:
+rule homologs_round2_raxmlng_reduced:
     input: HOMOLOGS_R2 + "pxclsq"
+    output: directory(HOMOLOGS_R2 + "raxmlng_reduced")
+    log: HOMOLOGS_R2 + "raxmlng_reduced.log"
+    benchmark: HOMOLOGS_R2 + "raxmlng_reduced.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/raxmlng_reduce_folder.sh \
+            {input} \
+            fa \
+            {output} \
+            fa \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+
+rule homologs_round2_raxmlng:
+    input: HOMOLOGS_R2 + "raxmlng_reduced"
     output: directory(HOMOLOGS_R2 + "raxmlng")
     log: HOMOLOGS_R2 + "raxmlng.log"
     benchmark: HOMOLOGS_R2 + "raxmlng.bmk"

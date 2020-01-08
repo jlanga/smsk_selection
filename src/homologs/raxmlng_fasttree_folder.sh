@@ -32,8 +32,6 @@ raxml_wrapper() {
     
     elif [[ $(grep -c ^">" "$file_in") -ge 4 ]] ; then
 
-        raxml-ng --check --msa "$file_in" --model WAG
-
         raxml-ng \
             --msa "$file_in" \
             --msa-format FASTA \
