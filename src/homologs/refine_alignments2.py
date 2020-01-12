@@ -200,7 +200,7 @@ if __name__ == '__main__':
             "ERROR: Incorrect number of parameters: \n" + \
             "python refine_alignments.py indir in_extension all.cds cores\n"
         )
-        exit(1)
+        sys.exit(1)
 
     IN_DIR = sys.argv[1]
     IN_EXT = sys.argv[2]

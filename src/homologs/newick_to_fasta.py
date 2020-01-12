@@ -15,7 +15,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 6:
         sys.stderr.write(
             "python2 newick_to_fasta.py tree.nwk in.cds in.pep out.cds out.pep")
-        exit(-1)
+        sys.exit(-1)
 
     # Parse arguments
     TREE_FN = sys.argv[1]

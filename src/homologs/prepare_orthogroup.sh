@@ -18,7 +18,7 @@ ext_out=$5
 
 mkdir -p "$dir_out"
 
-for alignment_file in ${dir_in}/*${ext_in}; do
+for alignment_file in "$dir_in"/*"{ext_in}"; do
     
     name=$(basename "${alignment_file}")
     cluster_id=${name%%.*}

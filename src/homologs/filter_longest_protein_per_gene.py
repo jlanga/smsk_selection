@@ -8,7 +8,7 @@ import sys
 from Bio import SeqIO
 
 if len(sys.argv) != 3:
-    exit(
+    sys.exit(
         """ERROR!: Incorrect number of arguments!
         Usage: python3 filter_longest_protein_per_gene.py FASTA_OUT FASTA_IN
         - is allowed for /dev/stdin or /dev/stdout
