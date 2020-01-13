@@ -232,18 +232,20 @@ rule homologs_round1_cut_internal_long_branches:
     log: HOMOLOGS_R1 + "cutted_internal_long_branches.log"
     benchmark: HOMOLOGS_R1 + "cutted_internal_long_branches.bmk"
     conda: "homologs.yml"
+    threads: MAX_THREADS
     shell:
         """
-        mkdir -p {output}
+        mkdir -p {output} 2> {log} 1>&2
         
-        # Find those with less than 4 sequences
-        find {input} -name "*.mm" \
+        # Find those with 4 or more sequences
+        (find {input} -name "*.mm" \
         | sort -V \
-        | parallel --tag --keep-order \
+        | parallel --jobs {threads} --tag --keep-order \
             python2 src/homologs/extract_leafs.py "<" {{}} "|" wc -l \
         | awk '$2 >= 4' \
         | cut -f 1 \
-        | parallel ln --symbolic --relative {{}} {output}
+        | parallel --jobs {threads} ln --symbolic --relative {{}} {output} \
+        ) 2>> {log} 1>&2
 
         # Run the trimming method
         python2.7 src/pdc2/scripts/cut_long_internal_branches.py \
@@ -252,7 +254,7 @@ rule homologs_round1_cut_internal_long_branches:
             {params.internal_branch_cutoff} \
             {params.minimum_taxa} \
             {output} \
-        2> {log} 1>&2
+        2>> {log} 1>&2
 
         find {output} -name "*.mm" -delete
         """
@@ -437,18 +439,20 @@ rule homologs_round2_cut_internal_long_branches:
     log: HOMOLOGS_R2 + "cutted_internal_long_branches.log"
     benchmark: HOMOLOGS_R2 + "cutted_internal_long_branches.bmk"
     conda: "homologs.yml"
+    threads: MAX_THREADS
     shell:
         """
-        mkdir -p {output} 
+        mkdir -p {output} 2> {log} 1>&2
         
         # Find those with 4 or more sequences
-        find {input} -name "*.mm" \
+        (find {input} -name "*.mm" \
         | sort -V \
-        | parallel --tag --keep-order \
+        | parallel --jobs {threads} --tag --keep-order \
             python2 src/homologs/extract_leafs.py "<" {{}} "|" wc -l \
         | awk '$2 >= 4' \
         | cut -f 1 \
-        | parallel ln --symbolic --relative {{}} {output}
+        | parallel --jobs {threads} ln --symbolic --relative {{}} {output} \
+        ) 2>> {log} 1>&2
 
         # Run the trimming method
         python2.7 src/pdc2/scripts/cut_long_internal_branches.py \
@@ -457,7 +461,7 @@ rule homologs_round2_cut_internal_long_branches:
             {params.internal_branch_cutoff} \
             {params.minimum_taxa} \
             {output} \
-        2> {log} 1>&2
+        2>> {log} 1>&2
 
         find {output} -name "*.mm" -delete
         """
