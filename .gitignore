@@ -8,3 +8,4 @@ data/downloads/*
 src/pdc3/scripts/*.pyc
 src/pdc3/scripts/__pycache__/
 bin/px*
+data/busco
