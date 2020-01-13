@@ -234,15 +234,27 @@ rule homologs_round1_cut_internal_long_branches:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output} 
+        mkdir -p {output}
         
+        # Find those with less than 4 sequences
+        find {input} -name "*.mm" \
+        | sort -V \
+        | parallel --tag --keep-order \
+            python2 src/homologs/extract_leafs.py "<" {{}} "|" wc -l \
+        | awk '$2 >= 4' \
+        | cut -f 1 \
+        | parallel ln --symbolic --relative {{}} {output}
+
+        # Run the trimming method
         python2.7 src/pdc2/scripts/cut_long_internal_branches.py \
-            {input} \
+            {output} \
             .mm \
             {params.internal_branch_cutoff} \
             {params.minimum_taxa} \
             {output} \
         2> {log} 1>&2
+
+        find {output} -name "*.mm" -delete
         """
 
 
@@ -429,13 +441,25 @@ rule homologs_round2_cut_internal_long_branches:
         """
         mkdir -p {output} 
         
+        # Find those with 4 or more sequences
+        find {input} -name "*.mm" \
+        | sort -V \
+        | parallel --tag --keep-order \
+            python2 src/homologs/extract_leafs.py "<" {{}} "|" wc -l \
+        | awk '$2 >= 4' \
+        | cut -f 1 \
+        | parallel ln --symbolic --relative {{}} {output}
+
+        # Run the trimming method
         python2.7 src/pdc2/scripts/cut_long_internal_branches.py \
-            {input} \
+            {output} \
             .mm \
             {params.internal_branch_cutoff} \
             {params.minimum_taxa} \
             {output} \
         2> {log} 1>&2
+
+        find {output} -name "*.mm" -delete
         """
 
 
