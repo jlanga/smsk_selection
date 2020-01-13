@@ -178,13 +178,14 @@ rule homologs_round1_trim_tips:
         cp -R {input}/*.bestTree {output} 2> {log} 1>&2
         rename.ul .raxml.bestTree .tree {output}/*.bestTree
 
-
         python2.7 src/pdc2/scripts/trim_tips.py \
             {output} \
             .tree \
             {params.relative_cutoff} \
             {params.absolute_cutoff} \
         2>> {log} 1>&2
+
+        find {output} -name "*.tree" -delete
         """
 
 
