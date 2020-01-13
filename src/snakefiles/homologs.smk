@@ -216,7 +216,8 @@ rule homologs_round1_mask_tips_by_taxon_id:
             {params.mask_paraphyletic} \
         2> {log} 1>&2
 
-        find {output} -name "*.aln-cln" -name "*.tree.tt" -delete
+        find {output} -name "*.aln-cln" -delete
+        find {output} -name "*.tree.tt" -delete
         """
 
 
@@ -394,6 +395,8 @@ rule homologs_round2_trim_tips:
             {params.relative_cutoff} \
             {params.absolute_cutoff} \
         2>> {log} 1>&2
+
+        find {output} -name "*.tree" -delete
         """
 
 
@@ -423,7 +426,8 @@ rule homologs_round2_mask_tips_by_taxon_id:
             {params.mask_paraphyletic} \
         2> {log} 1>&2
 
-        find {output} -name "*.aln-cln" -name "*.tree.tt" -delete
+        find {output} -name "*.aln-cln" -delete
+        find {output} -name "*.tree.tt" -delete
         """
 
 
