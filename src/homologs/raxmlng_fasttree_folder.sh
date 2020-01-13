@@ -80,17 +80,17 @@ conditional_execution () {
     file_in=$1
     file_out=$2
 
-    n_seqs=$(grep -c ^">" "$file_in")
+    # n_seqs=$(grep -c ^">" "$file_in")
 
-    if [[ "$n_seqs" -le 200 ]] ; then
+    # if [[ "$n_seqs" -le 200 ]] ; then
 
         raxml_wrapper "$file_in" "$file_out"
     
-    else 
+    # else 
 
-        fasttree_wrapper "$file_in" "$file_out"
+    #     fasttree_wrapper "$file_in" "$file_out"
 
-    fi
+    # fi
 
 }
 
