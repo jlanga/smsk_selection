@@ -1,9 +1,9 @@
 rule busco_download:
-    output: BUSCO + "{database}_odb9.tar.gz"
+    output: BUSCO_DB + "{database}_odb9.tar.gz"
     params: "http://busco.ezlab.org/v2/datasets/{database}_odb9.tar.gz"
     conda: "busco.yml"
-    log: BUSCO + "download_{database}_odb9.log"
-    benchmark: BUSCO + "download_{database}_odb9.bmk"
+    log: BUSCO_DB + "download_{database}_odb9.log"
+    benchmark: BUSCO_DB + "download_{database}_odb9.bmk"
     shell:
         "wget --continue {params} --output-document {output} 2> {log} 1>&2"
 
@@ -11,19 +11,19 @@ rule busco_extract:
     """
     Extract Busco database
     """
-    input: rules.busco_download.output[0]
-    output: directory(BUSCO + "{database}_odb9")
-    log: BUSCO + "{database}_odb9.log"
-    benchmark: BUSCO + "{database}_odb9.bmk"
+    input: BUSCO_DB + "{database}_odb9.tar.gz"
+    output: directory(BUSCO_DB + "{database}_odb9")
+    log: BUSCO_DB + "{database}_odb9.log"
+    benchmark: BUSCO_DB + "{database}_odb9.bmk"
     shell:
         """
-        tar --extract --verbose --file {input} --directory {BUSCO} 2> {log} 1>&2
+        tar --extract --verbose --file {input} --directory {BUSCO_DB} 2> {log} 1>&2
         """
 
 rule busco_run:
     input:
         fasta = RAW + "{species}.pep",
-        db_folder = rules.busco_extract.output[0]
+        db_folder = BUSCO_DB + "{database}_odb9"
     output: directory(BUSCO + "{species}_{database}")
     log: BUSCO + "{species}_{database}.log"
     benchmark: BUSCO + "{species}_{database}.bmk"

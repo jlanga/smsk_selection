@@ -2,6 +2,8 @@
 
 RAW = "results/transcriptome/"
 BUSCO = "results/busco/"
+BUSCO_DB = "data/busco/"
+
 TRANSDECODER = "results/transdecoder/"
 CDHIT = "results/cdhit/"
 
