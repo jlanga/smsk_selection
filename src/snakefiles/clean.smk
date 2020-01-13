@@ -6,4 +6,4 @@ rule clean_raw:
 
 rule clean:
     shell:
-        "rm -rf results/ doc/ "
+        "rm -rf results"
