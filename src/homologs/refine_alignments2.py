@@ -21,6 +21,13 @@ from Bio import SeqIO
 
 def run_tcoffee_mcoffee(filename_in, filename_out):
     """Run t_coffee with the methods in `methods"""
+
+    if os.path.isfile(filename_out):
+        sys.stderr.write("Output {file} exists, skipping".format(
+            file=filename_out
+        ))
+        sys.exit()
+
     methods = ["muscle_msa", "mafftgins_msa", "t_coffee_msa", "kalign_msa"]
     methods_str = " ".join(methods)
     command = (
@@ -37,6 +44,13 @@ def run_tcoffee_mcoffee(filename_in, filename_out):
 
 def run_tcoffee_eval(filename_in, filename_out):
     """Run t_coffee in eval mode"""
+
+    if os.path.isfile(filename_out):
+        sys.stderr.write("Output {file} exists, skipping".format(
+            file=filename_out
+        ))
+        sys.exit()
+
     command = (
         "t_coffee "
         "-infile " + filename_in + " "
@@ -108,6 +122,13 @@ def get_highly_occupied_columns(msa, min_ratio=0.5):
 
 def run_max_align(filename_in, filename_out):
     """Execute maxalign"""
+
+    if os.path.isfile(filename_out):
+        sys.stderr.write("Output {file} exists, skipping".format(
+            file=filename_out
+        ))
+        sys.exit()
+
     maxalign = "perl src/maxalign.pl"
     command = maxalign + " -p " + filename_in + " > " + filename_out
     sys.stderr.write(command + "\n")
@@ -129,6 +150,13 @@ def subset_cds(msa_in, fasta_out, cds_dict):
 
 def run_max_align_cds(filename_in_pep, filename_in_cds, filename_out):
     """Execute maxalign, returning the cds"""
+
+    if os.path.isfile(filename_out):
+        sys.stderr.write("Output {file} exists, skipping".format(
+            file=filename_out
+        ))
+        sys.exit()
+
     maxalign = "perl src/maxalign.pl"
     command = "{maxalign} -p {filein_pep} {filein_cds} > {fileout}".format(
         maxalign=maxalign,
