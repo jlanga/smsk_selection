@@ -569,7 +569,7 @@ rule homologs_refine1:
             {threads} \
         2> {log} 1>&2
 
-        rm -rf *.dnd
+        # rm -rf *.dnd
         """
 
 
@@ -594,7 +594,7 @@ rule homologs_refine2:
             {threads} \
         2> {log} 1>&2
 
-        rm -rf *.dnd
+        # rm -rf *.dnd
         """
 
 

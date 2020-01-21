@@ -130,14 +130,20 @@ def subset_cds(msa_in, fasta_out, cds_dict):
 def run_max_align_cds(filename_in_pep, filename_in_cds, filename_out):
     """Execute maxalign, returning the cds"""
     maxalign = "perl src/maxalign.pl"
-    command = maxalign + " -p " + filename_in_pep + " " + filename_in_cds + " > " + filename_out
+    command = "{maxalign} -p {filein_pep} {filein_cds} > {fileout}".format(
+        maxalign=maxalign,
+        filein_pep=filename_in_pep,
+        filein_cds=filename_in_cds,
+        fileout=filename_out
+    )
     sys.stderr.write(command + "\n")
     os.system(command)
 
 
 def run_pipeline(filename_in, cds_dict):
     """Run the refinement step per file"""
-    orthogroup_id = filename_in.split("/")[-1].split(".")[0]
+    extension_in = "." + filename_in.split(".")[-1]
+    orthogroup_id = filename_in.split("/")[-1].split(extension_in)[0]
     output_folder = "/".join(filename_in.split("/")[0:-1])
 
     run_tcoffee_mcoffee(
@@ -184,7 +190,7 @@ def run_pipeline(filename_in, cds_dict):
         filename_out=output_folder + "/" + orthogroup_id + ".maxalign.cds",
     )
 
-    #os.remove(orthogroup_id + ".dnd")
+    os.remove(orthogroup_id + ".dnd")
 
 
 def run_pipeline_starmap(params):
