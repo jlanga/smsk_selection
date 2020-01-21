@@ -539,15 +539,17 @@ rule homologs_refine1_fasta:
     benchmark: HOMOLOGS_REFINE1 + "refine1_fasta.bmk"
     conda: "homologs.yml"
     shell:
-       """
-       python src/homologs/tree_to_fasta.py \
+        """
+        mkdir -p {output}
+
+        python src/homologs/tree_to_fasta.py \
             {input.in_pep} \
             {input.in_dir} \
             tre \
             {output} \
             fa \
-       2> {log} 1>&2
-       """ 
+        2> {log} 1>&2
+        """ 
 
 
 rule homologs_refine1_tcoffee_align:
@@ -561,6 +563,8 @@ rule homologs_refine1_tcoffee_align:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         find {input.fasta_dir} -name "*.fa" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -584,6 +588,8 @@ rule homologs_refine1_tcoffee_eval:
     threads: MAX_THREADS
     shell:
         """
+        mkdir -p {output}
+
         (find {input.aln_dir} -name "*.aln" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -609,6 +615,8 @@ rule homologs_refine1_tcoffee_filter:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find {input.eval_dir} -name "*.cons" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -633,6 +641,8 @@ rule homologs_refine1_maxalign_pep:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find {input.filter_dir} -name "*.hq_tcoffee" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -655,6 +665,8 @@ rule homologs_refine1_maxaling_subset:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find {input.maxalign_pep} -name "*.maxalign_pep" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -678,6 +690,8 @@ rule homologs_refine1_maxalign_cds:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find results/homologs/refine1/ -name "*.maxalign_pep" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -708,6 +722,8 @@ rule homologs_refine2_fasta:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find {input} -name "*.maxalign_pep" \
         | sort -V \
         | parallel --keep-order cp {{}} {output}/{/.}.fa \
@@ -726,6 +742,8 @@ rule homologs_refine2_tcoffee_align:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         find {input.fasta_dir} -name "*.fa" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -749,6 +767,8 @@ rule homologs_refine2_tcoffee_eval:
     threads: MAX_THREADS
     shell:
         """
+        mkdir -p {output}
+
         (find {input.aln_dir} -name "*.aln" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -774,6 +794,8 @@ rule homologs_refine2_tcoffee_filter:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find {input.eval_dir} -name "*.cons" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -798,6 +820,8 @@ rule homologs_refine2_maxalign_pep:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find {input.filter_dir} -name "*.hq_tcoffee" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -820,6 +844,8 @@ rule homologs_refine2_maxaling_subset:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find {input.maxalign_pep} -name "*.maxalign_pep" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -843,6 +869,8 @@ rule homologs_refine2_maxalign_cds:
     conda: "homologs.yml"
     shell:
         """
+        mkdir -p {output}
+
         (find results/homologs/refine2/ -name "*.maxalign_pep" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
@@ -858,10 +886,5 @@ rule homologs_refine2:
     input:
         maxalign_cds = HOMOLOGS_REFINE2 + "maxalign_cds"
 
-
-
-
-
-
 rule homologs:
-    input: HOMOLOGS_REFINE2 + "fasta"
+    input: HOMOLOGS_REFINE2 + "maxalign_cds"
