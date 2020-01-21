@@ -568,8 +568,6 @@ rule homologs_refine1:
             {input.cds} \
             {threads} \
         2> {log} 1>&2
-
-        # rm -rf *.dnd
         """
 
 
@@ -593,8 +591,6 @@ rule homologs_refine2:
             {input.cds} \
             {threads} \
         2> {log} 1>&2
-
-        # rm -rf *.dnd
         """
 
 
