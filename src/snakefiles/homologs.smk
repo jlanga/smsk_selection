@@ -575,6 +575,8 @@ rule homologs_refine1_tcoffee_align:
                 -outfile {output.aln_dir}/{{/.}}.aln \
                 -quiet \
         2> {log} 1>&2
+
+        rm -rf *.dnd
         """
 
 
@@ -586,6 +588,7 @@ rule homologs_refine1_tcoffee_eval:
     log: HOMOLOGS_REFINE1 + "tcoffee_eval.log"
     benchmark: HOMOLOGS_REFINE1 + "tcofffee_eval.bmk"
     threads: MAX_THREADS
+    conda: "homologs.yml"
     shell:
         """
         mkdir -p {output}
@@ -597,7 +600,7 @@ rule homologs_refine1_tcoffee_eval:
                 -infile {{}} \
                 -evaluate \
                 -output=score_ascii \
-                -outfile {output.eval_dir}/{{/  .}}.cons \
+                -outfile {output.eval_dir}/{{/.}}.cons \
                 -quiet ) \
         2> {log} 1>&2
         """
@@ -621,8 +624,8 @@ rule homologs_refine1_tcoffee_filter:
         | sort -V \
         | parallel --keep-order --jobs {threads} \
             python2.7 src/homologs/filter_tcoffee.py \
-                {input.aln_dir}/{{.}}.aln \
-                {input.eval_dir}/{{.}}.cons \
+                {input.aln_dir}/{{/.}}.aln \
+                {input.eval_dir}/{{/.}}.cons \
                 {output.filter_dir}/{{/.}}.hq_tcoffee \
         ) 2> {log} 1>&2
         """
@@ -653,14 +656,14 @@ rule homologs_refine1_maxalign_pep:
         """
 
 
-rule homologs_refine1_maxaling_subset:
+rule homologs_refine1_maxalign_subset:
     input:
         maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep",
         cds = HOMOLOGS + "all.cds"
     output:
         maxalign_subset = directory(HOMOLOGS_REFINE1 + "maxalign_subset")
-    log: HOMOLOGS_REFINE1 + "subset.log"
-    benchmark: HOMOLOGS_REFINE1 + "subset.bmk"
+    log: HOMOLOGS_REFINE1 + "maxalign_subset.log"
+    benchmark: HOMOLOGS_REFINE1 + "maxalign_subset.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
@@ -670,9 +673,11 @@ rule homologs_refine1_maxaling_subset:
         (find {input.maxalign_pep} -name "*.maxalign_pep" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
-            seqtk subseq \
-                {input.cds} \
-                "<(seqkt seq {{}} | paste - - | cut -f 1 | tr -d ">" ) \
+            seqtk seq {{}} \
+            "|" paste - - \
+            "|" cut -f 1 \
+            "|" tr -d "\>" \
+            "|" seqtk subseq {input.cds} - \
             ">" {output.maxalign_subset}/{{/.}}.subset_cds \
         ) 2>{log} 1>&2
         """
@@ -705,6 +710,7 @@ rule homologs_refine1_maxalign_cds:
 
 rule homologs_refine1:
     input:
+        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep",
         maxalign_cds = HOMOLOGS_REFINE1 + "maxalign_cds"
 
 
@@ -726,7 +732,7 @@ rule homologs_refine2_fasta:
 
         (find {input} -name "*.maxalign_pep" \
         | sort -V \
-        | parallel --keep-order cp {{}} {output}/{/.}.fa \
+        | parallel --keep-order cp {{}} {output}/{{/.}}.fa \
         ) 2> {log} 1>&2
         """ 
 
@@ -754,6 +760,8 @@ rule homologs_refine2_tcoffee_align:
                 -outfile {output.aln_dir}/{{/.}}.aln \
                 -quiet \
         2> {log} 1>&2
+
+        rm -rf *.dnd
         """
 
 
@@ -765,6 +773,7 @@ rule homologs_refine2_tcoffee_eval:
     log: HOMOLOGS_REFINE2 + "tcoffee_eval.log"
     benchmark: HOMOLOGS_REFINE2 + "tcofffee_eval.bmk"
     threads: MAX_THREADS
+    conda: "homologs.yml"
     shell:
         """
         mkdir -p {output}
@@ -776,7 +785,7 @@ rule homologs_refine2_tcoffee_eval:
                 -infile {{}} \
                 -evaluate \
                 -output=score_ascii \
-                -outfile {output.eval_dir}/{{/  .}}.cons \
+                -outfile {output.eval_dir}/{{/.}}.cons \
                 -quiet ) \
         2> {log} 1>&2
         """
@@ -800,8 +809,8 @@ rule homologs_refine2_tcoffee_filter:
         | sort -V \
         | parallel --keep-order --jobs {threads} \
             python2.7 src/homologs/filter_tcoffee.py \
-                {input.aln_dir}/{{.}}.aln \
-                {input.eval_dir}/{{.}}.cons \
+                {input.aln_dir}/{{/.}}.aln \
+                {input.eval_dir}/{{/.}}.cons \
                 {output.filter_dir}/{{/.}}.hq_tcoffee \
         ) 2> {log} 1>&2
         """
@@ -832,7 +841,7 @@ rule homologs_refine2_maxalign_pep:
         """
 
 
-rule homologs_refine2_maxaling_subset:
+rule homologs_refine2_maxalign_subset:
     input:
         maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_pep",
         cds = HOMOLOGS + "all.cds"
@@ -849,9 +858,11 @@ rule homologs_refine2_maxaling_subset:
         (find {input.maxalign_pep} -name "*.maxalign_pep" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
-            seqtk subseq \
-                {input.cds} \
-                "<(seqkt seq {{}} | paste - - | cut -f 1 | tr -d ">" ) \
+            seqtk seq {{}} \
+            "|" paste - - \
+            "|" cut -f 1 \
+            "|" tr -d "\>" \
+            "|" seqtk subseq {input.cds} - \
             ">" {output.maxalign_subset}/{{/.}}.subset_cds \
         ) 2>{log} 1>&2
         """
@@ -884,6 +895,7 @@ rule homologs_refine2_maxalign_cds:
 
 rule homologs_refine2:
     input:
+        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_pep",
         maxalign_cds = HOMOLOGS_REFINE2 + "maxalign_cds"
 
 rule homologs:

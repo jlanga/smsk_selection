@@ -1,11 +1,13 @@
 #!/usr/bin/env python2.7
 
-import os
+'''
+filter_tcoffee.py: submodule to process the alignment and consensus files from
+t_coffee and keep columns with score 9 (maximum)
+'''
+
 import sys
-import multiprocessing as mp
 
 from Bio import AlignIO
-from Bio import SeqIO
 
 
 def parse_scores(filename):
@@ -65,7 +67,9 @@ def get_highly_occupied_columns(msa, min_ratio=0.5):
 
 
 def filter_tcoffee_files(aln_in, cons_in, fasta_out):
-
+    '''Pick the columns that have a score of 9 in 'cons_in', trim them in
+    'aln_in', and store them in 'fasta_out'.
+    '''
     scores = parse_scores(filename=cons_in)
     hq_scores = get_high_score_columns(scores, 9)
     msa = AlignIO.read(
@@ -92,7 +96,7 @@ if __name__ == '__main__':
             "python filter_tcoffee.py tcoffee_aln tcoffee_cons out_aln\n"
         )
         sys.exit(1)
-    
+
     ALN_IN = sys.argv[1]
     CONS_IN = sys.argv[2]
     ALN_OUT = sys.argv[3]
