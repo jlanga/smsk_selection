@@ -573,6 +573,7 @@ rule homologs_refine1_tcoffee_align:
                 -method muscle_msa mafftgins_msa t_coffee_msa kalign_msa \
                 -output=aln \
                 -outfile {output.aln_dir}/{{/.}}.aln \
+                -n_core 1 \
                 -quiet \
         2> {log} 1>&2
 
@@ -601,6 +602,7 @@ rule homologs_refine1_tcoffee_eval:
                 -evaluate \
                 -output=score_ascii \
                 -outfile {output.eval_dir}/{{/.}}.cons \
+                -n_core 1 \
                 -quiet ) \
         2> {log} 1>&2
         """
@@ -758,6 +760,7 @@ rule homologs_refine2_tcoffee_align:
                 -method muscle_msa mafftgins_msa t_coffee_msa kalign_msa \
                 -output=aln \
                 -outfile {output.aln_dir}/{{/.}}.aln \
+                -n_core 1 \
                 -quiet \
         2> {log} 1>&2
 
@@ -786,6 +789,7 @@ rule homologs_refine2_tcoffee_eval:
                 -evaluate \
                 -output=score_ascii \
                 -outfile {output.eval_dir}/{{/.}}.cons \
+                -n_core 1 \
                 -quiet ) \
         2> {log} 1>&2
         """
