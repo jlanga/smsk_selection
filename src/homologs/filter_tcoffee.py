@@ -69,6 +69,8 @@ def get_highly_occupied_columns(msa, min_ratio=0.5):
 def filter_tcoffee_files(aln_in, cons_in, fasta_out):
     '''Pick the columns that have a score of 9 in 'cons_in', trim them in
     'aln_in', and store them in 'fasta_out'.
+
+    If quality is too low, don't write the file.
     '''
     scores = parse_scores(filename=cons_in)
     hq_scores = get_high_score_columns(scores, 9)
@@ -81,11 +83,22 @@ def filter_tcoffee_files(aln_in, cons_in, fasta_out):
     highly_occupied_columns = get_highly_occupied_columns(msa_hq, 0.5)
     msa_vhq = keep_columns(msa_hq, highly_occupied_columns)
 
-    AlignIO.write(
-        alignments=msa_vhq,
-        handle=fasta_out,
-        format="fasta"
-    )
+    if msa_vhq.get_alignment_length() > 0:
+
+        AlignIO.write(
+            alignments=msa_vhq,
+            handle=fasta_out,
+            format="fasta"
+        )
+
+    else:
+
+        sys.stderr.write(
+            "Warning: {fasta_out} won't be written because it will be "
+            "empty".format(
+                fasta_out=fasta_out
+            )
+        )
 
 
 if __name__ == '__main__':
