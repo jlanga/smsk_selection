@@ -95,7 +95,7 @@ def filter_tcoffee_files(aln_in, cons_in, fasta_out):
 
         sys.stderr.write(
             "Warning: {fasta_out} won't be written because it will be "
-            "empty".format(
+            "empty\n".format(
                 fasta_out=fasta_out
             )
         )

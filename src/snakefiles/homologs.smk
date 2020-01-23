@@ -815,12 +815,12 @@ rule homologs_refine2_tcoffee_filter:
         """
         mkdir -p {output}
 
-        (find {input.eval_dir} -name "*.cons" \
+        (find {input.eval_dir} -name "*.aln" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
             python2.7 src/homologs/filter_tcoffee.py \
                 {input.aln_dir}/{{/.}}.aln \
-                {input.eval_dir}/{{/.}}.cons \
+                {input.eval_dir}/{{/.}}.aln \
                 {output.filter_dir}/{{/.}}.hq_tcoffee \
         ) 2> {log} 1>&2
         """
