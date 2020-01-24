@@ -726,8 +726,8 @@ rule homologs_refine2_fasta:
     input:
         HOMOLOGS_REFINE1 + "maxalign_pep",
     output: directory(HOMOLOGS_REFINE2 + "fasta")
-    log: HOMOLOGS_REFINE2 + "refine2_fasta.log"
-    benchmark: HOMOLOGS_REFINE2 + "refine2_fasta.bmk"
+    log: HOMOLOGS_REFINE2 + "fasta.log"
+    benchmark: HOMOLOGS_REFINE2 + "fasta.bmk"
     conda: "homologs.yml"
     shell:
         """
@@ -857,8 +857,8 @@ rule homologs_refine2_maxalign_subset:
         cds = HOMOLOGS + "all.cds"
     output:
         maxalign_subset = directory(HOMOLOGS_REFINE2 + "maxalign_subset")
-    log: HOMOLOGS_REFINE2 + "subset.log"
-    benchmark: HOMOLOGS_REFINE2 + "subset.bmk"
+    log: HOMOLOGS_REFINE2 + "maxalign_subset.log"
+    benchmark: HOMOLOGS_REFINE2 + "maxalign_subset.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
