@@ -2,4 +2,5 @@ species	pep	cds	inout
 amex	data/transcriptomes/amex.fads.pep	data/transcriptomes/amex.fads.cds	IN
 gmor	data/transcriptomes/gmor.fads.pep	data/transcriptomes/gmor.fads.cds	IN
 trur	data/transcriptomes/trur.fads.pep	data/transcriptomes/trur.fads.cds	IN
-drer	data/transcriptomes/drer.fads.pep	data/transcriptomes/drer.fads.cds	OUT
+drer	data/transcriptomes/drer.fads.pep	data/transcriptomes/drer.fads.cds	IN
+hsap	data/transcriptomes/hsap.fads.pep	data/transcriptomes/hsap.fads.cds	OUT

@@ -1,69 +1,100 @@
-rule tree_prepare:
-    input:
-        ok = HOMOLOGS + "refine2.ok",
-        cds = HOMOLOGS + "all.cds"
-    output: touch(TREE + "prepare.ok")
-    log: TREE + "prepare.log"
+rule tree_fourfold_degenerate_sites:
+    """
+    Get codons that are fourfold-degenerate
+    """
+    input: HOMOLOGS_REFINE2 + "maxalign_cds"
+    output: directory(TREE + "fourfold_degenerate_sites")
+    log: TREE + "fourfold_degenerate_sites.log"
+    benchmark: TREE + "fourfold_degenerate_sites.bmk"
+    conda: "tree.yml"
     threads: MAX_THREADS
-    benchmark: TREE + "prepare.bmk"
-    conda: "tree.yml"
     shell:
         """
-        mkdir -p {TREE_ALN}
+        mkdir --parents {output}
 
-        ln --symbolic --relative {HOMOLOGS_REFINE2}*.maxalign.cds {TREE_ALN}
-        #rename.ul .maxalign.cds .aln-cln {TREE_ALN}/*.maxalign.cds
-        """
-
-
-rule tree_extract_4d_sites:
-    input: TREE + "prepare.ok"
-    output: touch(TREE + "extract_4d_sistes.ok")
-    log: TREE + "extract_4d_sistes.log"
-    benchmark: TREE + "extract_4d_sistes.bmk"
-    conda: "tree.yml"
-    shell:
-        """
-        parallel \
+        (find {input} -name "*.fa" -type f \
+        | sort -V \
+        | parallel --keep-order \
             --jobs {threads} \
-            python2.7 src/extract_4d_sites_cds.py \
-                {{.}}.cds \
-                {{.}}.4d.cds \
-        ::: {TREE_ALN}*.maxalign.cds \
-        2> {log}
+            python2.7 src/homologs/extract_4d_sites_cds.py \
+                {input}/{{/.}}.fa \
+                {output}/{{/.}}.fa \
+        ) 2> {log}
+        """
+
+rule tree_supermatrix_prepare:
+    """
+    Strip the transcript id from the sequence names - leave only the species id.
+
+    concatenate_matrices_phyx.py requires the files to be *.aln-cln
+    """
+    input: TREE + "fourfold_degenerate_sites"
+    output: directory(TREE + "supermatrix_prepare")
+    log: TREE + "supermatrix_prepare.log"
+    benchmark: TREE + "supermatrix_prepare.bmk"
+    threads: MAX_THREADS
+    conda: "tree.yml"
+    shell:
+        """
+        mkdir --parent {output}
+
+        (find {input} -name "*.fa" \
+        | sort -V \
+        | parallel \
+            --jobs {threads} \
+            cut -f 1 -d @ \
+                "<" {input}/{{/.}}.fa \
+                ">" {output}/{{/.}}.aln-cln \
+        ) 2> {log} 1>&2
         """
 
 
 
 rule tree_supermatrix:
-    input: TREE + "extract_4d_sistes.ok"
-    output: TREE + "supermatrix.fa"
-    params: TREE + "supermatrix"
+    """
+    Concatenate the alignments in a fasta file and create the partition file for
+    raxml.
+    """
+    input: TREE + "supermatrix_prepare"
+    output:
+        fasta = TREE + "supermatrix.fa",
+        nex = TREE + "supermatrix.nex",
+        model = TREE + "supermatrix.model",
+        phy = TREE + "supermatrix.phy",
+        stats = TREE + "supermatrix_stats.txt"
     log: TREE + "supermatrix.log"
     benchmark: TREE + "supermatrix.bmk"
+    threads: MAX_THREADS
+    params:
+        min_length = params["tree"]["supermatrix"]["min_length"],
+        min_taxa = params["tree"]["supermatrix"]["min_taxa"],
+        output_prefix = TREE + "supermatrix",
+        stats_tmp = TREE + "supermatrix_taxon_occupancy_stats"
     shell:
         """
         PATH="bin:$PATH"
 
-        parallel \
-            --jobs {threads} \
-            cut -f 1 -d @ "<" {{.}}.cds ">" {{.}}.aln-cln \
-        ::: {TREE_ALN}*.4d.cds
-
         python2.7 src/pdc2/scripts/concatenate_matrices_phyx.py \
-            {TREE_ALN} \
-            0 \
-            3 \
-            {params} \
+            {input} \
+            {params.min_length} \
+            {params.min_taxa} \
+            {params.output_prefix} \
         2> {log} 1>&2
+
+        mv {params.stats_tmp} {output.stats}
         """
 
+
 rule tree_phyx_trim_cols:
+    """
+    Remove columns that are not
+    """
     input: TREE + "supermatrix.fa"
     output: TREE + "supermatrix_hq.fa"
     log: TREE + "supermatrix_hq.log"
     benchmark: TREE + "supermatrix_hq.bmk"
-    params: params["tree"]["min_occupation"]  # proportion of data that is required to be present
+    params:
+        params["tree"]["min_occupation"]  # proportion of data that is required to be present
     shell:
         """
         ./bin/pxclsq \
@@ -74,12 +105,12 @@ rule tree_phyx_trim_cols:
         """
 
 
-
 rule tree_modeltest:
     input: TREE + "supermatrix_hq.fa"
     output: TREE + "supermatrix_hq.modeltest-ng.out"
     params: TREE + "supermatrix_hq.modeltest-ng"
-    benchmark: TREE + "supermatrix_hq.modeltest-ng.bmk"
+    log: TREE + "modeltestng.log"
+    benchmark: TREE + "modeltest.bmk"
     threads: MAX_THREADS
     conda: "tree.yml"
     shell:
@@ -98,13 +129,13 @@ rule tree_raxmlng:
     input: 
         fasta = TREE + "supermatrix_hq.fa",
         model = TREE + "supermatrix_hq.modeltest-ng.out"
-    output: TREE + "tree_raxml.nwk"
-    log: TREE + "supermatrix_hq.raxmlmg.log"
-    benchmark: TREE + "supermatrix_hq.raxmlmg.bmk"
+    output: TREE + "supermatrix_hq.raxml.bestTree"
+    log: TREE + "raxmlmg.log"
+    benchmark: TREE + "raxmlmg.bmk"
     threads: MAX_THREADS
     params:
         bootstraps = params["tree"]["raxml"]["bootstrap_replicates"],
-        prefix = TREE + "supermatrix_hq.raxml"
+        prefix = TREE + "supermatrix_hq"
     conda: "tree.yml"
     shell:
         """
@@ -115,13 +146,13 @@ rule tree_raxmlng:
         )
 
         raxml-ng \
+            --all \
             --msa {input.fasta} \
             --model $model \
-            --bootstrap \
             --bs-trees {params.bootstraps} \
             --prefix {params.prefix} \
             --threads {threads} \
-        2> {log}
+        2> {log} 1>&2
         """
 
 

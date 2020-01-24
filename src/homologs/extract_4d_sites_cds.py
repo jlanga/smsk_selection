@@ -81,7 +81,7 @@ def extract_4d_sites(msa):
             for record in msa
         )
         if column_is_4d:
-            msa_degenerated += msa[:, codon_number : codon_number + 3]
+            msa_degenerated += msa[:, codon_number + 2 : codon_number + 3]
     return msa_degenerated
 
 
