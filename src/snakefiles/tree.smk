@@ -102,6 +102,8 @@ rule tree_phyx_trim_cols:
             --outf {output} \
             --prop {params} \
         2> {log} 1>&2
+
+        rm phyx.logfile
         """
 
 
