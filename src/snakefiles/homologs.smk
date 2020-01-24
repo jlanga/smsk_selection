@@ -46,7 +46,7 @@ rule homologs_join_pep:
 
 rule homologs_correct_leafs:
     input: ORTHOFINDER + "orthologues.ok"
-    output: directory(HOMOLOGS + "leafs_corrected")
+    output: directory(HOMOLOGS + "correct_leafs")
     log: HOMOLOGS + "correct_leafs.log"
     benchmark: HOMOLOGS + "correct_leafs.bmk"
     conda: "homologs.yml"
@@ -67,7 +67,7 @@ rule homologs_correct_leafs:
 rule homologs_round1_tree_to_fasta:
     input:
         pep = HOMOLOGS + "all.pep",
-        folder = HOMOLOGS + "leafs_corrected"
+        folder = HOMOLOGS + "correct_leafs"
     output:
         folder = directory(HOMOLOGS_R1 + "fasta")
     log: HOMOLOGS_R1 + "tree_to_fasta.log"
@@ -892,13 +892,13 @@ rule homologs_refine2_maxalign_cds:
         """
         mkdir -p {output}
 
-        (find results/homologs/refine2/ -name "*.maxalign_pep" \
+        (find results/homologs/refine2/ -name "*.fa" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
         perl src/maxalign.pl \
-            -p {input.filter_dir}/{{/.}}.hq_tcoffee \
-            {input.maxalign_subset}/{{/.}}.subset_cds \
-            ">" {output.maxalign_cds}/{{/.}}.maxalign_cds \
+            -p {input.filter_dir}/{{/.}}.fa \
+            {input.maxalign_subset}/{{/.}}.fa \
+            ">" {output.maxalign_cds}/{{/.}}.fa \
         ) 2> {log} 1>&2
         """
 
