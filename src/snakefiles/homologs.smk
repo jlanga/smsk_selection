@@ -821,7 +821,7 @@ rule homologs_refine2_tcoffee_filter:
             python2.7 src/homologs/filter_tcoffee.py \
                 {input.aln_dir}/{{/.}}.aln \
                 {input.eval_dir}/{{/.}}.aln \
-                {output.filter_dir}/{{/.}}.hq_tcoffee \
+                {output.filter_dir}/{{/.}}.fa \
         ) 2> {log} 1>&2
         """
 
@@ -841,12 +841,12 @@ rule homologs_refine2_maxalign_pep:
         """
         mkdir -p {output}
 
-        (find {input.filter_dir} -name "*.hq_tcoffee" \
+        (find {input.filter_dir} -name "*.fa" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
             perl src/maxalign.pl \
-                -p {{.}}.hq_tcoffee \
-                ">" {output.maxalign_pep}/{{/.}}.maxalign_pep \
+                -p {{.}}.fa \
+                ">" {output.maxalign_pep}/{{/.}}.fa \
         ) 2> {log} 1>&2
         """
 
@@ -865,7 +865,7 @@ rule homologs_refine2_maxalign_subset:
         """
         mkdir -p {output}
 
-        (find {input.maxalign_pep} -name "*.maxalign_pep" \
+        (find {input.maxalign_pep} -name "*.fa" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
             seqtk seq {{}} \
@@ -873,7 +873,7 @@ rule homologs_refine2_maxalign_subset:
             "|" cut -f 1 \
             "|" tr -d "\>" \
             "|" seqtk subseq {input.cds} - \
-            ">" {output.maxalign_subset}/{{/.}}.subset_cds \
+            ">" {output.maxalign_subset}/{{/.}}.fa \
         ) 2>{log} 1>&2
         """
 
