@@ -653,14 +653,45 @@ rule homologs_refine1_maxalign_pep:
         | parallel --keep-order --jobs {threads} \
             perl src/maxalign.pl \
                 -p {{.}}.fa \
-                ">" {output.maxalign_pep}/{{/.}}.fa \
+            "|" seqtk seq - \
+            ">" {output.maxalign_pep}/{{/.}}.fa \
         ) 2> {log} 1>&2
+        """
+
+
+rule homologs_refine1_maxalign_long:
+    input:
+        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep"
+    output:
+        maxalign_long = directory(HOMOLOGS_REFINE1 + "maxalign_long")
+    log:
+        HOMOLOGS_REFINE1 + "maxalign_long.log"
+    benchmark:
+        HOMOLOGS_REFINE1 + "maxalign_long.bmk"
+    params:
+        min_length = params["homologs"]["refine"]["min_length"]
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        mkdir -p {output}
+
+        (find {input} -name "*.fa" \
+        | sort -V \
+        | parallel --keep-order --jobs {threads} \
+            bash src/homologs/filter_fasta_by_length.sh \
+                {input}/{{/.}}.fa \
+                {params.min_length} \
+                {output}/{{/.}}.fa \
+        ) 2> {log} 1>&2
+
+        find {output} -size 0 -delete
         """
 
 
 rule homologs_refine1_maxalign_subset:
     input:
-        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep",
+        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_long",
         cds = HOMOLOGS + "all.cds"
     output:
         maxalign_subset = directory(HOMOLOGS_REFINE1 + "maxalign_subset")
@@ -703,9 +734,10 @@ rule homologs_refine1_maxalign_cds:
         (find {input.maxalign_pep} -name "*.fa" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
-        perl src/maxalign.pl \
-            -p {input.filter_dir}/{{/.}}.fa \
-            {input.maxalign_subset}/{{/.}}.fa \
+            perl src/maxalign.pl \
+                -p {input.filter_dir}/{{/.}}.fa \
+                {input.maxalign_subset}/{{/.}}.fa \
+            "|" seqtk seq - \
             ">" {output.maxalign_cds}/{{/.}}.fa \
         ) 2> {log} 1>&2
         """
@@ -846,14 +878,45 @@ rule homologs_refine2_maxalign_pep:
         | parallel --keep-order --jobs {threads} \
             perl src/maxalign.pl \
                 -p {{.}}.fa \
-                ">" {output.maxalign_pep}/{{/.}}.fa \
+            "|" seqtk seq \
+            ">" {output.maxalign_pep}/{{/.}}.fa \
         ) 2> {log} 1>&2
+        """
+
+
+rule homologs_refine2_maxalign_long:
+    input:
+        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_pep"
+    output:
+        maxalign_long = directory(HOMOLOGS_REFINE2 + "maxalign_long")
+    log:
+        HOMOLOGS_REFINE2 + "maxalign_long.log"
+    benchmark:
+        HOMOLOGS_REFINE2 + "maxalign_long.bmk"
+    params:
+        min_length = params["homologs"]["refine"]["min_length"]
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        mkdir -p {output}
+
+        (find {input} -name "*.fa" \
+        | sort -V \
+        | parallel --keep-order --jobs {threads} \
+            bash src/homologs/filter_fasta_by_length.sh \
+                {input}/{{/.}}.fa \
+                {params.min_length} \
+                {output}/{{/.}}.fa \
+        ) 2> {log} 1>&2
+
+        find {output} -size 0 -delete
         """
 
 
 rule homologs_refine2_maxalign_subset:
     input:
-        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_pep",
+        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_long",
         cds = HOMOLOGS + "all.cds"
     output:
         maxalign_subset = directory(HOMOLOGS_REFINE2 + "maxalign_subset")
@@ -909,4 +972,5 @@ rule homologs_refine2:
         maxalign_cds = HOMOLOGS_REFINE2 + "maxalign_cds"
 
 rule homologs:
-    input: HOMOLOGS_REFINE2 + "maxalign_cds"
+    input:
+        rules.homologs_refine2.input

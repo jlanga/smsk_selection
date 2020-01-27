@@ -24,6 +24,8 @@ homologs:
         minimum_taxa: 3
     root_to_tip:
         minimum_ingroup_taxa: 3
+    refine:
+        min_length: 100
 
 tree:
     supermatrix:
