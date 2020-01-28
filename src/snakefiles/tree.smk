@@ -2,7 +2,7 @@ rule tree_fourfold_degenerate_sites:
     """
     Get codons that are fourfold-degenerate
     """
-    input: HOMOLOGS_REFINE2 + "maxalign_long"
+    input: HOMOLOGS_REFINE2 + "maxalign_cds"
     output: directory(TREE + "fourfold_degenerate_sites")
     log: TREE + "fourfold_degenerate_sites.log"
     benchmark: TREE + "fourfold_degenerate_sites.bmk"
