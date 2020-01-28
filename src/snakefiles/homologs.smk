@@ -955,7 +955,7 @@ rule homologs_refine2_maxalign_cds:
         """
         mkdir -p {output}
 
-        (find results/homologs/refine2/ -name "*.fa" \
+        (find {input.filter_dir} -name "*.fa" \
         | sort -V \
         | parallel --keep-order --jobs {threads} \
         perl src/maxalign.pl \
