@@ -19,6 +19,9 @@ addons:
         - libnlopt-dev
         - libnlopt0
         - libarmadillo-dev
+        - libopenmpi-dev
+        - openmpi-bin
+        - wget
 
 cache:
     timeout: 1000
@@ -60,6 +63,11 @@ install: |
     ./configure
     make
     cp px* ../../../bin/
+    popd
+    pushd src/exabayes-1.5/
+    ./configure --enable-mpi
+    make -j 2
+    cp exabayes postProcParam sdsf ../../bin/
     popd
 
 script: |

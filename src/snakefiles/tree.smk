@@ -90,8 +90,11 @@ rule tree_phyx_trim_cols:
     """
     Remove columns that are not
     """
-    input: TREE + "supermatrix.fa"
-    output: TREE + "supermatrix_hq.fa"
+    input:
+        fasta = TREE + "supermatrix.fa"
+    output:
+        fasta = TREE + "supermatrix_hq.fa",
+        phy = TREE + "supermatrix_hq.phy"
     log: TREE + "supermatrix_hq.log"
     benchmark: TREE + "supermatrix_hq.bmk"
     params:
@@ -104,6 +107,11 @@ rule tree_phyx_trim_cols:
             --outf {output} \
             --prop {params} \
         2> {log} 1>&2
+
+        python2.7 src/homologs/fasta_to_phy.py \
+        < {output.fasta} \
+        > {output.phy} \
+        2>> {log}
 
         rm phyx.logfile
         """
@@ -182,16 +190,70 @@ ENDOFTEXT
         """
 
 
-    # """
-    # exabayes \
-    #     -f {input.phy} \
-    #     -s 12345 \
-    #     -n exabayes \
-    #     .m DNA \
-    #     -z \
-    #     -w {TREE} \
-    #     -C 
-    # """
+rule tree_exabayes:
+    input:
+        config_file = TREE + "exabayes_config.txt",
+        phy = TREE + "supermatrix_hq.phy",
+        tree = TREE + "supermatrix_hq.raxml.bestTree"
+    output:
+        directory(TREE + "exabayes")
+    log: TREE + "exabayes.log"
+    benchmark: TREE + "exabayes.bmk"
+    conda: "tree.yml"
+    threads: params["tree"]["exabayes"]["threads"]
+    params:
+        exabayes = params["tree"]["executables"]["exabayes"]
+    shell:
+        """
+        mkdir -p {output}
+
+        {params.exabayes} \
+            -f {input.phy} \
+            -s 12345 \
+            -n txt \
+            -t {input.tree} \
+            -m DNA \
+            -T {threads} \
+            -c {input.config_file} \
+            -w {output} \
+        2> {log} 1>&2
+        """
+
+
+rule tree_exabayes_sdsf:
+    input: TREE + "exabayes"
+    output: TREE + "exabayes_sdsf.txt"
+    log: TREE + "exabayes_sdsf.log"
+    benchmark: TREE + "exabayes_sdsf.bmk"
+    conda: "tree.yml"
+    params:
+        sdsf = params["tree"]["executables"]["sdsf"]
+    shell:
+        """
+        {params.sdsf} \
+            -f $(find {input} -name "Exabayes_topologies.run*") \
+        > {output} 2> {log}
+        """
+
+rule tree_exabayes_postprocparam:
+    input: TREE + "exabayes"
+    output: TREE + "exabayes_postprocparam.txt"
+    log: TREE + "exabayes_postprocparam.log"
+    benchmark: TREE + "exabayes_postprocparam.bmk"
+    conda: "tree.yml"
+    params:
+        postprocparam = params["tree"]["executables"]["postprocparam"]
+    shell:
+        """
+        {params.postProcParam} \
+            -n txt \
+            -f $(find {input} -name "Exabayes_parameters.run*") \
+        2> {log} 1>&2
+
+        mv ExaBayes_parameterStatistics.test {output}
+        """
+
+
 
 rule tree:
     input: rules.tree_raxmlng.output

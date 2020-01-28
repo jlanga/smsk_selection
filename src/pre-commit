@@ -50,7 +50,11 @@ do_shellcheck(){
     shellcheck --version
 
     # Check all files with a bash shebang
-    grep -rl '^#!/.*sh' src  | xargs shellcheck
+    find src \
+        -name "*.sh" \
+        -not -path "src/exabayes-1.5/*" \
+        -not -path "src/phyx-1.01/*" \
+    | xargs shellcheck
 }
 
 do_yamllint(){
