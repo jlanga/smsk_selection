@@ -230,10 +230,11 @@ rule tree_exabayes_sdsf:
         sdsf = params["tree"]["executables"]["sdsf"]
     shell:
         """
-        {params.sdsf} \
-            -f $(find {input} -name "Exabayes_topologies.run*") \
-        > {output} 2> {log}
+        files=$(find {input} -name "ExaBayes_topologies.run*")
+
+        {params.sdsf} -f $files > {output} 2> {log}
         """
+
 
 rule tree_exabayes_postprocparam:
     input: TREE + "exabayes"
@@ -245,12 +246,12 @@ rule tree_exabayes_postprocparam:
         postprocparam = params["tree"]["executables"]["postprocparam"]
     shell:
         """
-        {params.postProcParam} \
-            -n txt \
-            -f $(find {input} -name "Exabayes_parameters.run*") \
+        files=$(find {input} -name "ExaBayes_parameters.run*")
+
+        {params.postprocparam} -n txt -f $files \
         2> {log} 1>&2
 
-        mv ExaBayes_parameterStatistics.test {output}
+        mv ExaBayes_parameterStatistics.txt {output}
         """
 
 
