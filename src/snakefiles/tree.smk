@@ -159,6 +159,28 @@ rule tree_raxmlng:
         2> {log} 1>&2
         """
 
+rule tree_exabayes_config:
+    output: TREE + "exabayes_config.txt"
+    log: TREE + "exabayes_config.log"
+    benchmark: TREE + "exabayes_config.bmk"
+    conda: "tree.yml"
+    params:
+        mcmc_runs = params["tree"]["exabayes"]["mcmc_runs"],
+        coupled_chains = params["tree"]["exabayes"]["coupled_chains"],
+        generations = params["tree"]["exabayes"]["generations"],
+        sampling_frequency = params["tree"]["exabayes"]["sampling_frequency"]
+    shell:
+        """
+        cat > {output} <<ENDOFTEXT
+begin RUN;
+    numRuns {params.mcmc_runs}
+    numGen {params.generations}
+    samplingFreq {params.sampling_frequency}
+    numCoupledChains {params.coupled_chains}
+end;
+ENDOFTEXT
+        """
+
 
     # """
     # exabayes \

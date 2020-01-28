@@ -35,6 +35,12 @@ tree:
     raxml:
         threads: 1
         bootstrap_replicates: 1000
+    exabayes:
+        executable: "./bin/exabayes"
+        mcmc_runs: 4
+        coupled_chains: 3
+        generations: 1000000
+        sampling_frequency: 500
 
 fastcodeml:
     maximizer: 22
