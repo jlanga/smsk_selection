@@ -256,4 +256,6 @@ rule tree_exabayes_postprocparam:
 
 
 rule tree:
-    input: rules.tree_raxmlng.output
+    input:
+        TREE + "exabayes_sdsf.txt",
+        TREE + "exabayes_postprocparam.txt"
