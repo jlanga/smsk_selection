@@ -3,87 +3,106 @@
 """extract_4d_sites_cds.py
 
 Script to extract from a fasta file the 4-fold degenerate sites.
-
-Relies on functions described in the Biopython cookbook:
-https://biopython.org/wiki/Degenerated_Codons
 """
 
 import sys
 
-from Bio.Data.CodonTable import unambiguous_dna_by_id
-from Bio import AlignIO
+from Bio import \
+    AlignIO, \
+    Seq
 
 
-def altcodons(codon, table):
-    """List codons that code for the same aminonacid / are also stop.
-
-    @param codon
-    @table code table id
-    @return list of codons
-
+def get_codon_dict():
     """
-    tab = unambiguous_dna_by_id[table]
-
-    if codon in tab.stop_codons:
-        return tab.stop_codons
-
-    try:
-        aminoacid = tab.forward_table[codon]
-    except KeyError:
-        return []
-
-    return [
-        key for (key, value) in tab.forward_table.items()
-        if value == aminoacid and key[0] == codon[0] and key[1] == codon[1]
-    ]
-
-
-def degeneration(codon, table):
-    """Determine how many codons code for the same amino acid / are also stop
-
-    @param codon the codon
-    @param table code table id
-    @param the number of codons also coding for the amino acid codon codes for
+    Compose the codon to aminoacid dict: dict["AAA"] = "K"
     """
-    return len(altcodons(codon, table))
+    codon_dict = {}
+    bases = "ACGT"
+    for base1 in bases:
+        for base2 in bases:
+            for base3 in bases:
+                codon = base1 + base2 + base3
+                codon_dict[codon] = Seq.translate(codon, table="Standard")
+    return codon_dict
 
 
-def is_x_degenerated(x_degeneracy, codon, table):
-    """Determine if codon is x-fold degenerated.
+def get_fourfold_degenerate_list():
+    """Get the list of fourfold degenerate codons"""
+    fourfold_degenerate_codons = []
+    codon_dict = get_codon_dict()
+    for codon, aminoacid in codon_dict.items():
+        first_two = codon[0:2]
+        change = False
+        for third_base in "ACGT":
+            if Seq.translate(first_two + third_base) != aminoacid:
+                change = True
+        if change is False:
+            fourfold_degenerate_codons.append(codon)
+    return fourfold_degenerate_codons
 
-    @param codon the codon
-    @param table code table id
-    @param true if x <= the degeneration of the codon
+
+# 4d sites are:
+# ACN -> T,
+# CCN -> P, CGN -> R, CTN -> L
+# GCN -> A, GGN -> G, GTN -> V
+# TCN -> S
+# The first two letters indicate what to search for
+
+
+def extract_fourfold_degenerate_sites(alignment):
     """
-    return x_degeneracy <= len(altcodons(codon, table))
+    Extract the fourfold degenerate sites from a CDS alignment.
 
+    4d sites are the third base of a codon, of codons such that
+    any change in that base produce the same aminoacid
 
-def is_4d_or_gap(codon):
-    """Check if the codon is 4d or a gap '---'"""
-    if str(codon) == '---' or is_x_degenerated(4, codon, 1):
-        return True
-    return False
+    Such codons are:
+    ACN -> T,
+    CCN -> P, CGN -> R, CTN -> L
+    GCN -> A, GGN -> G, GTN -> V
+    TCN -> S
 
-
-
-def extract_4d_sites(msa):
-    """Subset the columns that are 4-fold degenerate sites
-
-    @param msa the multiple sequence alignment
-    @param the slice of the msa where all the columns are 4-fold degenerate sites
+    It is enough to check the first two bases to know if a codon is degenerate
     """
-    nt_length = msa.get_alignment_length()
-    msa_degenerated = msa[:, :0]
 
-    for codon_number in range(0, nt_length, 3):
-        column_is_4d = all(
-            is_4d_or_gap(str(record.seq[codon_number:codon_number+3]))
-            for record in msa
+    # Initialize data
+    degenerated_codons = set(  # Let gaps pass
+        ["AC", "CC", "CG", "CT", "GC", "GG", "GT", "TC", '--']
+    )
+
+    n_columns = alignment.get_alignment_length()
+    if n_columns % 3 != 0:
+        sys.stderr.write(
+            "ERROR: "
+            "Number of columns in alignment is not multiple of three. "
+            "I need codons."
         )
-        if column_is_4d:
-            msa_degenerated += msa[:, codon_number + 2 : codon_number + 3]
-    return msa_degenerated
+        sys.exit(1)
+    n_codons = int(n_columns / 3)
+    n_sequences = len(alignment)
 
+    output_alignment = alignment[:, :0]  # Just sequence names
+
+    for codon_index in range(n_codons):
+
+        # Get column
+        codon_column = [
+            str(alignment[sequence_index][3 * codon_index : 3 * codon_index + 3].seq)
+            for sequence_index in range(n_sequences)
+        ]
+
+        # Get the first two bases, since they determine if they are degenerate
+        two_bases_set = set(codon[0:2] for codon in codon_column)
+
+        # Check that all are degenerate or gap
+        if not all(two_bases in degenerated_codons for two_bases in two_bases_set):
+            continue
+
+        # Check that they are the same two start bases or a gap
+        if len(two_bases_set) == 1 or (len(two_bases_set) == 2 and '--' in two_bases_set):
+            output_alignment += alignment[:, 3*codon_index + 2 : 3 * codon_index + 3]
+
+    return output_alignment
 
 
 if __name__ == '__main__':
@@ -96,7 +115,8 @@ if __name__ == '__main__':
 
     MSA_IN = AlignIO.read(handle=FASTA_IN, format="fasta")
 
-    MSA_4D = extract_4d_sites(MSA_IN)
+    MSA_4D = extract_fourfold_degenerate_sites(MSA_IN)
+
     if MSA_4D.get_alignment_length() > 0:
         AlignIO.write(alignments=MSA_4D, handle=FASTA_OUT, format="fasta")
     else:

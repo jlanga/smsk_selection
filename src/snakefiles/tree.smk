@@ -70,6 +70,7 @@ rule tree_supermatrix:
         min_taxa = params["tree"]["supermatrix"]["min_taxa"],
         output_prefix = TREE + "supermatrix",
         stats_tmp = TREE + "supermatrix_taxon_occupancy_stats"
+    conda: "tree.yml"
     shell:
         """
         PATH="bin:$PATH"
@@ -95,6 +96,7 @@ rule tree_phyx_trim_cols:
     benchmark: TREE + "supermatrix_hq.bmk"
     params:
         params["tree"]["min_occupation"]  # proportion of data that is required to be present
+    conda: "tree.yml"
     shell:
         """
         ./bin/pxclsq \
@@ -134,7 +136,7 @@ rule tree_raxmlng:
     output: TREE + "supermatrix_hq.raxml.bestTree"
     log: TREE + "raxmlmg.log"
     benchmark: TREE + "raxmlmg.bmk"
-    threads: MAX_THREADS
+    threads: params["tree"]["raxml"]["threads"]
     params:
         bootstraps = params["tree"]["raxml"]["bootstrap_replicates"],
         prefix = TREE + "supermatrix_hq"

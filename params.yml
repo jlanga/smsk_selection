@@ -29,10 +29,11 @@ homologs:
 
 tree:
     supermatrix:
-        min_taxa: 3  # Raxml requires at least 4
-        min_length: 10  # 100 if 4d sites, 300 for codons, 100 for aa
+        min_taxa: 4  # Raxml requires at least 4
+        min_length: 0  # 0 if 4d sites, 300 for codons, 100 for aa
     min_occupation: 0.5
     raxml:
+        threads: 1
         bootstrap_replicates: 1000
 
 fastcodeml:
