@@ -577,7 +577,8 @@ rule homologs_refine1_tcoffee_align:
                 -quiet \
         2> {log} 1>&2
 
-        rm -rf *.dnd
+        rm -rf *.dnd 2>>{log} 1>&2
+        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
         """
 
 
@@ -605,6 +606,8 @@ rule homologs_refine1_tcoffee_eval:
                 -n_core 1 \
                 -quiet "||" true ) \
         2> {log} 1>&2
+
+        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
         """
 
 
@@ -797,7 +800,8 @@ rule homologs_refine2_tcoffee_align:
                 -quiet \
         2> {log} 1>&2
 
-        rm -rf *.dnd
+        rm -rf *.dnd 2>> {log} 1>&2
+        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
         """
 
 
@@ -830,6 +834,8 @@ rule homologs_refine2_tcoffee_eval:
                 -n_core 1 \
                 -quiet "||" true ) \
         2> {log} 1>&2
+
+        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
         """
 
 
