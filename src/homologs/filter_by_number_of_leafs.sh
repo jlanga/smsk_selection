@@ -7,7 +7,7 @@ filter_by_number_of_leafs() {
     file_out=$2
     min_leafs=$3
 
-    n_leafs=$(python2.7 src/homologs/count_leafs.py < "$file_in")
+    n_leafs=$(python2.7 src/homologs/extract_leafs.py < "$file_in" | wc -l)
 
     if [ "$n_leafs" -ge "$min_leafs" ] ; then
         ln "$file_in" "$file_out"

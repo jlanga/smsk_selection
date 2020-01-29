@@ -545,16 +545,10 @@ rule homologs_refine1_tcoffee_align:
         """
         mkdir -p {output}
 
-        find {input.fasta_dir} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            t_coffee \
-                {{}} \
-                -method muscle_msa mafftgins_msa t_coffee_msa kalign_msa \
-                -output=aln \
-                -outfile {output.aln_dir}/{{/.}}.aln \
-                -n_core 1 \
-                -quiet \
+        bash src/homologs/tcoffee_align_folder.sh \
+            {input} fa \
+            {output} aln \
+            {threads} \
         2> {log} 1>&2
 
         rm -rf *.dnd 2>>{log} 1>&2
@@ -573,18 +567,10 @@ rule homologs_refine1_tcoffee_eval:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.aln_dir} -name "*.aln" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            t_coffee \
-                -infile {{}} \
-                -evaluate \
-                -output=score_ascii \
-                -outfile {output.eval_dir}/{{/.}}.aln \
-                -n_core 1 \
-                -quiet "||" true ) \
+        bash src/homologs/tcoffee_eval_folder.sh \
+            {input} aln \
+            {output} aln \
+            {threads} \
         2> {log} 1>&2
 
         bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
@@ -603,16 +589,12 @@ rule homologs_refine1_tcoffee_filter:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.eval_dir} -name "*.aln" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            python2.7 src/homologs/filter_tcoffee.py \
-                {input.aln_dir}/{{/.}}.aln \
-                {input.eval_dir}/{{/.}}.aln \
-                {output.filter_dir}/{{/.}}.fa \
-        ) 2> {log} 1>&2
+        bash src/homologs/tcoffee_filter_folder.sh \
+            {input.aln_dir} aln \
+            {input.eval_dir} aln \
+            {output} fa \
+            {threads} \
+        2> {log}
         """
 
 
@@ -768,19 +750,13 @@ rule homologs_refine2_tcoffee_align:
         """
         mkdir -p {output}
 
-        find {input.fasta_dir} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            t_coffee \
-                {{}} \
-                -method muscle_msa mafftgins_msa t_coffee_msa kalign_msa \
-                -output=aln \
-                -outfile {output.aln_dir}/{{/.}}.aln \
-                -n_core 1 \
-                -quiet \
+        bash src/homologs/tcoffee_align_folder.sh \
+            {input} fa \
+            {output} aln \
+            {threads} \
         2> {log} 1>&2
 
-        rm -rf *.dnd 2>> {log} 1>&2
+        rm -rf *.dnd 2>>{log} 1>&2
         bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
         """
 
@@ -801,18 +777,10 @@ rule homologs_refine2_tcoffee_eval:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.aln_dir} -name "*.aln" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            t_coffee \
-                -infile {{}} \
-                -evaluate \
-                -output=score_ascii \
-                -outfile {output.eval_dir}/{{/.}}.aln \
-                -n_core 1 \
-                -quiet "||" true ) \
+        bash src/homologs/tcoffee_eval_folder.sh \
+            {input} aln \
+            {output} aln \
+            {threads} \
         2> {log} 1>&2
 
         bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
@@ -831,16 +799,12 @@ rule homologs_refine2_tcoffee_filter:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.eval_dir} -name "*.aln" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            python2.7 src/homologs/filter_tcoffee.py \
-                {input.aln_dir}/{{/.}}.aln \
-                {input.eval_dir}/{{/.}}.aln \
-                {output.filter_dir}/{{/.}}.fa \
-        ) 2> {log} 1>&2
+        bash src/homologs/tcoffee_filter_folder.sh \
+            {input.aln_dir} aln \
+            {input.eval_dir} aln \
+            {output} fa \
+            {threads} \
+        2> {log}
         """
 
 
