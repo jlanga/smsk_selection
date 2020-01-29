@@ -603,7 +603,7 @@ rule homologs_refine1_tcoffee_eval:
                 -output=score_ascii \
                 -outfile {output.eval_dir}/{{/.}}.aln \
                 -n_core 1 \
-                -quiet ) \
+                -quiet "||" true ) \
         2> {log} 1>&2
         """
 
