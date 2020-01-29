@@ -883,4 +883,5 @@ rule homologs_refine2:
 
 rule homologs:
     input:
+        rules.homologs_refine1.input,
         rules.homologs_refine2.input
