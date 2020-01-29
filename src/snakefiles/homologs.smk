@@ -611,16 +611,11 @@ rule homologs_refine1_maxalign_pep:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.filter_dir} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            perl src/maxalign.pl \
-                -p {{.}}.fa \
-            "|" seqtk seq - \
-            ">" {output.maxalign_pep}/{{/.}}.fa \
-        ) 2> {log} 1>&2
+        bash src/homologs/maxalign_pep_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+        2> {log} 1>&2
         """
 
 
@@ -639,18 +634,14 @@ rule homologs_refine1_maxalign_long:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
+        bash src/homologs/maxalign_long_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+            {params.min_length} \
+        2> {log} 1>&2
 
-        (find {input} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            bash src/homologs/filter_fasta_by_length.sh \
-                {input}/{{/.}}.fa \
-                {params.min_length} \
-                {output}/{{/.}}.fa \
-        ) 2> {log} 1>&2
-
-        find {output} -size 0 -delete
+        find {output} -size 0 -delete 2>> {log}
         """
 
 
@@ -666,26 +657,19 @@ rule homologs_refine1_maxalign_subset:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.maxalign_pep} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            seqtk seq {{}} \
-            "|" paste - - \
-            "|" cut -f 1 \
-            "|" tr -d "\>" \
-            "|" seqtk subseq {input.cds} - \
-            ">" {output.maxalign_subset}/{{/.}}.fa \
-        ) 2>{log} 1>&2
+        bash src/homologs/maxalign_subset_folder.sh \
+            {input.maxalign_pep} fa \
+            {output.maxalign_subset} fa \
+            {threads} \
+            {input.cds} \
+        2> {log} 1>&2
         """
 
 
 rule homologs_refine1_maxalign_cds:
     input:
-        filter_dir = HOMOLOGS_REFINE1 + "tcoffee_filter",
-        maxalign_subset = HOMOLOGS_REFINE1 + "maxalign_subset",
-        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep"
+        tcoffee_filter = HOMOLOGS_REFINE1 + "tcoffee_filter",
+        maxalign_subset = HOMOLOGS_REFINE1 + "maxalign_subset"
     output:
         maxalign_cds = directory(HOMOLOGS_REFINE1 + "maxalign_cds")
     log: HOMOLOGS_REFINE1 + "maxalign_cds.log"
@@ -694,17 +678,12 @@ rule homologs_refine1_maxalign_cds:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.maxalign_pep} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            perl src/maxalign.pl \
-                -p {input.filter_dir}/{{/.}}.fa \
-                {input.maxalign_subset}/{{/.}}.fa \
-            "|" seqtk seq - \
-            ">" {output.maxalign_cds}/{{/.}}.fa \
-        ) 2> {log} 1>&2
+        bash src/homologs/maxalign_cds_folder.sh \
+            {input.tcoffee_filter} fa \
+            {input.maxalign_subset} fa \
+            {output.maxalign_cds} fa \
+            {threads} \
+        2> {log}
         """
 
 
@@ -821,16 +800,11 @@ rule homologs_refine2_maxalign_pep:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.filter_dir} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            perl src/maxalign.pl \
-                -p {{.}}.fa \
-            "|" seqtk seq \
-            ">" {output.maxalign_pep}/{{/.}}.fa \
-        ) 2> {log} 1>&2
+        bash src/homologs/maxalign_pep_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+        2> {log} 1>&2
         """
 
 
@@ -849,18 +823,14 @@ rule homologs_refine2_maxalign_long:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
+        bash src/homologs/maxalign_long_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+            {params.min_length} \
+        2> {log} 1>&2
 
-        (find {input} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            bash src/homologs/filter_fasta_by_length.sh \
-                {input}/{{/.}}.fa \
-                {params.min_length} \
-                {output}/{{/.}}.fa \
-        ) 2> {log} 1>&2
-
-        find {output} -size 0 -delete
+        find {output} -size 0 -delete 2>> {log}
         """
 
 
@@ -876,24 +846,18 @@ rule homologs_refine2_maxalign_subset:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.maxalign_pep} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-            seqtk seq {{}} \
-            "|" paste - - \
-            "|" cut -f 1 \
-            "|" tr -d "\>" \
-            "|" seqtk subseq {input.cds} - \
-            ">" {output.maxalign_subset}/{{/.}}.fa \
-        ) 2>{log} 1>&2
+        bash src/homologs/maxalign_subset_folder.sh \
+            {input.maxalign_pep} fa \
+            {output.maxalign_subset} fa \
+            {threads} \
+            {input.cds} \
+        2> {log} 1>&2
         """
 
 
 rule homologs_refine2_maxalign_cds:
     input:
-        filter_dir = HOMOLOGS_REFINE2 + "tcoffee_filter",
+        tcoffee_filter = HOMOLOGS_REFINE2 + "tcoffee_filter",
         maxalign_subset = HOMOLOGS_REFINE2 + "maxalign_subset"
     output:
         maxalign_cds = directory(HOMOLOGS_REFINE2 + "maxalign_cds")
@@ -903,16 +867,12 @@ rule homologs_refine2_maxalign_cds:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        (find {input.filter_dir} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order --jobs {threads} \
-        perl src/maxalign.pl \
-            -p {input.filter_dir}/{{/.}}.fa \
-            {input.maxalign_subset}/{{/.}}.fa \
-            ">" {output.maxalign_cds}/{{/.}}.fa \
-        ) 2> {log} 1>&2
+        bash src/homologs/maxalign_cds_folder.sh \
+            {input.tcoffee_filter} fa \
+            {input.maxalign_subset} fa \
+            {output.maxalign_cds} fa \
+            {threads} \
+        2> {log}
         """
 
 

@@ -55,7 +55,7 @@ do_shellcheck(){
         -not -path "src/exabayes-1.5/*" \
         -not -path "src/phyx-1.01/*" \
         -print0 \
-    | xargs shellcheck
+    | xargs --null shellcheck
 }
 
 do_yamllint(){
