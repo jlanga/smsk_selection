@@ -7,40 +7,20 @@ rule homologs_join_cds:
     input: expand(CDHIT + "{species}.cds", species=SPECIES)
     output: HOMOLOGS + "all.cds"
     conda: "homologs.yml"
+    threads: MAX_THREADS
     shell:
         """
-        cat /dev/null > {output}
-
-        for file in {input}; do
-            species=$(basename $file | sed "s/.cds//")
-            seqtk seq $file \
-            | cut -f 1 -d " " \
-            | paste - - \
-            | sed "s/^>/>$species@/" \
-            | sed 's/ENA|[A-Z0-9]*|//' \
-            | tr "\t" "\n" \
-            >> {output}
-        done
+        bash src/homologs/join_fasta_species.sh {input} > {output}
         """
 
 rule homologs_join_pep:
     input: expand(CDHIT + "{species}.pep", species=SPECIES)
     output: HOMOLOGS + "all.pep"
     conda: "homologs.yml"
+    threads: MAX_THREADS
     shell:
         """
-        cat /dev/null > {output}
-
-        for file in {input}; do
-            species=$(basename $file | sed "s/.pep//")
-            seqtk seq $file \
-            | cut -f 1 -d " " \
-            | paste - - \
-            | sed "s/^>/>$species@/" \
-            | sed 's/ENA|[A-Z0-9]*|//' \
-            | tr "\t" "\n" \
-            >> {output}
-        done
+        bash src/homologs/join_fasta_species.sh {input} > {output}
         """
 
 
@@ -239,14 +219,14 @@ rule homologs_round1_cut_internal_long_branches:
         mkdir -p {output} 2> {log} 1>&2
         
         # Find those with 4 or more sequences
-        (find {input} -name "*.mm" \
-        | sort -V \
-        | parallel --jobs {threads} --tag --keep-order \
-            python2 src/homologs/extract_leafs.py "<" {{}} "|" wc -l \
-        | awk '$2 >= 4' \
-        | cut -f 1 \
-        | parallel --jobs {threads} ln --symbolic --relative {{}} {output} \
-        ) 2>> {log} 1>&2
+        bash src/homologs/filter_by_number_of_leafs.sh \
+            {input} \
+            mm \
+            {output} \
+            mm \
+            4 \
+            {threads} \
+        2>> {log} 1>&2
 
         # Run the trimming method
         python2.7 src/pdc2/scripts/cut_long_internal_branches.py \
@@ -449,14 +429,14 @@ rule homologs_round2_cut_internal_long_branches:
         mkdir -p {output} 2> {log} 1>&2
         
         # Find those with 4 or more sequences
-        (find {input} -name "*.mm" \
-        | sort -V \
-        | parallel --jobs {threads} --tag --keep-order \
-            python2 src/homologs/extract_leafs.py "<" {{}} "|" wc -l \
-        | awk '$2 >= 4' \
-        | cut -f 1 \
-        | parallel --jobs {threads} ln --symbolic --relative {{}} {output} \
-        ) 2>> {log} 1>&2
+        bash src/homologs/filter_by_number_of_leafs.sh \
+            {input} \
+            mm \
+            {output} \
+            mm \
+            4 \
+            {threads} \
+        2>> {log} 1>&2
 
         # Run the trimming method
         python2.7 src/pdc2/scripts/cut_long_internal_branches.py \
