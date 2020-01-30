@@ -9,3 +9,4 @@ dependencies:
     - python=2.7
     - raxml-ng
     - modeltest-ng
+    - parallel
