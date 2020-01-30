@@ -213,7 +213,6 @@ rule tree_exabayes:
             -n txt \
             -t {input.tree} \
             -m DNA \
-            -T {threads} \
             -c {input.config_file} \
             -w {output} \
         2> {log} 1>&2
