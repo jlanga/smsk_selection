@@ -11,6 +11,7 @@ addons:
         - curl
         - autotools-dev
         - autoconf
+        - autoconf-archive
         - automake
         - cmake
         - libtool
