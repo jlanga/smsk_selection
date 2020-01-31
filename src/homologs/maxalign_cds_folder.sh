@@ -23,7 +23,7 @@ export -f get_cds
 
 mkdir --parents "$out_dir"
 
-find "$filter_dir" -name "*.$filter_ext" \
+find "$subset_dir" -name "*.$filter_ext" \
 | sort --version-sort \
 | parallel --keep-order --jobs "$threads" \
     get_cds \

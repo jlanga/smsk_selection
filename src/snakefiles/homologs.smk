@@ -836,7 +836,7 @@ rule homologs_refine2_maxalign_long:
 
 rule homologs_refine2_maxalign_subset:
     input:
-        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_long",
+        maxalign_long = HOMOLOGS_REFINE2 + "maxalign_long",
         cds = HOMOLOGS + "all.cds"
     output:
         maxalign_subset = directory(HOMOLOGS_REFINE2 + "maxalign_subset")
@@ -847,7 +847,7 @@ rule homologs_refine2_maxalign_subset:
     shell:
         """
         bash src/homologs/maxalign_subset_folder.sh \
-            {input.maxalign_pep} fa \
+            {input.maxalign_long} fa \
             {output.maxalign_subset} fa \
             {threads} \
             {input.cds} \
