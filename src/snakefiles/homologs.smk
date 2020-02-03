@@ -619,35 +619,9 @@ rule homologs_refine1_maxalign_pep:
         """
 
 
-rule homologs_refine1_maxalign_long:
-    input:
-        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep"
-    output:
-        maxalign_long = directory(HOMOLOGS_REFINE1 + "maxalign_long")
-    log:
-        HOMOLOGS_REFINE1 + "maxalign_long.log"
-    benchmark:
-        HOMOLOGS_REFINE1 + "maxalign_long.bmk"
-    params:
-        min_length = params["homologs"]["refine"]["min_length"]
-    threads: MAX_THREADS
-    conda: "homologs.yml"
-    shell:
-        """
-        bash src/homologs/maxalign_long_folder.sh \
-            {input} fa \
-            {output} fa \
-            {threads} \
-            {params.min_length} \
-        2> {log} 1>&2
-
-        find {output} -size 0 -delete 2>> {log}
-        """
-
-
 rule homologs_refine1_maxalign_subset:
     input:
-        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_long",
+        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep",
         cds = HOMOLOGS + "all.cds"
     output:
         maxalign_subset = directory(HOMOLOGS_REFINE1 + "maxalign_subset")
@@ -808,35 +782,9 @@ rule homologs_refine2_maxalign_pep:
         """
 
 
-rule homologs_refine2_maxalign_long:
-    input:
-        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_pep"
-    output:
-        maxalign_long = directory(HOMOLOGS_REFINE2 + "maxalign_long")
-    log:
-        HOMOLOGS_REFINE2 + "maxalign_long.log"
-    benchmark:
-        HOMOLOGS_REFINE2 + "maxalign_long.bmk"
-    params:
-        min_length = params["homologs"]["refine"]["min_length"]
-    threads: MAX_THREADS
-    conda: "homologs.yml"
-    shell:
-        """
-        bash src/homologs/maxalign_long_folder.sh \
-            {input} fa \
-            {output} fa \
-            {threads} \
-            {params.min_length} \
-        2> {log} 1>&2
-
-        find {output} -size 0 -delete 2>> {log}
-        """
-
-
 rule homologs_refine2_maxalign_subset:
     input:
-        maxalign_long = HOMOLOGS_REFINE2 + "maxalign_long",
+        maxalign_long = HOMOLOGS_REFINE2 + "maxalign_pep",
         cds = HOMOLOGS + "all.cds"
     output:
         maxalign_subset = directory(HOMOLOGS_REFINE2 + "maxalign_subset")

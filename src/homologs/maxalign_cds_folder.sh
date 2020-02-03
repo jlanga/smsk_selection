@@ -30,3 +30,9 @@ find "$subset_dir" -name "*.$filter_ext" \
         "$filter_dir/{/.}.$filter_ext" \
         "$subset_dir/{/.}.$subset_ext" \
         "$out_dir/{/.}.$out_ext"
+
+# Remove failed files
+(find "$out_dir" -name "*.$out_ext" -type f -print0 \
+| xargs --null grep --with-filename "fastafile" \
+| cut -f 1 -d ":" \
+| xargs --no-run-if-empty rm || true)

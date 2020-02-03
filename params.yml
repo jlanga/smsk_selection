@@ -24,8 +24,6 @@ homologs:
         minimum_taxa: 3
     root_to_tip:
         minimum_ingroup_taxa: 3
-    refine:
-        min_length: 10  # Min aa length to convert aa to cds with maxalign
 
 tree:
     supermatrix:
