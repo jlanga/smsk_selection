@@ -167,6 +167,7 @@ rule tree_raxmlng:
         2> {log} 1>&2
         """
 
+
 rule tree_exabayes_config:
     output: TREE + "exabayes_config.txt"
     log: TREE + "exabayes_config.log"
@@ -254,8 +255,25 @@ rule tree_exabayes_postprocparam:
         """
 
 
+rule tree_exabayes_consensus:
+    input: TREE + "exabayes"
+    output: TREE + "exabayes_consensus.nwk"
+    log: TREE + "exabayes_consensus.log"
+    benchmark: TREE + "exabayes_consensus.bmk"
+    shell:
+        """
+        ./bin/consense \
+            -n consensus \
+            -f {input}/ExaBayes_topologies.run-* \
+        2> {log} 1>&2
+
+        mv ExaBayes_ConsensusExtendedMajorityRuleNewick.consensus {output}
+        rm ExaBayes_ConsensusExtendedMajorityRuleNexus.consensus
+        """
+
 
 rule tree:
     input:
+        TREE + "exabayes_consensus.nwk",
         TREE + "exabayes_sdsf.txt",
         TREE + "exabayes_postprocparam.txt"
