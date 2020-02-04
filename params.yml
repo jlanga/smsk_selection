@@ -44,6 +44,7 @@ tree:
         generations: 1000000  # 1e6
         sampling_frequency: 500  # 1000 by default
         threads: 1
+    outgroup: hsap
 
 fastcodeml:
     maximizer: 22

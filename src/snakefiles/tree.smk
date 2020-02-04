@@ -168,6 +168,24 @@ rule tree_raxmlng:
         """
 
 
+rule tree_raxmlng_rooted:
+    input: TREE + "supermatrix_hq.raxml.bestTree"
+    output: TREE + "supermatrix_hq.rooted.nwk"
+    log: TREE + "supermatrix_hq.rooted.log"
+    benchmark: TREE + "supermatrix_hq.rooted.bmk"
+    conda: "tree.yml"
+    params:
+        outgroup = params["tree"]["outgroup"]
+    shell:
+        """
+        ./bin/pxrr \
+            --outgroups {params.outgroup} \
+            --treef {input} \
+            --outf {output} \
+        2> {log} 1>&2
+        """
+
+
 rule tree_exabayes_config:
     output: TREE + "exabayes_config.txt"
     log: TREE + "exabayes_config.log"
@@ -272,8 +290,27 @@ rule tree_exabayes_consensus:
         """
 
 
+rule tree_exabayes_consensus_rooted:
+    input: TREE + "exabayes_consensus.nwk"
+    output: TREE + "exabayes_consensus.rooted.nwk"
+    log: TREE + "exabayes_consensus.rooted.log"
+    benchmark: TREE + "exabayes_consensus.rooted.bmk"
+    conda: "tree.yml"
+    params:
+        outgroup = params["tree"]["outgroup"]
+    shell:
+        """
+        ./bin/pxrr \
+            --outgroups {params.outgroup} \
+            --treef {input} \
+            --outf {output} \
+        2> {log} 1>&2
+        """
+
+
 rule tree:
     input:
-        TREE + "exabayes_consensus.nwk",
+        TREE + "supermatrix_hq.rooted.nwk",
+        TREE + "exabayes_consensus.rooted.nwk",
         TREE + "exabayes_sdsf.txt",
         TREE + "exabayes_postprocparam.txt"
