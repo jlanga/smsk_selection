@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-filter_dir=$1
-filter_ext=$2
+in_dir=$1
+in_ext=$2
 out_dir=$3
 out_ext=$4
 all_cds=$5
@@ -22,13 +22,20 @@ export -f get_cds
 
 mkdir --parents "$out_dir"
 
-find "$filter_dir" -name "*.$filter_ext" \
+python src/homologs/split_cds.py \
+    "$in_dir" "$in_ext" \
+    "$out_dir" "tmp" \
+    "$all_cds"
+
+find "$out_dir" -name "*.tmp" \
 | sort --version-sort \
 | parallel --keep-order --jobs "$threads" \
     get_cds \
-        "$filter_dir/{/.}.$filter_ext" \
-        "$all_cds" \
+        "$in_dir/{/.}.$in_ext" \
+        "$out_dir/{/.}.tmp" \
         "$out_dir/{/.}.$out_ext"
+
+find "$out_dir" -name "*.tmp" -type f -delete
 
 # # Remove failed files
 # (find "$out_dir" -name "*.$out_ext" -type f -print0 \

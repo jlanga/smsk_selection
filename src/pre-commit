@@ -41,9 +41,13 @@ do_pylint_snakefiles() {
 do_pylint_python() {
 
     pylint --version
-    pylint src \
-        --ignore=src/pdc3/scripts,src/phyx-1.01/src,src/pdc2/scripts
-
+    folders=(src/homologs)
+    for folder in "${folders[@]}" ; do
+        pushd "$folder"
+        pylint .
+        popd
+    done
+    echo 
 }
 
 do_shellcheck(){

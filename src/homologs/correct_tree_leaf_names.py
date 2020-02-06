@@ -4,17 +4,14 @@
 (species_transcript_id) to the names for the pdc3 scripts (species@transcript_id)
 """
 
-import os
-import sys
 import re
+import sys
 
 from Bio import Phylo
 
-# from helpers import fix_dir_path
-
-def fix_dir_path(path):
-    """Add a / at the end if necessary"""
-    return path if path.endswith("/") else path + "/"
+from helpers import \
+    fix_dir_path, \
+    process_folders
 
 def correct_tree_leaf_names(filename_in, filename_out):
     """Correct a single tree
@@ -39,11 +36,4 @@ if __name__ == '__main__':
     OUT_DIR = fix_dir_path(sys.argv[3])
     OUT_EXT = sys.argv[4]
 
-    if not os.path.exists(OUT_DIR):
-        os.makedirs(OUT_DIR)
-
-    for in_file in os.listdir(IN_DIR):
-        if in_file.endswith(IN_EXT):
-            prefix = in_file.split("/")[-1].split(IN_EXT)[0]
-            out_file = OUT_DIR + prefix + OUT_EXT
-            correct_tree_leaf_names(IN_DIR + in_file, out_file)
+    process_folders(IN_DIR, IN_EXT, OUT_DIR, OUT_EXT, correct_tree_leaf_names)
