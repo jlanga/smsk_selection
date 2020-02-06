@@ -11,6 +11,8 @@ from Bio import \
     AlignIO, \
     Seq
 
+from helpers import process_folders
+
 
 def get_codon_dict():
     """
@@ -105,19 +107,28 @@ def extract_fourfold_degenerate_sites(alignment):
     return output_alignment
 
 
+
+def filter_4ds_sites(file_in, file_out):
+    msa_in = AlignIO.read(handle=file_in, format="fasta")
+    msa_4d = extract_fourfold_degenerate_sites(msa_in)
+    if msa_4d.get_alignment_length() > 0:
+        AlignIO.write(alignments=msa_4d, handle=file_out, format="fasta")
+    else:
+        sys.stderr.write(file_in + ": No fourfold-degenerate site was found\n")
+
+
+
 if __name__ == '__main__':
 
     if len(sys.argv) != 3:
         sys.stderr.write("ERROR: python3 extract_4d_sites_cds.py in.fa out.fa\n")
         sys.exit(1)
 
-    FASTA_IN, FASTA_OUT = sys.argv[1], sys.argv[2]
+    IN_DIR = fix_dir_path(sys.argv[1])
+    IN_EXT = sys.argv[2]
+    OUT_DIR = fix_dir_path(sys.argv[3])
+    OUT_EXT = sys.argv[4]
 
-    MSA_IN = AlignIO.read(handle=FASTA_IN, format="fasta")
+    process_folders(IN_DIR, IN_EXT, OUT_DIR, OUT_EXT, filter_4ds_sites)
 
-    MSA_4D = extract_fourfold_degenerate_sites(MSA_IN)
 
-    if MSA_4D.get_alignment_length() > 0:
-        AlignIO.write(alignments=MSA_4D, handle=FASTA_OUT, format="fasta")
-    else:
-        sys.stderr.write(FASTA_IN + ": No 4d sites were found\n")
