@@ -34,6 +34,7 @@ if __name__ == '__main__':
             "Error. Usage: python split_cds.py folder_in ext_in folder_out "
             "ext_out all_cds.fa"
         )
+        sys.exit(1)
 
     IN_DIR = fix_dir_path(sys.argv[1])
     IN_EXT = sys.argv[2]
