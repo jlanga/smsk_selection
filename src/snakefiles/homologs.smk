@@ -616,9 +616,10 @@ rule homologs_refine2_fasta:
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        find {input} -name "*.fa" -exec mv {{}} {output}/ \;
+        bash src/homologs/remove_gaps_folder.sh \
+            {input} fa \
+            {output} fa \
+        2> {log} 1>&2
         """ 
 
 
