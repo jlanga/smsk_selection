@@ -23,7 +23,7 @@ tcoffee_align(){
             -output=aln \
             -outfile "$aln" \
             -n_core 1 \
-            -quiet
+            -quiet || true
     
     fi
 }
