@@ -13,7 +13,7 @@ remove_gaps(){
 
     seqtk seq "$fasta_in" \
     | paste - - \
-    | awk '{gsub(/-/,"",$2); print}' \
+    | awk '{gsub(/-/,"",$2); print $1"\t"$2}' \
     | tr "\t" "\n" \
     > "$fasta_out"
 

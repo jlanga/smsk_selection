@@ -35,5 +35,3 @@ find "$in_dir" -name "*.$in_ext" -type f \
     tcoffee_translate \
         "$in_dir/{/.}.$in_ext" \
         "$out_dir/{/.}.$out_ext"
-
-find . -maxdepth 1 -name "*.dnd" -delete

@@ -562,7 +562,7 @@ rule homologs_refine1_tcoffee_align:
         """
         bash src/homologs/tcoffee_align_folder.sh \
             {input} fa \
-            {output} fa \
+            {output} aln \
             {threads} \
         2> {log} 1>&2
         """
@@ -578,7 +578,7 @@ rule homologs_refine1_tcoffee_evaluate:
     shell:
         """
         bash src/homologs/tcoffee_evaluate_folder.sh \
-            {input} fa \
+            {input} aln \
             {output} score_ascii \
             {threads} \
         2> {log} 1>&2
@@ -598,7 +598,7 @@ rule homologs_refine1_tcoffee_backtranslate:
     shell:
         """
         bash src/homologs/tcoffee_backtranslate_folder.sh \
-            {input.align} fa \
+            {input.align} aln \
             {input.fasta} fa \
             {input.evaluate} score_ascii \
             {output} fa \
@@ -705,7 +705,7 @@ rule homologs_refine2_tcoffee_align:
         """
         bash src/homologs/tcoffee_align_folder.sh \
             {input} fa \
-            {output} fa \
+            {output} aln \
             {threads} \
         2> {log} 1>&2
         """
@@ -721,7 +721,7 @@ rule homologs_refine2_tcoffee_evaluate:
     shell:
         """
         bash src/homologs/tcoffee_evaluate_folder.sh \
-            {input} fa \
+            {input} aln \
             {output} score_ascii \
             {threads} \
         2> {log} 1>&2
@@ -741,7 +741,7 @@ rule homologs_refine2_tcoffee_backtranslate:
     shell:
         """
         bash src/homologs/tcoffee_backtranslate_folder.sh \
-            {input.align} fa \
+            {input.align} aln \
             {input.fasta} fa \
             {input.evaluate} score_ascii \
             {output} fa \
