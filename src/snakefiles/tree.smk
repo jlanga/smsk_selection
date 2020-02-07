@@ -1,11 +1,11 @@
-rule tree_fourfold_degenerate_sites:
+rule tree_4ds:
     """
     Get codons that are fourfold-degenerate
     """
     input: HOMOLOGS_REFINE2 + "maxalign"
-    output: directory(TREE + "fourfold_degenerate_sites")
-    log: TREE + "fourfold_degenerate_sites.log"
-    benchmark: TREE + "fourfold_degenerate_sites.bmk"
+    output: directory(TREE + "4ds")
+    log: TREE + "4ds.log"
+    benchmark: TREE + "4ds.bmk"
     conda: "tree.yml"
     shell:
         """
@@ -17,16 +17,16 @@ rule tree_fourfold_degenerate_sites:
         2> {log}
         """
 
-rule tree_supermatrix_prepare:
+rule tree_prepare:
     """
     Strip the transcript id from the sequence names - leave only the species id.
 
     concatenate_matrices_phyx.py requires the files to be *.aln-cln
     """
-    input: TREE + "fourfold_degenerate_sites"
-    output: directory(TREE + "supermatrix_prepare")
-    log: TREE + "supermatrix_prepare.log"
-    benchmark: TREE + "supermatrix_prepare.bmk"
+    input: TREE + "4ds"
+    output: directory(TREE + "prepare")
+    log: TREE + "prepare.log"
+    benchmark: TREE + "prepare.bmk"
     threads: MAX_THREADS
     conda: "tree.yml"
     shell:
@@ -50,21 +50,21 @@ rule tree_supermatrix:
     Concatenate the alignments in a fasta file and create the partition file for
     raxml.
     """
-    input: TREE + "supermatrix_prepare"
+    input: TREE + "prepare"
     output:
-        fasta = TREE + "supermatrix.fa",
-        nex = TREE + "supermatrix.nex",
-        model = TREE + "supermatrix.model",
-        phy = TREE + "supermatrix.phy",
-        stats = TREE + "supermatrix_stats.txt"
+        fasta = TREE + "supermatrix/supermatrix.fa",
+        nex = TREE + "supermatrix/supermatrix.nex",
+        model = TREE + "supermatrix/supermatrix.model",
+        phy = TREE + "supermatrix/supermatrix.phy",
+        stats = TREE + "supermatrix/supermatrix_stats.txt"
     log: TREE + "supermatrix.log"
     benchmark: TREE + "supermatrix.bmk"
     threads: MAX_THREADS
     params:
         min_length = params["tree"]["supermatrix"]["min_length"],
         min_taxa = params["tree"]["supermatrix"]["min_taxa"],
-        output_prefix = TREE + "supermatrix",
-        stats_tmp = TREE + "supermatrix_taxon_occupancy_stats"
+        output_prefix = TREE + "supermatrix/supermatrix",
+        stats_tmp = TREE + "supermatrix/supermatrix_taxon_occupancy_stats"
     conda: "tree.yml"
     shell:
         """
@@ -81,17 +81,17 @@ rule tree_supermatrix:
         """
 
 
-rule tree_phyx_trim_cols:
+rule tree_trim:
     """
-    Remove columns that are not
+    Remove columns that are not very occupied
     """
     input:
-        fasta = TREE + "supermatrix.fa"
+        fasta = TREE + "supermatrix/supermatrix.fa"
     output:
-        fasta = TREE + "supermatrix_hq.fa",
-        phy = TREE + "supermatrix_hq.phy"
-    log: TREE + "supermatrix_hq.log"
-    benchmark: TREE + "supermatrix_hq.bmk"
+        fasta = TREE + "trim/supermatrix.fa",  # For raxml
+        phy = TREE + "trim/supermatrix.phy"  # For exabayes
+    log: TREE + "trim.log"
+    benchmark: TREE + "trim.bmk"
     params:
         params["tree"]["min_occupation"]  # proportion of data that is required to be present
     conda: "tree.yml"
@@ -112,12 +112,12 @@ rule tree_phyx_trim_cols:
         """
 
 
-rule tree_modeltest:
-    input: TREE + "supermatrix_hq.fa"
-    output: TREE + "supermatrix_hq.modeltest-ng.out"
-    params: TREE + "supermatrix_hq.modeltest-ng"
+rule tree_modeltestng:
+    input: TREE + "trim/supermatrix.fa"
+    output: TREE + "modeltestng/modeltestng.out"
+    params: TREE + "modeltestng/modeltestng"
     log: TREE + "modeltestng.log"
-    benchmark: TREE + "modeltest.bmk"
+    benchmark: TREE + "modeltestng.bmk"
     threads: MAX_THREADS
     conda: "tree.yml"
     shell:
@@ -134,15 +134,18 @@ rule tree_modeltest:
 
 rule tree_raxmlng:
     input: 
-        fasta = TREE + "supermatrix_hq.fa",
-        model = TREE + "supermatrix_hq.modeltest-ng.out"
-    output: TREE + "supermatrix_hq.raxml.bestTree"
-    log: TREE + "raxmlmg.log"
-    benchmark: TREE + "raxmlmg.bmk"
+        fasta = TREE + "trim/supermatrix.fa",
+        model = TREE + "modeltestng/modeltestng.out"
+    output:
+        best_tree = TREE + "raxmlng/supermatrix.raxml.bestTree",
+        rooted_tree = TREE + "raxmlng/supermatrix.raxml.rooted.nwk"
+    log: TREE + "raxmlng.log"
+    benchmark: TREE + "raxmlng.bmk"
     threads: params["tree"]["raxml"]["threads"]
     params:
         bootstraps = params["tree"]["raxml"]["bootstrap_replicates"],
-        prefix = TREE + "supermatrix_hq"
+        prefix = TREE + "raxmlng/supermatrix",
+        outgroup = params["tree"]["outgroup"]
     conda: "tree.yml"
     shell:
         """
@@ -160,24 +163,12 @@ rule tree_raxmlng:
             --prefix {params.prefix} \
             --threads {threads} \
         2> {log} 1>&2
-        """
 
-
-rule tree_raxmlng_rooted:
-    input: TREE + "supermatrix_hq.raxml.bestTree"
-    output: TREE + "supermatrix_hq.rooted.nwk"
-    log: TREE + "supermatrix_hq.rooted.log"
-    benchmark: TREE + "supermatrix_hq.rooted.bmk"
-    conda: "tree.yml"
-    params:
-        outgroup = params["tree"]["outgroup"]
-    shell:
-        """
         ./bin/pxrr \
             --outgroups {params.outgroup} \
-            --treef {input} \
-            --outf {output} \
-        2> {log} 1>&2
+            --treef {output.best_tree} \
+            --outf {output.rooted_tree} \
+        2>> {log} 1>&2
         """
 
 
@@ -207,20 +198,26 @@ ENDOFTEXT
 rule tree_exabayes:
     input:
         config_file = TREE + "exabayes_config.txt",
-        phy = TREE + "supermatrix_hq.phy",
-        tree = TREE + "supermatrix_hq.raxml.bestTree"
+        phy = TREE + "trim/supermatrix.phy",
+        tree = TREE + "raxmlng/supermatrix.raxml.bestTree"
     output:
-        directory(TREE + "exabayes")
+        sdsf = TREE + "exabayes/ExaBayes.sdsf.txt",
+        prostprocparam = TREE + "exabayes/ExaBayes_parameterStatistics.txt",
+        consensus = TREE + "exabayes/ExaBayes.consensus.nwk",
+        rooted = TREE + "exabayes/ExaBayes.rooted.nwk"
     log: TREE + "exabayes.log"
     benchmark: TREE + "exabayes.bmk"
     conda: "tree.yml"
     threads: params["tree"]["exabayes"]["threads"]
     params:
-        exabayes = params["tree"]["executables"]["exabayes"]
+        out_dir = TREE + "exabayes",
+        exabayes = params["tree"]["executables"]["exabayes"],
+        sdsf = params["tree"]["executables"]["sdsf"],
+        consense = params["tree"]["executables"]["consense"],
+        postprocparam = params["tree"]["executables"]["postprocparam"],
+        outgroup = params["tree"]["outgroup"]
     shell:
         """
-        mkdir -p {output}
-
         {params.exabayes} \
             -f {input.phy} \
             -s 12345 \
@@ -228,84 +225,28 @@ rule tree_exabayes:
             -t {input.tree} \
             -m DNA \
             -c {input.config_file} \
-            -w {output} \
-        2> {log} 1>&2
-        """
-
-
-rule tree_exabayes_sdsf:
-    input: TREE + "exabayes"
-    output: TREE + "exabayes_sdsf.txt"
-    log: TREE + "exabayes_sdsf.log"
-    benchmark: TREE + "exabayes_sdsf.bmk"
-    conda: "tree.yml"
-    params:
-        sdsf = params["tree"]["executables"]["sdsf"]
-    shell:
-        """
-        files=$(find {input} -name "ExaBayes_topologies.run*")
-
-        {params.sdsf} -f $files > {output} 2> {log}
-        """
-
-
-rule tree_exabayes_postprocparam:
-    input: TREE + "exabayes"
-    output: TREE + "exabayes_postprocparam.txt"
-    log: TREE + "exabayes_postprocparam.log"
-    benchmark: TREE + "exabayes_postprocparam.bmk"
-    conda: "tree.yml"
-    params:
-        postprocparam = params["tree"]["executables"]["postprocparam"]
-    shell:
-        """
-        files=$(find {input} -name "ExaBayes_parameters.run*")
-
-        {params.postprocparam} -n txt -f $files \
+            -w {params.out_dir} \
         2> {log} 1>&2
 
-        mv ExaBayes_parameterStatistics.txt {output}
-        """
+        topologies=$(find {params.out_dir} -name "ExaBayes_topologies.run*")
+        {params.sdsf} -f $topologies > {output.sdsf} 2>&1
 
+        parameters=$(find {params.out_dir} -name "ExaBayes_parameters.run*")
+        {params.postprocparam} -n txt -f $parameters 2>>{log} 1>&2
+        mv ExaBayes_parameterStatistics.txt {output.prostprocparam}
 
-rule tree_exabayes_consensus:
-    input: TREE + "exabayes"
-    output: TREE + "exabayes_consensus.nwk"
-    log: TREE + "exabayes_consensus.log"
-    benchmark: TREE + "exabayes_consensus.bmk"
-    shell:
-        """
-        ./bin/consense \
-            -n consensus \
-            -f {input}/ExaBayes_topologies.run-* \
-        2> {log} 1>&2
-
-        mv ExaBayes_ConsensusExtendedMajorityRuleNewick.consensus {output}
+        {params.consense} -n consensus -f $topologies 2>>{log} 1>&2
+        mv ExaBayes_ConsensusExtendedMajorityRuleNewick.consensus {output.consensus}
         rm ExaBayes_ConsensusExtendedMajorityRuleNexus.consensus
-        """
 
-
-rule tree_exabayes_consensus_rooted:
-    input: TREE + "exabayes_consensus.nwk"
-    output: TREE + "exabayes_consensus.rooted.nwk"
-    log: TREE + "exabayes_consensus.rooted.log"
-    benchmark: TREE + "exabayes_consensus.rooted.bmk"
-    conda: "tree.yml"
-    params:
-        outgroup = params["tree"]["outgroup"]
-    shell:
-        """
         ./bin/pxrr \
             --outgroups {params.outgroup} \
-            --treef {input} \
-            --outf {output} \
-        2> {log} 1>&2
+            --treef {output.consensus} \
+            --outf {output.rooted} \
+        2>> {log} 1>&2
         """
-
 
 rule tree:
     input:
-        TREE + "supermatrix_hq.rooted.nwk",
-        TREE + "exabayes_consensus.rooted.nwk",
-        TREE + "exabayes_sdsf.txt",
-        TREE + "exabayes_postprocparam.txt"
+        rules.tree_raxmlng.output,
+        rules.tree_exabayes.output
