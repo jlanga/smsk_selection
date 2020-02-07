@@ -24,6 +24,7 @@ export -f remove_gaps
 mkdir --parents "$dir_out"
 
 find "$dir_in" -name "*.$ext_in" -type f \
+| sort --version-sort \
 | parallel --jobs 1 \
     remove_gaps \
         "$dir_in/{/.}.$ext_in" \

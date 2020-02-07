@@ -20,7 +20,7 @@ export -f maxalign
 mkdir --parents "$out_dir"
 
 find "$in_dir" -name "*.$in_ext" \
-| sort -V \
+| sort --version-sort \
 | parallel --keep-order --jobs "$threads" \
     maxalign \
         "$in_dir/{/.}.$in_ext" \
