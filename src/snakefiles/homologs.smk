@@ -534,20 +534,74 @@ rule homologs_refine1_fasta:
         """ 
 
 
-rule homologs_refine1_tcoffee:
-    input:
-        fasta_dir = HOMOLOGS_REFINE1 + "fasta"
-    output:
-        tcoffee_dir = directory(HOMOLOGS_REFINE1 + "tcoffee")
-    log: HOMOLOGS_REFINE1 + "tcoffee.log"
-    benchmark: HOMOLOGS_REFINE1 + "tcoffee.bmk"
+rule homologs_refine1_tcoffee_translate:
+    input: HOMOLOGS_REFINE1 + "fasta"
+    output: directory(HOMOLOGS_REFINE1 + "tcoffee/translate")
+    log: HOMOLOGS_REFINE1 + "tcoffee/translate.log"
+    benchmark: HOMOLOGS_REFINE1 + "tcoffee/translate.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
-        bash src/homologs/tcoffee_folder.sh \
-            {input.fasta_dir} fa \
-            {output.tcoffee_dir} fa \
+        bash src/homologs/tcoffee_translate_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+rule homologs_refine1_tcoffee_align:
+    input: HOMOLOGS_REFINE1 + "tcoffee/translate"
+    output: directory(HOMOLOGS_REFINE1 + "tcoffee/align")
+    log: HOMOLOGS_REFINE1 + "tcoffee/align.log"
+    benchmark: HOMOLOGS_REFINE1 + "tcoffee/align.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/tcoffee_align_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+rule homologs_refine1_tcoffee_evaluate:
+    input: HOMOLOGS_REFINE1 + "tcoffee/align"
+    output: directory(HOMOLOGS_REFINE1 + "tcoffee/evaluate")
+    log: HOMOLOGS_REFINE1 + "tcoffee/evaluate.log"
+    benchmark: HOMOLOGS_REFINE1 + "tcoffee/evaluate.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/tcoffee_evaluate_folder.sh \
+            {input} fa \
+            {output} score_ascii \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+rule homologs_refine1_tcoffee_backtranslate:
+    input: 
+        fasta = HOMOLOGS_REFINE1 + "fasta",
+        align = HOMOLOGS_REFINE1 + "tcoffee/align",
+        evaluate = HOMOLOGS_REFINE1 + "tcoffee/evaluate"
+    output: directory(HOMOLOGS_REFINE1 + "tcoffee/backtranslate")
+    log: HOMOLOGS_REFINE1 + "tcoffee/backtranslate.log"
+    benchmark: HOMOLOGS_REFINE1 + "tcoffee/backtranslate.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/tcoffee_backtranslate_folder.sh \
+            {input.align} fa \
+            {input.fasta} fa \
+            {input.evaluate} score_ascii \
+            {output} fa \
             {threads} \
         2> {log} 1>&2
         """
@@ -555,7 +609,7 @@ rule homologs_refine1_tcoffee:
 
 rule homologs_refine1_trim:
     input:
-        tcoffee_dir = HOMOLOGS_REFINE1 + "tcoffee"
+        tcoffee_dir = HOMOLOGS_REFINE1 + "tcoffee/backtranslate"
     output:
         trim_dir = directory(HOMOLOGS_REFINE1 + "trim")
     log: HOMOLOGS_REFINE1 + "trim.log"
@@ -623,20 +677,74 @@ rule homologs_refine2_fasta:
         """ 
 
 
-rule homologs_refine2_tcoffee:
-    input:
-        fasta_dir = HOMOLOGS_REFINE2 + "fasta"
-    output:
-        tcoffee_dir = directory(HOMOLOGS_REFINE2 + "tcoffee")
-    log: HOMOLOGS_REFINE2 + "tcoffee.log"
-    benchmark: HOMOLOGS_REFINE2 + "tcoffee.bmk"
+rule homologs_refine2_tcoffee_translate:
+    input: HOMOLOGS_REFINE2 + "fasta"
+    output: directory(HOMOLOGS_REFINE2 + "tcoffee/translate")
+    log: HOMOLOGS_REFINE2 + "tcoffee/translate.log"
+    benchmark: HOMOLOGS_REFINE2 + "tcoffee/translate.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
-        bash src/homologs/tcoffee_folder.sh \
-            {input.fasta_dir} fa \
-            {output.tcoffee_dir} fa \
+        bash src/homologs/tcoffee_translate_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+rule homologs_refine2_tcoffee_align:
+    input: HOMOLOGS_REFINE2 + "tcoffee/translate"
+    output: directory(HOMOLOGS_REFINE2 + "tcoffee/align")
+    log: HOMOLOGS_REFINE2 + "tcoffee/align.log"
+    benchmark: HOMOLOGS_REFINE2 + "tcoffee/align.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/tcoffee_align_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+rule homologs_refine2_tcoffee_evaluate:
+    input: HOMOLOGS_REFINE2 + "tcoffee/align"
+    output: directory(HOMOLOGS_REFINE2 + "tcoffee/evaluate")
+    log: HOMOLOGS_REFINE2 + "tcoffee/evaluate.log"
+    benchmark: HOMOLOGS_REFINE2 + "tcoffee/evaluate.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/tcoffee_evaluate_folder.sh \
+            {input} fa \
+            {output} score_ascii \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+rule homologs_refine2_tcoffee_backtranslate:
+    input: 
+        fasta = HOMOLOGS_REFINE2 + "fasta",
+        align = HOMOLOGS_REFINE2 + "tcoffee/align",
+        evaluate = HOMOLOGS_REFINE2 + "tcoffee/evaluate"
+    output: directory(HOMOLOGS_REFINE2 + "tcoffee/backtranslate")
+    log: HOMOLOGS_REFINE2 + "tcoffee/backtranslate.log"
+    benchmark: HOMOLOGS_REFINE2 + "tcoffee/backtranslate.bmk"
+    threads: MAX_THREADS
+    conda: "homologs.yml"
+    shell:
+        """
+        bash src/homologs/tcoffee_backtranslate_folder.sh \
+            {input.align} fa \
+            {input.fasta} fa \
+            {input.evaluate} score_ascii \
+            {output} fa \
             {threads} \
         2> {log} 1>&2
         """
@@ -644,7 +752,7 @@ rule homologs_refine2_tcoffee:
 
 rule homologs_refine2_trim:
     input:
-        tcoffee_dir = HOMOLOGS_REFINE2 + "tcoffee"
+        tcoffee_dir = HOMOLOGS_REFINE2 + "tcoffee/backtranslate"
     output:
         trim_dir = directory(HOMOLOGS_REFINE2 + "trim")
     log: HOMOLOGS_REFINE2 + "trim.log"
