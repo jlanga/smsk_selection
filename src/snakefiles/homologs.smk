@@ -513,17 +513,19 @@ rule homologs_rt:
 rule homologs_refine1_fasta:
     input:
         in_dir = HOMOLOGS_RT,
-        in_pep = HOMOLOGS + "all.pep"
+        in_cds = HOMOLOGS + "all.cds"
     output: directory(HOMOLOGS_REFINE1 + "fasta")
     log: HOMOLOGS_REFINE1 + "fasta.log"
     benchmark: HOMOLOGS_REFINE1 + "fasta.bmk"
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
+        PATH="$(pwd)/bin:$PATH"
+        
+        mkdir --parents {output}
 
         python src/homologs/tree_to_fasta.py \
-            {input.in_pep} \
+            {input.in_cds} \
             {input.in_dir} \
             tre \
             {output} \
@@ -532,120 +534,72 @@ rule homologs_refine1_fasta:
         """ 
 
 
-rule homologs_refine1_tcoffee_align:
+rule homologs_refine1_tcoffee:
     input:
         fasta_dir = HOMOLOGS_REFINE1 + "fasta"
     output:
-        aln_dir = directory(HOMOLOGS_REFINE1 + "tcoffee_align")
-    log: HOMOLOGS_REFINE1 + "tcoffee_align.log"
-    benchmark: HOMOLOGS_REFINE1 + "tcoffee_align.bmk"
+        tcoffee_dir = directory(HOMOLOGS_REFINE1 + "tcoffee")
+    log: HOMOLOGS_REFINE1 + "tcoffee.log"
+    benchmark: HOMOLOGS_REFINE1 + "tcoffee.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        bash src/homologs/tcoffee_align_folder.sh \
-            {input} fa \
-            {output} aln \
+        bash src/homologs/tcoffee_folder.sh \
+            {input.fasta_dir} fa \
+            {output.tcoffee_dir} fa \
             {threads} \
         2> {log} 1>&2
-
-        rm -rf *.dnd 2>>{log} 1>&2
-        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
         """
 
 
-rule homologs_refine1_tcoffee_eval:
+rule homologs_refine1_trim:
     input:
-        aln_dir = HOMOLOGS_REFINE1 + "tcoffee_align" 
+        tcoffee_dir = HOMOLOGS_REFINE1 + "tcoffee"
     output:
-        eval_dir = directory(HOMOLOGS_REFINE1 + "tcoffee_eval")
-    log: HOMOLOGS_REFINE1 + "tcoffee_eval.log"
-    benchmark: HOMOLOGS_REFINE1 + "tcoffee_eval.bmk"
-    threads: MAX_THREADS
+        trim_dir = directory(HOMOLOGS_REFINE1 + "trim")
+    log: HOMOLOGS_REFINE1 + "trim.log"
+    benchmark: HOMOLOGS_REFINE1 + "trim.bmk"
     conda: "homologs.yml"
+    params:
+        min_occupancy = 0.5
     shell:
         """
-        bash src/homologs/tcoffee_eval_folder.sh \
-            {input} aln \
-            {output} aln \
+        PATH="$(pwd)/bin:$PATH"
+
+        bash src/homologs/trim_folder.sh \
+            {input.tcoffee_dir} fa \
+            {output.trim_dir} fa \
             {threads} \
-        2> {log} 1>&2
-
-        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
-        """
-
-
-rule homologs_refine1_tcoffee_filter:
-    input:
-        aln_dir = HOMOLOGS_REFINE1 + "tcoffee_align",
-        eval_dir = HOMOLOGS_REFINE1 + "tcoffee_eval"
-    output:
-        filter_dir = directory(HOMOLOGS_REFINE1 + "tcoffee_filter")
-    log: HOMOLOGS_REFINE1 + "tcoffee_filter.log"
-    benchmark: HOMOLOGS_REFINE1 + "tcoffee_filter.bmk"
-    threads: MAX_THREADS
-    conda: "homologs.yml"
-    shell:
-        """
-        bash src/homologs/tcoffee_filter_folder.sh \
-            {input.aln_dir} aln \
-            {input.eval_dir} aln \
-            {output} fa \
-            {threads} \
+            {params.min_occupancy} \
         2> {log}
         """
 
 
-rule homologs_refine1_maxalign_pep:
+rule homologs_refine1_maxalign:
     input:
-        filter_dir = HOMOLOGS_REFINE1 + "tcoffee_filter"
+        filter_dir = HOMOLOGS_REFINE1 + "trim"
     output:
-        maxalign_pep = directory(HOMOLOGS_REFINE1 + "maxalign_pep")
+        maxalign = directory(HOMOLOGS_REFINE1 + "maxalign")
     log:
-        HOMOLOGS_REFINE1 + "maxalign_pep.log"
+        HOMOLOGS_REFINE1 + "maxalign.log"
     benchmark:
-        HOMOLOGS_REFINE1 + "maxalign_pep.bmk"
+        HOMOLOGS_REFINE1 + "maxalign.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
-        bash src/homologs/maxalign_pep_folder.sh \
+        bash src/homologs/maxalign_folder.sh \
             {input} fa \
             {output} fa \
             {threads} \
         2> {log} 1>&2
-        """
-
-
-rule homologs_refine1_maxalign_cds:
-    input:
-        cds = HOMOLOGS + "all.cds",
-        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep"
-    output:
-        maxalign_cds = directory(HOMOLOGS_REFINE1 + "maxalign_cds")
-    log: HOMOLOGS_REFINE1 + "maxalign_cds.log"
-    benchmark: HOMOLOGS_REFINE1 + "maxalign_cds.bmk"
-    threads: MAX_THREADS
-    conda: "homologs.yml"
-    shell:
-        """
-        PATH="bin:$PATH"
-
-        bash src/homologs/maxalign_cds_folder.sh \
-            {input.maxalign_pep} fa \
-            {output.maxalign_cds} fa \
-            {input.cds} \
-            {threads} \
-        2> {log}
         """
 
 
 rule homologs_refine1:
     input:
-        maxalign_pep = HOMOLOGS_REFINE1 + "maxalign_pep",
-        maxalign_cds = HOMOLOGS_REFINE1 + "maxalign_cds"
+        maxalign = HOMOLOGS_REFINE1 + "maxalign"
 
 
 ###############################################################################
@@ -655,7 +609,7 @@ rule homologs_refine1:
 
 rule homologs_refine2_fasta:
     input:
-        HOMOLOGS_REFINE1 + "maxalign_pep",
+        HOMOLOGS_REFINE1 + "maxalign",
     output: directory(HOMOLOGS_REFINE2 + "fasta")
     log: HOMOLOGS_REFINE2 + "fasta.log"
     benchmark: HOMOLOGS_REFINE2 + "fasta.bmk"
@@ -664,132 +618,76 @@ rule homologs_refine2_fasta:
         """
         mkdir -p {output}
 
-        (find {input} -name "*.fa" \
-        | sort -V \
-        | parallel --keep-order cp {{}} {output}/{{/.}}.fa \
-        ) 2> {log} 1>&2
+        find {input} -name "*.fa" -exec mv {{}} {output}/ \;
         """ 
 
 
-rule homologs_refine2_tcoffee_align:
+rule homologs_refine2_tcoffee:
     input:
         fasta_dir = HOMOLOGS_REFINE2 + "fasta"
     output:
-        aln_dir = directory(HOMOLOGS_REFINE2 + "tcoffee_align")
-    log: HOMOLOGS_REFINE2 + "tcoffee_align.log"
-    benchmark: HOMOLOGS_REFINE2 + "tcoffee_align.bmk"
+        tcoffee_dir = directory(HOMOLOGS_REFINE2 + "tcoffee")
+    log: HOMOLOGS_REFINE2 + "tcoffee.log"
+    benchmark: HOMOLOGS_REFINE2 + "tcoffee.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
-        mkdir -p {output}
-
-        bash src/homologs/tcoffee_align_folder.sh \
-            {input} fa \
-            {output} aln \
+        bash src/homologs/tcoffee_folder.sh \
+            {input.fasta_dir} fa \
+            {output.tcoffee_dir} fa \
             {threads} \
         2> {log} 1>&2
-
-        rm -rf *.dnd 2>>{log} 1>&2
-        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
         """
 
 
-rule homologs_refine2_tcoffee_eval:
-    """
-    On very big alignments (titin, I'm looking at you), the alignment step 
-    works, while the eval doesn't. Careful with the "|| true" at the end of 
-    parallel.
-    """
+rule homologs_refine2_trim:
     input:
-        aln_dir = HOMOLOGS_REFINE2 + "tcoffee_align" 
+        tcoffee_dir = HOMOLOGS_REFINE2 + "tcoffee"
     output:
-        eval_dir = directory(HOMOLOGS_REFINE2 + "tcoffee_eval")
-    log: HOMOLOGS_REFINE2 + "tcoffee_eval.log"
-    benchmark: HOMOLOGS_REFINE2 + "tcoffee_eval.bmk"
-    threads: MAX_THREADS
+        trim_dir = directory(HOMOLOGS_REFINE2 + "trim")
+    log: HOMOLOGS_REFINE2 + "trim.log"
+    benchmark: HOMOLOGS_REFINE2 + "trim.bmk"
     conda: "homologs.yml"
+    params:
+        min_occupancy = 0.5
     shell:
         """
-        bash src/homologs/tcoffee_eval_folder.sh \
-            {input} aln \
-            {output} aln \
+        PATH="$(pwd)/bin:$PATH"
+
+        bash src/homologs/trim_folder.sh \
+            {input.tcoffee_dir} fa \
+            {output.trim_dir} fa \
             {threads} \
-        2> {log} 1>&2
-
-        bash src/homologs/clean_tcoffee.sh 2>> {log} 1>&2
-        """
-
-
-rule homologs_refine2_tcoffee_filter:
-    input:
-        aln_dir = HOMOLOGS_REFINE2 + "tcoffee_align",
-        eval_dir = HOMOLOGS_REFINE2 + "tcoffee_eval"
-    output:
-        filter_dir = directory(HOMOLOGS_REFINE2 + "tcoffee_filter")
-    log: HOMOLOGS_REFINE2 + "tcoffee_filter.log"
-    benchmark: HOMOLOGS_REFINE2 + "tcoffee_filter.bmk"
-    threads: MAX_THREADS
-    conda: "homologs.yml"
-    shell:
-        """
-        bash src/homologs/tcoffee_filter_folder.sh \
-            {input.aln_dir} aln \
-            {input.eval_dir} aln \
-            {output} fa \
-            {threads} \
+            {params.min_occupancy} \
         2> {log}
         """
 
 
-rule homologs_refine2_maxalign_pep:
+rule homologs_refine2_maxalign:
     input:
-        filter_dir = HOMOLOGS_REFINE2 + "tcoffee_filter"
+        filter_dir = HOMOLOGS_REFINE2 + "trim"
     output:
-        maxalign_pep = directory(HOMOLOGS_REFINE2 + "maxalign_pep")
+        maxalign = directory(HOMOLOGS_REFINE2 + "maxalign")
     log:
-        HOMOLOGS_REFINE2 + "maxalign_pep.log"
+        HOMOLOGS_REFINE2 + "maxalign.log"
     benchmark:
-        HOMOLOGS_REFINE2 + "maxalign_pep.bmk"
+        HOMOLOGS_REFINE2 + "maxalign.bmk"
     threads: MAX_THREADS
     conda: "homologs.yml"
     shell:
         """
-        bash src/homologs/maxalign_pep_folder.sh \
+        bash src/homologs/maxalign_folder.sh \
             {input} fa \
             {output} fa \
             {threads} \
         2> {log} 1>&2
-        """
-
-
-rule homologs_refine2_maxalign_cds:
-    input:
-        cds = HOMOLOGS + "all.cds",
-        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_pep"
-    output:
-        maxalign_cds = directory(HOMOLOGS_REFINE2 + "maxalign_cds")
-    log: HOMOLOGS_REFINE2 + "maxalign_cds.log"
-    benchmark: HOMOLOGS_REFINE2 + "maxalign_cds.bmk"
-    threads: MAX_THREADS
-    conda: "homologs.yml"
-    shell:
-        """
-        PATH="bin:$PATH"
-
-        bash src/homologs/maxalign_cds_folder.sh \
-            {input.maxalign_pep} fa \
-            {output.maxalign_cds} fa \
-            {input.cds} \
-            {threads} \
-        2> {log}
         """
 
 
 rule homologs_refine2:
     input:
-        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign_pep",
-        maxalign_cds = HOMOLOGS_REFINE2 + "maxalign_cds"
+        maxalign_pep = HOMOLOGS_REFINE2 + "maxalign"
 
 rule homologs:
     input:

@@ -6,31 +6,22 @@ in_ext=$2
 out_dir=$3
 out_ext=$4
 threads=$5
-cds_file=$6
 
 
-subset(){
+maxalign(){
     in=$1
     out=$2
-    cds=$3
 
-    seqtk seq "$in" \
-    | paste - - \
-    | cut -f 1 \
-    | tr -d ">" \
-    | seqtk subseq "$cds" - \
-    > "$out"
-
+    perl src/maxalign.pl -p "$in" | seqtk seq - > "$out"
 }
 
-export -f subset
+export -f maxalign
 
 mkdir --parents "$out_dir"
 
 find "$in_dir" -name "*.$in_ext" \
-| sort --version-sort \
+| sort -V \
 | parallel --keep-order --jobs "$threads" \
-    subset \
+    maxalign \
         "$in_dir/{/.}.$in_ext" \
-        "$out_dir/{/.}.$out_ext" \
-        "$cds_file"
+        "$out_dir/{/.}.$out_ext"

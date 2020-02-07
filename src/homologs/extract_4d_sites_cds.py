@@ -5,13 +5,18 @@
 Script to extract from a fasta file the 4-fold degenerate sites.
 """
 
+# pylint: disable=no-name-in-module
+
 import sys
 
 from Bio import \
     AlignIO, \
     Seq
 
-from helpers import process_folders
+from helpers import \
+    process_folders, \
+    fix_dir_path
+    
 
 
 def get_codon_dict():
@@ -120,8 +125,11 @@ def filter_4ds_sites(file_in, file_out):
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 3:
-        sys.stderr.write("ERROR: python3 extract_4d_sites_cds.py in.fa out.fa\n")
+    if len(sys.argv) != 5:
+        sys.stderr.write(
+            "ERROR: python3 extract_4d_sites_cds.py folder_in extension_in "
+            "folder_out extension_out\n"
+        )
         sys.exit(1)
 
     IN_DIR = fix_dir_path(sys.argv[1])

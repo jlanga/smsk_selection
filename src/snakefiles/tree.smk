@@ -2,24 +2,19 @@ rule tree_fourfold_degenerate_sites:
     """
     Get codons that are fourfold-degenerate
     """
-    input: HOMOLOGS_REFINE2 + "maxalign_cds"
+    input: HOMOLOGS_REFINE2 + "maxalign"
     output: directory(TREE + "fourfold_degenerate_sites")
     log: TREE + "fourfold_degenerate_sites.log"
     benchmark: TREE + "fourfold_degenerate_sites.bmk"
     conda: "tree.yml"
-    threads: MAX_THREADS
     shell:
         """
         mkdir --parents {output}
 
-        (find {input} -name "*.fa" -type f \
-        | sort -V \
-        | parallel --keep-order \
-            --jobs {threads} \
-            python2.7 src/homologs/extract_4d_sites_cds.py \
-                {input}/{{/.}}.fa \
-                {output}/{{/.}}.fa \
-        ) 2> {log}
+        python2.7 src/homologs/extract_4d_sites_cds.py \
+            {input} fa \
+            {output} fa \
+        2> {log}
         """
 
 rule tree_supermatrix_prepare:

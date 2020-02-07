@@ -7,6 +7,8 @@ Example: we have a folder with multiple protein files, and we want the cds of
 every single msa as codons in a separate folder for post-processing.
 """
 
+# pylint: disable=no-name-in-module
+
 import sys
 
 from helpers import \
