@@ -13,11 +13,15 @@ tcoffee_translate(){
     cds=$1
     pep=$2
 
-    t_coffee -other_pg seq_reformat \
-        -in "$cds" \
-        -action +translate \
-        -output fasta_seq \
-        -out "$pep"
+    if [[ ! -e "$pep" ]] ; then
+
+        t_coffee -other_pg seq_reformat \
+            -in "$cds" \
+            -action +translate \
+            -output fasta_seq \
+            -out "$pep"
+    
+    fi
 
 }
 
@@ -27,14 +31,17 @@ tcoffee_align(){
 
     methods="muscle_msa mafftgins_msa t_coffee_msa kalign_msa"
 
-    t_coffee \
-        -seq "$pep" \
-        -method "$methods" \
-        -output=aln \
-        -outfile "$aln" \
-        -n_core 1 \
-        -quiet
+    if [[ ! -e "$aln" ]] ; then
+
+        t_coffee \
+            -seq "$pep" \
+            -method "$methods" \
+            -output=aln \
+            -outfile "$aln" \
+            -n_core 1 \
+            -quiet || true
     
+    fi
 }
 
 
@@ -42,12 +49,16 @@ tcoffee_evaluate(){
     aln=$1
     score_ascii=$2
 
-    t_coffee -evaluate \
-        -infile "$aln" \
-        -output=score_ascii \
-        -n_core 1 \
-        -outfile "$score_ascii" \
-        -quiet || true
+    if [[ ! -e "$score_ascii" ]] ; then
+
+        t_coffee -evaluate \
+            -infile "$aln" \
+            -output=score_ascii \
+            -n_core 1 \
+            -outfile "$score_ascii" \
+            -quiet || true
+    
+    fi
 
 }
 
@@ -57,13 +68,17 @@ tcoffee_backtranslate(){
     score_ascii=$3
     fasta=$4
 
-    t_coffee -other_pg seq_reformat \
-        -in "$aln" \
-        -in2 "$cds" \
-        -struc_in "$score_ascii" \
-        -struc_in_f number_aln \
-        -output tcs_column_filter9_fasta \
-        -out "$fasta"
+    if [[ ! -e "$fasta" ]] ; then
+
+        t_coffee -other_pg seq_reformat \
+            -in "$aln" \
+            -in2 "$cds" \
+            -struc_in "$score_ascii" \
+            -struc_in_f number_aln \
+            -output tcs_column_filter9_fasta \
+            -out "$fasta" || true
+
+    fi
 
 }
 
@@ -81,7 +96,7 @@ tcoffee(){
     tcoffee_evaluate "$aln" "$score_ascii"
     tcoffee_backtranslate "$aln" "$cds" "$score_ascii" "$cds_trimmed"
 
-    rm "$pep" "$aln" "$score_ascii"
+    rm --force "$pep" "$aln" "$score_ascii"
 
 }
 
@@ -95,6 +110,7 @@ export -f tcoffee
 mkdir --parents "$out_dir"
 
 find "$in_dir" -name "*.$in_ext" -type f \
+| sort --version-sort \
 | parallel --jobs "$threads" \
     tcoffee \
         "$in_dir/{/.}.$in_ext" \
