@@ -33,7 +33,7 @@ def filter_by_occupancy(filename_in, filename_out, min_occupancy=0.5):
     columns_to_keep = []
     for column_number, column in enumerate(columns):
         n_gaps = column.count('-')
-        if float(n_gaps) / float(n_sequences) <= 1 - min_occupancy:
+        if 1 - float(n_gaps) / float(n_sequences) >= min_occupancy:
             columns_to_keep.append(column_number)
     
     fasta_trimmed = {}
