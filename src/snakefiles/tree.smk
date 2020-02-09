@@ -97,19 +97,18 @@ rule tree_trim:
     conda: "tree.yml"
     shell:
         """
-        ./bin/pxclsq \
-            --seqf {input} \
-            --outf {output} \
-            --prop {params} \
+        python src/homologs/filter_by_occupancy.py \
+            {input.fasta} \
+            {output.fasta} \
+            {params} \
         2> {log} 1>&2
 
-        python2.7 src/homologs/fasta_to_phy.py \
+        python src/homologs/fasta_to_phy.py \
         < {output.fasta} \
         > {output.phy} \
         2>> {log}
-
-        rm phyx.logfile
         """
+
 
 
 rule tree_modeltestng:
