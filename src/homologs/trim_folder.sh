@@ -24,16 +24,18 @@ trim(){
     | tr "\t" "\n" \
     > "$file_out"
 
-    if [[ -s "$file_out" ]] ; then
+    if [[ ! -s "$file_out" ]] ; then
         rm "$file_out"
     fi
 
 }
 
+export -f trim
+
 find "$in_dir" -name "*.$in_ext" \
 | sort -V \
 | parallel --keep-order --jobs "$threads" \
-    pxclsq \
-        --seqf "$in_dir/{/.}.$in_ext" \
-        --outf "$out_dir/{/.}.$out_ext" \
-        --prop "$min_occupancy"
+    trim \
+        "$in_dir/{/.}.$in_ext" \
+        "$out_dir/{/.}.$out_ext" \
+        "$min_occupancy"
