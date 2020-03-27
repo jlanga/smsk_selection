@@ -1,0 +1,9 @@
+# Conda environment for selection tests
+---
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - paml
+    - ete3

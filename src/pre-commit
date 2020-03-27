@@ -14,17 +14,17 @@ set -euo pipefail
 # Pipeline
 do_clean() {
     snakemake --version
-    snakemake clean
+    snakemake clean -j 1
 }
 
 do_pipeline_dry_run() {
     snakemake --version
-    snakemake --dryrun --printshellcmds -j
+    snakemake --dryrun --printshellcmds -j 1
 }
 
 do_pipeline() {
     snakemake --version
-    snakemake --use-conda -j
+    snakemake --use-conda -j 4
 }
 
 

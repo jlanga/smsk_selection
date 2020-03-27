@@ -227,10 +227,10 @@ rule tree_exabayes:
             -w {params.out_dir} \
         2> {log} 1>&2
 
-        topologies=$(find {params.out_dir} -name "ExaBayes_topologies.run*")
+        topologies=$(find {params.out_dir} -name "ExaBayes_topologies.*")
         {params.sdsf} -f $topologies > {output.sdsf} 2>&1
 
-        parameters=$(find {params.out_dir} -name "ExaBayes_parameters.run*")
+        parameters=$(find {params.out_dir} -name "ExaBayes_parameters.*")
         {params.postprocparam} -n txt -f $parameters 2>>{log} 1>&2
         mv ExaBayes_parameterStatistics.txt {output.prostprocparam}
 
