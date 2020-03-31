@@ -34,7 +34,7 @@ tree:
         threads: 1
         bootstrap_replicates: 1000
     executables:
-        exabayes: "./bin/exabayes"
+        exabayes: "./bin/exabayes"  # "./bin/yggdrasil"
         sdsf: "./bin/sdsf"
         postprocparam: "./bin/postProcParam"
         tracer: "tracer"
@@ -46,6 +46,15 @@ tree:
         sampling_frequency: 500  # 1000 by default
         threads: 1
     outgroup: drer
+
+selection:
+    foreground_branches:
+        test:
+            species: "trur,gmor"
+            models: "M1 bsA bsA1"
+    minimum_foreground_species: 2
+    minimum_background_species: 2
+
 
 fastcodeml:
     maximizer: 22

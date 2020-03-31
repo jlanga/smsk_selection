@@ -25,3 +25,5 @@ HOMOLOGS_REFINE1 = HOMOLOGS + "refine1/"
 HOMOLOGS_REFINE2 = HOMOLOGS + "refine2/"
 
 TREE = "results/tree/"
+
+SELECTION = "results/selection/"

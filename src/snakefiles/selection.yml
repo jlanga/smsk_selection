@@ -1,9 +1,16 @@
 # Conda environment for selection tests
 ---
 channels:
+    - etetoolkit
     - conda-forge
     - bioconda
     - defaults
 dependencies:
-    - paml
-    - ete3
+    - ete_toolchain
+    - biopython
+    - pip
+    - six
+    - pyqt
+    - lxml
+    - pip:
+        - git+https://github.com/etetoolkit/ete
