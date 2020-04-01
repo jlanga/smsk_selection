@@ -59,7 +59,8 @@ rule selection_ete3_group:
             {output.ete3_folder} \
             {threads} \
             "{params.models}" \
-            {params.species}
+            {params.species} \
+        2> {log} 1>&2
         """
 
 
