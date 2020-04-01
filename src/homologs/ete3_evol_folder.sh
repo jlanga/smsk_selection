@@ -14,7 +14,7 @@ ete3_evol(){
 
     transcripts=$(python src/homologs/get_definers.py "$tree" "$species")
 
-    ete3 evol \
+    xvfb-run --auto-servernum ete3 evol \
         --resume \
         -t "$tree" \
         --alg "$msa" \

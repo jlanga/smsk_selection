@@ -53,6 +53,9 @@ rule selection_ete3_group:
         species = get_species
     shell:
         """
+
+        
+        
         bash src/homologs/ete3_evol_folder.sh \
             {input.tree_folder} \
             {input.msa_folder} \
