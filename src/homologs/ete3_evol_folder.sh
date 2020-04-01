@@ -8,6 +8,7 @@ ete3_evol(){
     tree=$1; shift
     msa=$1; shift
     image=$1; shift
+    codeml=$1; shift
     output=$1; shift
     species=$1; shift
     models=$*
@@ -20,6 +21,7 @@ ete3_evol(){
         --alg "$msa" \
         --models ${models[@]} \
         --image "$image" \
+        -o "$codeml" \
         --mark "$transcripts" \
         --cpu 1 \
         --resume \
@@ -34,7 +36,10 @@ cores=$4
 models=$5
 species=$6
 
-mkdir --parents "$output_folder"
+mkdir --parents \
+    "$output_folder/images" \
+    "$output_folder/values" \
+    "$output_folder/codeml"
 
 export -f ete3_evol
 
@@ -44,9 +49,8 @@ find "$tree_folder" -name "*.nwk" \
     ete3_evol \
         "$tree_folder/{/.}.nwk" \
         "$msa_folder/{/.}.fa" \
-        "$output_folder/{/.}.pdf" \
-        "$output_folder/{/.}.txt" \
+        "$output_folder/images/{/.}.pdf" \
+        "$output_folder/codeml/" \
+        "$output_folder/values/{/.}.txt" \
         "$species" \
         "$models"
-
-rm -rf /tmp/ete3-tmp
