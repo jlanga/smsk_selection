@@ -10,7 +10,7 @@ dependencies:
     - biopython
     - pip
     - six
-    - pyqt
+    - pyqt=4.11.4
     - lxml
     - parallel
     - pip:
