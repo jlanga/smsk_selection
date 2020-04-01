@@ -11,6 +11,7 @@ ete3_evol(){
     codeml=$1; shift
     output=$1; shift
     species=$1; shift
+    omega=$1; shift
     models=$*
 
     transcripts=$(python src/homologs/get_definers.py "$tree" "$species")
@@ -22,9 +23,11 @@ ete3_evol(){
         --models ${models[@]} \
         --image "$image" \
         -o "$codeml" \
+        --codeml_param "omega,$omega" \
         --mark "$transcripts" \
         --cpu 1 \
         --resume \
+        --codeml_binary "$PWD/bin/codeml" \
     > "$output" 
 
 }
@@ -43,14 +46,15 @@ mkdir --parents \
 
 export -f ete3_evol
 
-find "$tree_folder" -name "*.nwk" \
-| sort -V \
-| parallel --keep-order --jobs "$cores" \
+parallel --keep-order --jobs "$cores" \
     ete3_evol \
-        "$tree_folder/{/.}.nwk" \
-        "$msa_folder/{/.}.fa" \
-        "$output_folder/images/{/.}.pdf" \
+        "$tree_folder/{1/.}.nwk" \
+        "$msa_folder/{1/.}.fa" \
+        "$output_folder/images/{1/.}.{2}.pdf" \
         "$output_folder/codeml/" \
-        "$output_folder/values/{/.}.txt" \
+        "$output_folder/values/{1/.}.{2}.txt" \
         "$species" \
-        "$models"
+        "{2}" \
+        "$models" \
+::: "$(find $tree_folder -name '*.nwk' | sort -V )" \
+::: 0.5 1.0 1.5

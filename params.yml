@@ -51,7 +51,7 @@ selection:
     foreground_branches:
         test:
             species: "trur,gmor"
-            models: "M1 bsA bsA1"
+            models: "bsA bsA1"
     minimum_foreground_species: 2
     minimum_background_species: 2
 
