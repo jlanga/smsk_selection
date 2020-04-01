@@ -22,6 +22,7 @@ ete3_evol(){
         --image "$image" \
         --mark "$transcripts" \
         --cpu 1 \
+        --resume \
     > "$output" 
 
 }
