@@ -13,6 +13,10 @@ import sys
 from Bio import Phylo
 from Bio import AlignIO
 
+from helpers import \
+    fix_dir_path, \
+    process_folders
+
 def get_species_to_seqid(alignment):
     """Get the species to seqid dictionary:
     
@@ -103,28 +107,62 @@ def ete3_evol_prepare(
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 7:
+    if len(sys.argv) != 9:
         sys.stderr.write(
             "ERROR. Incorrect number of parameters. Example:\n"
-            "ete3_evol_prepare.py species_tree.nwk codon_alignment.fa "
-            "output.nwk human,chimp,bonobo 2 2\n"
+            "ete3_evol_prepare.py species_tree.nwk msa_folder msa_extension "
+            "output_folder output_extension human,chimp,bonobo 2 2\n"
         )
         sys.exit(1)
 
     TREE_IN_FN = sys.argv[1]
-    ALIGNMENT_IN_FN = sys.argv[2]
-    TREE_OUT_FN = sys.argv[3]
-    FOREGROUND_LIST = sys.argv[4].split(",")
-    MIN_FOREGROUND = int(sys.argv[5])
-    MIN_BACKGROUND = int(sys.argv[6])
+    MSA_DIR_IN = fix_dir_path(sys.argv[2])
+    MSA_EXT_IN = sys.argv[3]
+    TREE_DIR_OUT = fix_dir_path(sys.argv[4])
+    TREE_EXT_OUT = sys.argv[5]
+    FOREGROUND_LIST = sys.argv[6].split(",")
+    MIN_FOREGROUND = int(sys.argv[7])
+    MIN_BACKGROUND = int(sys.argv[8])
 
-    ete3_evol_prepare(
-        tree_in_fn=TREE_IN_FN,
-        alignment_in_fn=ALIGNMENT_IN_FN,
-        tree_out_fn=TREE_OUT_FN,
-        foreground_list=FOREGROUND_LIST,
-        min_foreground=MIN_FOREGROUND,
-        min_background=MIN_BACKGROUND
+    def ete3_evol_prepare_wrapper(file_in, file_out):
+        ete3_evol_prepare(
+            tree_in_fn=TREE_IN_FN,
+            alignment_in_fn=file_in,
+            tree_out_fn=file_out,
+            foreground_list=FOREGROUND_LIST,
+            min_foreground=MIN_FOREGROUND,
+            min_background=MIN_BACKGROUND
+        )
+    
+    process_folders(
+        MSA_DIR_IN, MSA_EXT_IN, TREE_DIR_OUT, TREE_EXT_OUT,
+        ete3_evol_prepare_wrapper
     )
 
 
+
+# if __name__ == '__main__':
+
+#     if len(sys.argv) != 7:
+#         sys.stderr.write(
+#             "ERROR. Incorrect number of parameters. Example:\n"
+#             "ete3_evol_prepare.py species_tree.nwk codon_alignment.fa "
+#             "output.nwk human,chimp,bonobo 2 2\n"
+#         )
+#         sys.exit(1)
+
+#     TREE_IN_FN = sys.argv[1]
+#     ALIGNMENT_IN_FN = sys.argv[2]
+#     TREE_OUT_FN = sys.argv[3]
+#     FOREGROUND_LIST = sys.argv[4].split(",")
+#     MIN_FOREGROUND = int(sys.argv[5])
+#     MIN_BACKGROUND = int(sys.argv[6])
+
+#     ete3_evol_prepare(
+#         tree_in_fn=TREE_IN_FN,
+#         alignment_in_fn=ALIGNMENT_IN_FN,
+#         tree_out_fn=TREE_OUT_FN,
+#         foreground_list=FOREGROUND_LIST,
+#         min_foreground=MIN_FOREGROUND,
+#         min_background=MIN_BACKGROUND
+#     )

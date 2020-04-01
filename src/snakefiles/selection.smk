@@ -18,14 +18,12 @@ rule selection_trees_group:
         species = get_species,
         minimum_foreground_species = params["selection"]["minimum_foreground_species"],
         minimum_background_species = params["selection"]["minimum_background_species"]
-    threads: MAX_THREADS
     shell:
         """
-        bash src/homologs/ete3_evol_prepare_folder.sh \
+        python src/homologs/ete3_evol_prepare_folder.py \
             {input.tree} \
             {input.msa_folder} fa \
             {output.tree_folder} nwk \
-            {threads} \
             {params.species} \
             {params.minimum_foreground_species} \
             {params.minimum_background_species} \
