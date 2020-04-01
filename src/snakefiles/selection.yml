@@ -12,5 +12,7 @@ dependencies:
     - six
     - pyqt
     - lxml
+    - libselinux
+    - parallel
     - pip:
         - git+https://github.com/etetoolkit/ete
