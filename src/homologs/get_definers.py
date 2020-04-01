@@ -25,7 +25,9 @@ def translate_target_sequences(tree, target_species):
     """
     species_to_transcript = get_species_to_transcript(tree)
     return {
-        species_to_transcript[species] for species in target_species
+        species_to_transcript[species]
+        for species in target_species 
+        if species in species_to_transcript
     }
 
 
