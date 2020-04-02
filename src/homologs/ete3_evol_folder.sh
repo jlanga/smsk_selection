@@ -58,17 +58,3 @@ find $tree_folder -name '*.nwk' | sort -V \
         "{2}" \
         "$models" \
 ::: 0.5 1.0 1.5
-
-
-# parallel --keep-order --jobs "$cores" \
-#     ete3_evol \
-#         "$tree_folder/{1/.}.nwk" \
-#         "$msa_folder/{1/.}.fa" \
-#         "$output_folder/images/{1/.}.{2}.pdf" \
-#         "$output_folder/codeml/" \
-#         "$output_folder/values/{1/.}.{2}.txt" \
-#         "$species" \
-#         "{2}" \
-#         "$models" \
-# ::: "$(find $tree_folder -name '*.nwk' | sort -V )" \
-# ::: 0.5 1.0 1.5
