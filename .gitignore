@@ -11,3 +11,4 @@ bin/px*
 data/busco
 *.pyc
 phyx.logfile
+*.o

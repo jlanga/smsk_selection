@@ -6,12 +6,17 @@ channels:
     - bioconda
     - defaults
 dependencies:
-    - ete_toolchain
     - biopython
-    - pip
-    - six
-    - pyqt=4.11.4
+    - ete_toolchain
     - lxml
     - parallel
+    - pip
+    - perl=5.22
+    - perl-bioperl
+    - prank
+    - pyqt=4.11.4
+    - six
+    - bioconda::t_coffee
+    - bioconda::trimal
     - pip:
         - git+https://github.com/etetoolkit/ete
