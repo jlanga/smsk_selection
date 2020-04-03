@@ -43,16 +43,13 @@ rule selection_ete3_group:
         msa_folder = HOMOLOGS_REFINE2 + "maxalign",
         tree_folder = SELECTION + "{group}/trees"
     output:
-        codeml = directory(SELECTION + "{group}/codeml"),
-        values = directory(SELECTION + "{group}/values"),
-        images = directory(SELECTION + "{group}/images"),
+        ete3_folder = directory(SELECTION + "{group}/ete3"),
         results = SELECTION + "{group}/ete3.tsv"
     log: SELECTION + "{group}/ete3.log"
     benchmark: SELECTION + "{group}/ete3.bmk"
     conda: "selection.yml"
     threads: MAX_THREADS
     params:
-        folder = SELECTION + "{group}",
         models = get_models,
         species = get_species
     shell:
@@ -60,14 +57,14 @@ rule selection_ete3_group:
         bash src/homologs/ete3_evol_folder.sh \
             {input.tree_folder} \
             {input.msa_folder} \
-            {params.folder} \
+            {output.ete3_folder} \
             {threads} \
             "{params.models}" \
             {params.species} \
         2> {log} 1>&2
 
         python src/homologs/parse_ete3_evol_folder.py \
-            {output.values} txt \
+            {output.ete3_folder}/values txt \
         > {output.results} 2>> {log}
         """
 
