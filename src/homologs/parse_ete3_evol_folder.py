@@ -38,7 +38,7 @@ def parse_ete3_evol_file(file_in):
 def parse_ete3_evol_folder(in_dir, in_ext):
     """Parse an entire folder"""
     sys.stdout.write("orthogroup\tstarting_omega\tmodel1\tmodel2\tp-value\n")
-    for file in os.listdir(in_dir):
+    for file in sorted(os.listdir(in_dir)):
         if file.endswith(in_ext):
             parse_ete3_evol_file(in_dir + "/" + file)
 

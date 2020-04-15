@@ -17,8 +17,8 @@ rule selection_trees_group:
     conda: "selection.yml"
     params:
         species = get_species,
-        minimum_foreground_species = params["selection"]["minimum_foreground_species"],
-        minimum_background_species = params["selection"]["minimum_background_species"]
+        min_foreground = params["selection"]["ete3"]["min_foreground"],
+        min_background = params["selection"]["ete3"]["min_background"]
     shell:
         """
         python src/homologs/ete3_evol_prepare_folder.py \
@@ -26,8 +26,8 @@ rule selection_trees_group:
             {input.msa_folder} fa \
             {output.tree_folder} nwk \
             {params.species} \
-            {params.minimum_foreground_species} \
-            {params.minimum_background_species} \
+            {params.min_foreground} \
+            {params.min_background} \
         2> {log} 1>&2
         """
 
@@ -65,6 +65,8 @@ rule selection_ete3_group:
             {params.species} \
         2> {log} 1>&2
 
+        touch {output.tsv}
+
         python src/homologs/parse_ete3_evol_folder.py \
             {output.ete3_folder}/values txt \
         > {output.tsv} 2>> {log}
@@ -79,6 +81,52 @@ rule selection_ete3:
         )
 
 
+# rule selection_fastcodeml1_group:
+#     input:
+#         tree = TREE + "exabayes/ExaBayes.rooted.nwk",
+#         msa_folder = HOMOLOGS_REFINE2 + "maxalign"
+#     output:
+#         results_folder = directory(SELECTION + "{group}/fastcodeml1"),
+#         results_tsv = SELECTION + "{group}/fastcodeml1.tsv"
+#     log: SELECTION + "{group}/fastcodeml1.log"
+#     benchmark: SELECTION + "{group}/fastcodeml1.bmk"
+#     conda: "selection.yml"
+#     threads: MAX_THREADS
+#     params:
+#         omega_zeros = params["selection"]["fastcodeml"]["omega_zeros"],
+#         target_species = get_species,
+#         min_foreground = params["selection"]["fastcodeml"]["min_foreground"],
+#         min_background = params["selection"]["fastcodeml"]["min_background"],
+#         binary = params["selection"]["fastcodeml"]["binary"]
+#     shell:
+#         """
+#         bash src/homologs/run_fastcodeml_folder.sh \
+#             --tree {input.tree} \
+#             --input-msa-folder {input.msa_folder} \
+#             --omega-zeros {params.omega_zeros} \
+#             --target-species {params.target_species} \
+#             --min-foreground {params.min_foreground} \
+#             --min-background {params.min_background} \
+#             --output-folder {output.results_folder} \
+#             --output-pvalues {output.results_tsv} \
+#             --jobs {threads} \
+#             --fastcodeml-binary {params.binary} \
+#         2> {log} 1>&2
+#         """
+
+
+# rule selection_fastcodeml1:
+#     input:
+#         expand(
+#             SELECTION + "{group}/fastcodeml1",
+#             group=params["selection"]["foreground_branches"]
+#         )
+
+
+
+
+
+
 rule selection_trees_filtered_group:
     input:
         tsv = SELECTION + "{group}/ete3.tsv",
@@ -88,7 +136,7 @@ rule selection_trees_filtered_group:
     log: SELECTION + "{group}/trees_filtered.log"
     benchmark: SELECTION + "{group}/trees_filtered.bmk"
     params:
-        evalue = params["selection"]["evalue"]
+        evalue = params["selection"]["ete3"]["evalue"]
     conda: "selection.yml"
     shell:
         """
