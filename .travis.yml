@@ -25,11 +25,11 @@ addons:
         - wget
         - xvfb
 
- cache:
-     timeout: 1000
-     directories:
-         - "$HOME/miniconda3_$TRAVIS_OS_NAME"
-         - "$TRAVIS_BUILD_DIR/.snakemake/conda"  # snakemake envs
+cache:
+    timeout: 1000
+    directories:
+        - "$HOME/miniconda3_$TRAVIS_OS_NAME"
+        - "$TRAVIS_BUILD_DIR/.snakemake/conda"  # snakemake envs
 
 before_install: |
     url="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
