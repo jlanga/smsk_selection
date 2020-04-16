@@ -7,7 +7,7 @@ ete3_evol(){
 
     tree=$1; shift
     msa=$1; shift
-    image=$1; shift
+    # image=$1; shift
     codeml=$1; shift
     output=$1; shift
     species=$1; shift
@@ -16,12 +16,13 @@ ete3_evol(){
 
     transcripts=$(python src/homologs/get_definers.py "$tree" "$species")
 
-    xvfb-run --auto-servernum ete3 evol \
+    #xvfb-run --auto-servernum \
+    ete3 evol \
         --resume \
         -t "$tree" \
         --alg "$msa" \
         --models ${models[@]} \
-        --image "$image" \
+        `# --image "$image"` \
         -o "$codeml" \
         --codeml_param "omega,$omega" \
         --mark "$transcripts" \
@@ -40,7 +41,7 @@ models=$5
 species=$6
 
 mkdir --parents \
-    "$output_folder/images" \
+    `# "$output_folder/images"` \
     "$output_folder/values" \
     "$output_folder/codeml"
 
@@ -51,7 +52,7 @@ find $tree_folder -name '*.nwk' | sort -V \
     ete3_evol \
         "$tree_folder/{1/.}.nwk" \
         "$msa_folder/{1/.}.fa" \
-        "$output_folder/images/{1/.}.{2}.pdf" \
+        `# "$output_folder/images/{1/.}.{2}.pdf"` \
         "$output_folder/codeml/" \
         "$output_folder/values/{1/.}.{2}.txt" \
         "$species" \
