@@ -66,6 +66,9 @@ install: |
     make
     cp px* ../../../bin/
     popd
+    pushd src/guidance.v2.02/programs
+    make -j 2
+    popd
 
 script: |
     echo $PATH
