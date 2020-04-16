@@ -12,3 +12,10 @@ data/busco
 *.pyc
 phyx.logfile
 *.o
+src/guidance.v2.02/libs/phylogeny/libEvolTree.a
+src/guidance.v2.02/programs/isEqualTree/isEqualTree
+src/guidance.v2.02/programs/isEqualTree/libisEqualTree.a
+src/guidance.v2.02/programs/removeTaxa/libremoveTaxa.a
+src/guidance.v2.02/programs/removeTaxa/removeTaxa
+src/guidance.v2.02/programs/semphy/libSEMPHY.a
+src/guidance.v2.02/programs/semphy/semphy
