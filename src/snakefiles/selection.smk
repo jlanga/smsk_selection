@@ -313,3 +313,30 @@ rule selection_trimal:
             SELECTION + "{group}/trimal",
             group=params["selection"]["foreground_branches"]
         )
+
+
+rule selection_maxalign_group:
+    input:
+        trimal_folder = SELECTION + "{group}/trimal"
+    output:
+        maxalign_folder = directory(SELECTION + "{group}/maxalign")
+    log: SELECTION + "{group}/maxalign.log"
+    benchmark: SELECTION + "{group}/maxalign.bmk"
+    conda: "selection.yml"
+    threads: MAX_THREADS
+    shell:
+        """
+        bash src/homologs/maxalign_folder.sh \
+            {input} fa \
+            {output} fa \
+            {threads} \
+        2> {log} 1>&2
+        """
+
+
+rule selection_maxalign:
+    input:
+        expand(
+            SELECTION + "{group}/maxalign",
+            group=params["selection"]["foreground_branches"]
+        )

@@ -1,25 +1,26 @@
 # Conda environment for selection tests
 ---
 channels:
-    - etetoolkit
+    # - etetoolkit
     - conda-forge
     - bioconda
     - defaults
 dependencies:
     - biopython
     # - ete_toolchain
-    - lxml
+    - lxml  # ete
     - parallel
     - pip
-    - perl=5.22
+    - perl=5.22  # maxalign, guidance
     - perl-bioperl
     - prank
-    - pyqt=4.11.4
-    - six
+    - pyqt=4.11.4  # ete
+    - six  # ete
     - scipy
     - trimal
-    - bioconda::t_coffee
-    - bioconda::trimal
-    - bioconda::paml
+    - t_coffee
+    - trimal
+    - paml
+    - seqtk  # maxalign
     - pip:
         - git+https://github.com/etetoolkit/ete
