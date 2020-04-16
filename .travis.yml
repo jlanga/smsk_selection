@@ -69,7 +69,6 @@ install: |
     pushd src/guidance.v2.02/
     make -j 2
     popd
-    parallel --cite
 
 script: |
     echo $PATH
