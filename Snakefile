@@ -35,4 +35,4 @@ rule all:
         # rules.busco.input,
         # rules.homologs.input
         # rules.tree.input,
-        rules.selection_trimal.input
+        rules.selection.maxalign.input
