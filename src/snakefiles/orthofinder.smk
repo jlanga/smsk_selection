@@ -32,6 +32,8 @@ rule orthofinder_groups:
     conda: "orthofinder.yml"
     shell:
         """
+        rm -rf {ORTHOFINDER}/groups  # Sometimes complains because it exists
+
         orthofinder \
             --algthreads {threads} \
             --threads {threads} \
