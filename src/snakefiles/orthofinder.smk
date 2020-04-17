@@ -32,8 +32,9 @@ rule orthofinder_groups:
     conda: "orthofinder.yml"
     shell:
         """
-        rm -rf {ORTHOFINDER}/groups  # Sometimes complains because it exists
-
+        # Sometimes complains because it exists
+        rm -rf {ORTHOFINDER}/OrthoFinder/Results_groups
+        
         orthofinder \
             --algthreads {threads} \
             --threads {threads} \
@@ -55,6 +56,9 @@ rule orthofinder_trees:
     conda: "orthofinder.yml"
     shell:
         """
+        # Sometimes complains because it exists
+        rm -rf {ORTHOFINDER}/OrthoFinder/Results_trees
+
         orthofinder \
             --only-trees \
             --algthreads 4 \
@@ -76,6 +80,9 @@ rule orthofinder_orthologues:
     conda: "orthofinder.yml"
     shell:
         """
+        # Sometimes complains because it exists
+        rm -rf {ORTHOFINDER}/OrthoFinder/Results_orthologues
+
         orthofinder \
             --algthreads {threads} \
             --threads {threads} \
