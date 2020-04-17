@@ -21,4 +21,4 @@ dependencies:
     - paml
     - seqtk  # maxalign
     - pip:
-        - git+https://github.com/etetoolkit/ete
+          - git+https://github.com/etetoolkit/ete

@@ -61,8 +61,8 @@ rule selection_ete3_group:
             {input.msa_folder} \
             {output.ete3_folder} \
             {threads} \
-            "{params.models}" \
             {params.species} \
+            {params.models} \
         2> {log} 1>&2
 
         touch {output.tsv}

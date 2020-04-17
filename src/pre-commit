@@ -58,6 +58,7 @@ do_shellcheck(){
         -name "*.sh" \
         -not -path "src/exabayes-1.5/*" \
         -not -path "src/phyx-1.01/*" \
+        -not -path "src/guidance.v2.02/*" \
         -print0 \
     | xargs --null shellcheck
 }
