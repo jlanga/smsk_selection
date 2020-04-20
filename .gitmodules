@@ -1,0 +1,3 @@
+[submodule "src/fastcodeml"]
+	path = src/fastcodeml
+	url = https://gitlab.isb-sib.ch/phylo/fastcodeml

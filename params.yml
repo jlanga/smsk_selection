@@ -66,7 +66,12 @@ selection:
         sequence_cutoff: 0.6
         column_cutoff: 0.93
         sequence_type: codon
-
+    fastcodeml:
+        min_foreground: 2  # Number of species needed for the foreground branch
+        min_background: 2  # Number of species needed for the background branch
+        omega_zeros: "0.5,1.0,1.5"  # Starting values for ML optimization
+        evalue: 0.05  # e-value to say that a test is significant
+        binary: "bin/fast"
 
 fastcodeml:
     maximizer: 22

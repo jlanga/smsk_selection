@@ -81,52 +81,6 @@ rule selection_ete3:
         )
 
 
-# rule selection_fastcodeml1_group:
-#     input:
-#         tree = TREE + "exabayes/ExaBayes.rooted.nwk",
-#         msa_folder = HOMOLOGS_REFINE2 + "maxalign"
-#     output:
-#         results_folder = directory(SELECTION + "{group}/fastcodeml1"),
-#         results_tsv = SELECTION + "{group}/fastcodeml1.tsv"
-#     log: SELECTION + "{group}/fastcodeml1.log"
-#     benchmark: SELECTION + "{group}/fastcodeml1.bmk"
-#     conda: "selection.yml"
-#     threads: MAX_THREADS
-#     params:
-#         omega_zeros = params["selection"]["fastcodeml"]["omega_zeros"],
-#         target_species = get_species,
-#         min_foreground = params["selection"]["fastcodeml"]["min_foreground"],
-#         min_background = params["selection"]["fastcodeml"]["min_background"],
-#         binary = params["selection"]["fastcodeml"]["binary"]
-#     shell:
-#         """
-#         bash src/homologs/run_fastcodeml_folder.sh \
-#             --tree {input.tree} \
-#             --input-msa-folder {input.msa_folder} \
-#             --omega-zeros {params.omega_zeros} \
-#             --target-species {params.target_species} \
-#             --min-foreground {params.min_foreground} \
-#             --min-background {params.min_background} \
-#             --output-folder {output.results_folder} \
-#             --output-pvalues {output.results_tsv} \
-#             --jobs {threads} \
-#             --fastcodeml-binary {params.binary} \
-#         2> {log} 1>&2
-#         """
-
-
-# rule selection_fastcodeml1:
-#     input:
-#         expand(
-#             SELECTION + "{group}/fastcodeml1",
-#             group=params["selection"]["foreground_branches"]
-#         )
-
-
-
-
-
-
 rule selection_trees_filtered_group:
     input:
         tsv = SELECTION + "{group}/ete3.tsv",
@@ -338,5 +292,47 @@ rule selection_maxalign:
     input:
         expand(
             SELECTION + "{group}/maxalign",
+            group=params["selection"]["foreground_branches"]
+        )
+
+
+rule selection_fastcodeml_group:
+    input:
+        tree = TREE + "exabayes/ExaBayes.rooted.nwk",
+        maxalign_folder = SELECTION + "{group}/maxalign"
+    output:
+        results_folder = directory(SELECTION + "{group}/fastcodeml"),
+        results_tsv = SELECTION + "{group}/fastcodeml.tsv"
+    log: SELECTION + "{group}/fastcodeml.log"
+    benchmark: SELECTION + "{group}/fastcodeml.bmk"
+    conda: "selection.yml"
+    threads: MAX_THREADS
+    params:
+        omega_zeros = params["selection"]["fastcodeml"]["omega_zeros"],
+        target_species = get_species,
+        min_foreground = params["selection"]["fastcodeml"]["min_foreground"],
+        min_background = params["selection"]["fastcodeml"]["min_background"],
+        binary = params["selection"]["fastcodeml"]["binary"]
+    shell:
+        """
+        bash src/homologs/run_fastcodeml_folder.sh \
+            --tree {input.tree} \
+            --input-msa-folder {input.maxalign_folder} \
+            --omega-zeros {params.omega_zeros} \
+            --target-species {params.target_species} \
+            --min-foreground {params.min_foreground} \
+            --min-background {params.min_background} \
+            --output-folder {output.results_folder} \
+            --output-pvalues {output.results_tsv} \
+            --jobs {threads} \
+            --fastcodeml-binary {params.binary} \
+        2> {log} 1>&2
+        """
+
+
+rule selection_fastcodeml:
+    input:
+        expand(
+            SELECTION + "{group}/fastcodeml",
             group=params["selection"]["foreground_branches"]
         )
