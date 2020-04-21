@@ -14,6 +14,7 @@ addons:
         - autoconf-archive
         - automake
         - cmake
+        - libboost-all-dev
         - libtool
         - liblapack-dev
         - libatlas-cpp-0.6-dev
