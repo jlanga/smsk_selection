@@ -21,6 +21,7 @@ addons:
         - libnlopt0
         - libarmadillo-dev
         - libopenmpi-dev
+        - libopenblas-dev
         - openmpi-bin
         - wget
         - xvfb
@@ -74,7 +75,8 @@ install: |
     # fastcodeml
     pushd src/fastcodeml
     MATH_LIB_NAMES="openblas;lapack" cmake . -DUSE_LAPACK:BOOL=ON
-    cp --force fast ../../bin/
+    make -j 2
+    cp fast ../../bin/
     popd
 
 script: |
