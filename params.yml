@@ -45,13 +45,14 @@ tree:
         generations: 1000  # 1e6
         sampling_frequency: 500  # 1000 by default
         threads: 1
-    outgroup: drer
+    outgroup: eenc
 
 selection:
     foreground_branches:
-        test:
-            species: "trur,gmor"
+       clupeinae:
+            species: "char,cpal"
             models: "bsA bsA1"
+
     ete3:
         min_foreground: 2  # Number of species needed for the foreground branch
         min_background: 2  # Number of species needed for the background branch
@@ -71,7 +72,7 @@ selection:
         min_background: 2  # Number of species needed for the background branch
         omega_zeros: "0.5,1.0,1.5"  # Starting values for ML optimization
         evalue: 0.05  # e-value to say that a test is significant
-        binary: "bin/fast"
+        binary: "./bin/fast"
 
 fastcodeml:
     maximizer: 22
