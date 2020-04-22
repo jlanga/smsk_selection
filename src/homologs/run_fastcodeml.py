@@ -126,6 +126,7 @@ def clean_msa_names(msa):
         sequence.id = sequence.id.replace("@", "_", 1)
     return msa
 
+
 def clean_tree_names(tree):
     """Remove strange characters in tree names (for fastcodeml)
     
@@ -135,6 +136,7 @@ def clean_tree_names(tree):
     for leaf in tree.get_terminals():
         leaf.name = leaf.name.replace("@", "_", 1)
     return tree
+
 
 def write_phy(msa, fileout):
     """Write the msa in a nonstadard phylip format: One line per record"""
@@ -156,7 +158,7 @@ def run_fastcodeml(
         "--only-hyp", str(hypothesis),
         "--init-param", f"w0={omega_zero}",
         "--init-param", f"p0=0.1",
-        "--branch-lengths-fixed",
+        #"--branch-lengths-fixed",
         "--seed", "42",
         f"{out_prefix}.nwk", 
         f"{out_prefix}.phy"
@@ -174,7 +176,7 @@ def write_pvalues(out_prefix, omegas={0.5, 1.0, 1.5}, fastcodeml_binary="fast"):
     """Run fastcodeml using multiple starting omegas and both hypothesis"""
     with open(f"{out_prefix}.tsv", "w") as tsv_out:
         
-        tsv_out.write(f"prefix\tomega_zero\tlnl0\tlnl1\tl\tp_value\n")
+        tsv_out.write(f"orthogroup\tomega_zero\tlnL0\tlnL1\tl\tpvalue\n")
         
         for omega_zero in omegas:
             lnl0 = run_fastcodeml(
@@ -194,12 +196,11 @@ def write_pvalues(out_prefix, omegas={0.5, 1.0, 1.5}, fastcodeml_binary="fast"):
                 fastcodeml_binary=fastcodeml_binary
             )
             delta_l = 2 * abs(lnl1 -lnl0)
-            p_value = 1 - chi2.cdf(delta_l, 1)
+            pvalue = 1 - chi2.cdf(delta_l, 1)
+            group = out_prefix.split("/")[-1]
             tsv_out.write(
-                f"{out_prefix}\t{omega_zero}\t{lnl0}\t{lnl1}\t{delta_l}\t"
-                f"{p_value}\n"
+                f"{group}\t{omega_zero}\t{lnl0}\t{lnl1}\t{delta_l}\t{pvalue}\n"
             )
-
 
 
 def parse_arguments():
@@ -261,7 +262,6 @@ def parse_arguments():
     )
 
     return vars(parser.parse_args())
-
 
 
 if __name__ == '__main__':

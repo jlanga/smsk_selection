@@ -17,7 +17,6 @@ dependencies:
     - scipy
     - trimal
     - t_coffee
-    - trimal
     - paml
     - seqtk  # maxalign
     - pip:

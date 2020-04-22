@@ -100,7 +100,7 @@ find "$INPUT_MSA_FOLDER" -type f -name "*.fa" \
         --output-prefix "$OUTPUT_FOLDER/{/.}" \
         --fastcodeml-binary "$FASTCODEML_BINARY"
 
-printf "prefix\tomega_zero\tlnl0\tlnl1\tl\tp_value\n" > "$OUTPUT_PVALUES"
+printf "orthogroup\tomega_zero\tlnL0\tlnL1\tl\tpvalue\n" > "$OUTPUT_PVALUES"
 find "$OUTPUT_FOLDER" -name "*.tsv" -type f \
 | sort -V \
 | xargs --max-lines=1 tail -n+2 \

@@ -329,10 +329,36 @@ rule selection_fastcodeml_group:
         2> {log} 1>&2
         """
 
-
 rule selection_fastcodeml:
     input:
         expand(
             SELECTION + "{group}/fastcodeml",
             group=params["selection"]["foreground_branches"]
         )
+
+
+# rule selection_correction_group:
+#     input:
+#         tsv_ete = SELECTION + "{group}/ete3.tsv",
+#         tsv_fastcodeml = SELECTION + "{group}/fastcodeml.tsv"
+#     output:
+#         tsv_corrected = SELECTION + "{group}/pvalues_bh.tsv"
+#     log: SELECTION + "{group}/pvalues_bh.log"
+#     benchmark: SELECTION + "{group}/pvalues_bh.bmk"
+#     conda: "selection.yml"
+#     shell:
+#         """
+#         Rscript src/homologs/correct_pvalues.R \
+#             --ete-tsv {input.tsv_ete} \
+#             --fastcodeml-tsv {input.tsv_fastcodeml} \
+#             --output {output.tsv_corrected} \
+#         2> {log} 1>&2 
+#         """
+
+
+# rule selection_correction:
+#     input:
+#         expand(
+#             SELECTION + "{group}/pvalues_bh.tsv",
+#             group=params["selection"]["foreground_branches"]
+#         )
