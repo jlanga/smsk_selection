@@ -25,7 +25,7 @@ addons:
         - libopenblas-dev
         - openmpi-bin
         - wget
-        - xvfb
+        # - xvfb
 
 cache:
     timeout: 1000
@@ -54,6 +54,7 @@ before_install: |
     fi
 
 install: |
+    # conda
     export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
     echo "$PATH"
     conda config --add channels defaults
@@ -62,6 +63,7 @@ install: |
     conda install --quiet --yes --channel bioconda snakemake=5.12.3
     snakemake --use-conda --create-envs-only
     conda clean --all --yes
+    # Non-conda software
     mkdir -p bin/
     # phyx
     pushd src/phyx-1.01/src
