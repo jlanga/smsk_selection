@@ -5,7 +5,6 @@ def get_models(wildcards):
 def get_species(wildcards):
     return params["selection"]["foreground_branches"][wildcards.group]["species"]
 
-
 rule selection_trees_group:
     input:
         tree = TREE + "exabayes/ExaBayes.rooted.nwk",
@@ -90,7 +89,8 @@ rule selection_trees_filtered_group:
     log: SELECTION + "{group}/trees_filtered.log"
     benchmark: SELECTION + "{group}/trees_filtered.bmk"
     params:
-        evalue = params["selection"]["ete3"]["evalue"]
+        evalue = params["selection"]["ete3"]["evalue"],
+        n_tests = len(params["selection"]["ete3"]["omega_zeros"].split(","))
     conda: "selection.yml"
     shell:
         """
@@ -99,6 +99,7 @@ rule selection_trees_filtered_group:
             {params.evalue} \
             {input.tree_folder} \
             {output.tree_folder} \
+            {params.n_tests} \
         2> {log} 1>&2
         """
 
