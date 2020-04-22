@@ -196,7 +196,7 @@ rule selection_guidance_group:
         (find {input.folder} -type f -name "*.fa" \
         | sort --version-sort \
         | parallel \
-            --keep-order \
+            `#--keep-order` \
             --jobs {threads} \
             perl -I "$PERLLIB" src/guidance.v2.02/www/Guidance/guidance.pl \
                 --seqFile {input.folder}/{{/.}}.fa \
@@ -252,7 +252,7 @@ rule selection_trimal_group:
         (find {input.msa_folder} -name "*.fa" \
         | sort --version-sort \
         | parallel \
-            --keep-order \
+            `#--keep-order` \
             --jobs {threads} \
             trimal \
                 -in {input.msa_folder}/{{/.}}.fa \

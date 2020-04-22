@@ -52,7 +52,7 @@ export -f ete3_evol
 
 find "$tree_folder" -name '*.nwk' \
 | sort -V \
-| parallel -a - --keep-order --jobs "$cores" \
+| parallel -a - `#--keep-order` --jobs "$cores" \
     ete3_evol \
         "$tree_folder/{1/.}.nwk" \
         "$msa_folder/{1/.}.fa" \
