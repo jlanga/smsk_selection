@@ -213,7 +213,7 @@ rule selection_guidance_group:
         2>> {log} 1>&2
         
         # Remove dirs
-        # find {output.folder}/ -type d | sort -V | xargs rm -rf 2>> {log} 1>&2
+        ls -1d {output.folder}/*/ | xargs rm -rf 2>> {log} 1>&2
         """
 
 
