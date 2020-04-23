@@ -197,13 +197,14 @@ rule selection_guidance_group:
         | sort --version-sort \
         | parallel \
             `#--keep-order` \
-            --jobs {threads} \
+            --jobs 1 \
             perl -I "$PERLLIB" src/guidance.v2.02/www/Guidance/guidance.pl \
                 --seqFile {input.folder}/{{/.}}.fa \
                 --msaProgram {params.msa_program} \
                 --seqType {params.sequence_type} \
                 --outDir $(readlink --canonicalize {output.folder})/{{/.}} \
                 --program {params.program} \
+                --proc_num {threads} \
                 --bootstraps {params.bootstraps} \
                 --genCode {params.genetic_code} \
                 --outOrder as_input \
