@@ -182,11 +182,7 @@ rule selection_guidance_group:
     params:
         msa_program = params["selection"]["guidance"]["msa_program"],
         program = params["selection"]["guidance"]["program"],
-        bootstraps = params["selection"]["guidance"]["bootstraps"],
-        genetic_code = params["selection"]["guidance"]["genetic_code"],
-        sequence_cutoff = params["selection"]["guidance"]["sequence_cutoff"],
-        sequence_type = params["selection"]["guidance"]["sequence_type"],
-        column_cutoff = params["selection"]["guidance"]["column_cutoff"]
+        msa_param = params["selection"]["guidance"]["msa_param"]
     shell:
         """
         PERLLIB="$CONDA_PREFIX/lib/perl5/site_perl/5.22.0"
@@ -196,36 +192,28 @@ rule selection_guidance_group:
         (find {input.folder} -type f -name "*.fa" \
         | sort --version-sort \
         | parallel \
-            `#--keep-order` \
             --jobs 1 \
             perl -I "$PERLLIB" src/guidance.v2.02/www/Guidance/guidance.pl \
                 --seqFile {input.folder}/{{/.}}.fa \
                 --msaProgram {params.msa_program} \
-                --seqType {params.sequence_type} \
-                --outDir $(readlink --canonicalize {output.folder})/{{/.}} \
+                --MSA_Param {params.msa_param} \
+                --seqType codon \
+                --outDir $PWD/{output.folder}/{{/.}} \
                 --program {params.program} \
                 --proc_num {threads} \
-                --bootstraps {params.bootstraps} \
-                --genCode {params.genetic_code} \
-                --outOrder as_input \
-                --seqCutoff {params.sequence_cutoff} \
-                --colCutoff {params.column_cutoff} \
-                --dataset {{/.}}) \
-        2> {log} 1>&2
+                --genCode 1 \
+        )2> {log} 1>&2
 
         # Extract output files
-        find {output.folder} -type f -name "*.aln.Sorted.With_Names" \
+        ls -1 {output.folder} \
         | parallel \
             mv \
-                {{}} \
-                {output.folder}/
-
-        # Rename them
-        find {output.folder} -type f -name "*.aln.Sorted.With_Names" \
-        | xargs rename.ul .{params.msa_program}.aln.Sorted.With_Names .fa 
+                {output.folder}/{{}}/*.aln.With_Names \
+                {output.folder}/{{}}.fa \
+        2>> {log} 1>&2
         
         # Remove dirs
-        find {output.folder}/* -type d | sort -V | xargs rm -rf 
+        # find {output.folder}/ -type d | sort -V | xargs rm -rf 2>> {log} 1>&2
         """
 
 
@@ -334,7 +322,7 @@ rule selection_fastcodeml_group:
 rule selection_fastcodeml:
     input:
         expand(
-            SELECTION + "{group}/fastcodeml",
+            SELECTION + "{group}/fastcodeml.tsv",
             group=params["selection"]["foreground_branches"]
         )
 

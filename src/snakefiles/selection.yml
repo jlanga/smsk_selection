@@ -10,7 +10,7 @@ dependencies:
     - parallel
     - pip
     - perl=5.22  # maxalign, guidance
-    - perl-bioperl
+    - perl-bioperl  # guidance
     - prank
     - pyqt=4.11.4  # ete
     - six  # ete
@@ -19,5 +19,8 @@ dependencies:
     - t_coffee
     - paml
     - seqtk  # maxalign
+    - mafft  # guidance
+    - clustalw  # guidance
+    - ruby
     - pip:
           - git+https://github.com/etetoolkit/ete
