@@ -327,28 +327,31 @@ rule selection_fastcodeml:
         )
 
 
-# rule selection_correction_group:
-#     input:
-#         tsv_ete = SELECTION + "{group}/ete3.tsv",
-#         tsv_fastcodeml = SELECTION + "{group}/fastcodeml.tsv"
-#     output:
-#         tsv_corrected = SELECTION + "{group}/pvalues_bh.tsv"
-#     log: SELECTION + "{group}/pvalues_bh.log"
-#     benchmark: SELECTION + "{group}/pvalues_bh.bmk"
-#     conda: "selection.yml"
-#     shell:
-#         """
-#         Rscript src/homologs/correct_pvalues.R \
-#             --ete-tsv {input.tsv_ete} \
-#             --fastcodeml-tsv {input.tsv_fastcodeml} \
-#             --output {output.tsv_corrected} \
-#         2> {log} 1>&2 
-#         """
+rule selection_pcorrection_group:
+    input:
+        tsv_ete = SELECTION + "{group}/ete3.tsv",
+        tsv_fastcodeml = SELECTION + "{group}/fastcodeml.tsv"
+    output:
+        tsv_corrected = SELECTION + "{group}/pcorrection.tsv"
+    log: SELECTION + "{group}/pcorrection.log"
+    benchmark: SELECTION + "{group}/pcorrection.bmk"
+    conda: "selection.yml"
+    params:
+        pvalue = params["selection"]["correction"]["pvalue"]
+    shell:
+        """
+        Rscript src/homologs/correct_pvalues.R \
+            --ete {input.tsv_ete} \
+            --fastcodeml {input.tsv_fastcodeml} \
+            --output {output.tsv_corrected} \
+            --pvalue {params.pvalue} \
+        2> {log} 1>&2 
+        """
 
 
-# rule selection_correction:
-#     input:
-#         expand(
-#             SELECTION + "{group}/pvalues_bh.tsv",
-#             group=params["selection"]["foreground_branches"]
-#         )
+rule selection_pcorrection:
+    input:
+        expand(
+            SELECTION + "{group}/pcorrection.tsv",
+            group=params["selection"]["foreground_branches"]
+        )

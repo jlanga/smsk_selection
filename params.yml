@@ -68,3 +68,5 @@ selection:
         omega_zeros: "0.5,1.0,1.5"  # Starting values for ML optimization
         evalue: 0.05  # e-value to say that a test is significant
         binary: "./bin/fast"
+    correction:
+        pvalue: 0.05
