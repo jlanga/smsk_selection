@@ -20,3 +20,6 @@ src/guidance.v2.02/programs/removeTaxa/removeTaxa
 src/guidance.v2.02/programs/semphy/libSEMPHY.a
 src/guidance.v2.02/programs/semphy/semphy
 .Rproj.user
+.RData
+.Rhistory
+smsk_orthofinder.Rproj
