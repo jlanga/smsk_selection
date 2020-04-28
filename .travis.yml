@@ -34,64 +34,16 @@ cache:
         - "$TRAVIS_BUILD_DIR/.snakemake/conda"  # snakemake envs
 
 before_install: |
-    url="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-    if [[ -d "$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin ]]; then
-        echo "miniconda already installed."
-    else
-        echo "Installing miniconda."
-        mkdir -p "$HOME"/download
-        wget \
-            --continue \
-            --output-document "$HOME"/download/miniconda_"$TRAVIS_OS_NAME".sh \
-            $url
-        chmod +x "$HOME"/download/miniconda_"$TRAVIS_OS_NAME".sh
-        "$HOME"/download/miniconda_"$TRAVIS_OS_NAME".sh \
-            -u \
-            -b \
-            -p "$HOME"/miniconda3_"$TRAVIS_OS_NAME"
-        "$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin/conda clean --all --yes
-        echo "local_repodata_ttl: 1800" >> ~/.condarc
-    fi
+    bash .travis/before_install.sh
 
 install: |
-    # conda
-    export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
-    echo "$PATH"
-    conda config --add channels defaults
-    conda config --add channels conda-forge
-    conda config --add channels bioconda
-    conda install --quiet --yes --channel bioconda snakemake=5.12.3
-    snakemake --use-conda --create-envs-only
-    conda clean --all --yes
-    # Non-conda software
-    mkdir -p bin/
-    # phyx
-    pushd src/phyx-1.01/src
-    ./configure
-    make
-    cp px* ../../../bin/
-    popd
-    # guidance
-    pushd src/guidance.v2.02/
-    make -j 2
-    popd
-    # fastcodeml
-    pushd src/fastcodeml
-    MATH_LIB_NAMES="openblas;lapack" cmake . -DUSE_LAPACK:BOOL=ON
-    make -j 2
-    cp fast ../../bin/
-    popd
+    bash .travis/install.sh
 
 script: |
-    echo $PATH
-    python --version
-    export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
-    snakemake --use-conda --jobs 2 --show-failed-logs
+    bash .travis/script.sh
 
 before_cache: |
-    snakemake --cleanup-conda
-    conda clean --all --yes
-    rm -rf results/
-    rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
+    bash .travis/before_cache.sh
 
 # after_failure:
+    # bash .travis/after_failure.sh
