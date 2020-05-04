@@ -1,3 +1,4 @@
 .git
 .snakemake
 results
+data/busco/
