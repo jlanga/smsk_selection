@@ -11,9 +11,9 @@ RUN apt update \
     automake \
     autotools-dev \
     build-essential \
+    cmake \
     curl \
     git \
-    cmake \
     libarmadillo-dev \
     libatlas-cpp-0.6-dev \
     libboost-all-dev \

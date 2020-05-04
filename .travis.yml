@@ -6,26 +6,26 @@ language: bash
 
 addons:
     apt_packages:
-        - build-essential
-        - git
-        - curl
-        - autotools-dev
         - autoconf
         - autoconf-archive
         - automake
+        - autotools-dev
+        - build-essential
         - cmake
-        - libboost-all-dev
-        - libtool
-        - liblapack-dev
-        - libatlas-cpp-0.6-dev
-        - libnlopt-dev
-        - libnlopt0
+        - curl
+        - git
         - libarmadillo-dev
+        - libatlas-cpp-0.6-dev
+        - libboost-all-dev
+        - liblapack-dev
+        - libnlopt0
+        - libnlopt-dev
         - libopenmpi-dev
         - libopenblas-dev
+        - libtool
         - openmpi-bin
-        - wget
         - tzdata
+        - wget
         - xvfb
 
 cache:
