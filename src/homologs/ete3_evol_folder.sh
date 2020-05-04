@@ -62,4 +62,4 @@ find "$tree_folder" -name '*.nwk' \
         "$species" \
         "{2}" \
         "${models[@]}" \
-::: 0.5 1.0 1.5 || True
+::: 0.5 1.0 1.5
