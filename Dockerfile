@@ -43,3 +43,7 @@ RUN \
     conda config --add channels bioconda && \
     conda install --yes --channel bioconda snakemake-minimal=5.15 pandas && \
     conda clean --all --yes
+
+RUN \
+    mkdir /.conda \
+    && chmod ugo+rwx /.conda
