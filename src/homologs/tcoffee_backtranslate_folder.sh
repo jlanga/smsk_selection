@@ -20,6 +20,9 @@ tcoffee_backtranslate(){
 
     if [[ ! -e "$fasta" ]] ; then
 
+        HOME_4_TCOFFEE=$(pwd)
+        export HOME_4_TCOFFEE
+
         t_coffee -other_pg seq_reformat \
             -in "$aln" \
             -in2 "$cds" \

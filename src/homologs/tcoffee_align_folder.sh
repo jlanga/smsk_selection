@@ -17,6 +17,9 @@ tcoffee_align(){
 
     if [[ ! -e "$aln" ]] ; then
 
+        HOME_4_TCOFFEE=$(pwd)
+        export HOME_4_TCOFFEE
+
         t_coffee \
             -seq "$pep" \
             -method "$methods" \

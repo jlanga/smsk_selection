@@ -15,6 +15,9 @@ tcoffee_evaluate(){
 
     if [[ ! -e "$score_ascii" ]] ; then
 
+        HOME_4_TCOFFEE=$(pwd)
+        export HOME_4_TCOFFEE
+
         t_coffee -evaluate \
             -infile "$aln" \
             -output=score_ascii \

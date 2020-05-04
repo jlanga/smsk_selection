@@ -14,6 +14,9 @@ tcoffee_translate(){
 
     if [[ ! -e "$pep" ]] ; then
 
+        HOME_4_TCOFFEE=$(pwd)
+        export HOME_4_TCOFFEE
+
         t_coffee -other_pg seq_reformat \
             -in "$cds" \
             -action +translate \
