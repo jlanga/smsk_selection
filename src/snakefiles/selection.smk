@@ -182,25 +182,28 @@ rule selection_guidance_group:
     params:
         msa_program = params["selection"]["guidance"]["msa_program"],
         program = params["selection"]["guidance"]["program"],
-        msa_param = params["selection"]["guidance"]["msa_param"]
+        msa_param = params["selection"]["guidance"]["msa_param"],
+        bootstraps = params["selection"]["guidance"]["bootstraps"]
     shell:
         """
         PERLLIB="$CONDA_PREFIX/lib/perl5/site_perl/5.22.0"
 
         mkdir --parents {output.folder}
 
-        (find {input.folder} -type f -name "*.fa" \
-        | sort --version-sort \
+        (find {input.folder} -type f -name "*.fa" -printf "%s\t%p\n" \
+        | sort --numeric --reverse --key 1,1 \
+        | cut -f 2 \
         | parallel \
-            --jobs 1 \
+            --jobs {threads} \
             perl -I "$PERLLIB" src/guidance.v2.02/www/Guidance/guidance.pl \
                 --seqFile {input.folder}/{{/.}}.fa \
                 --msaProgram {params.msa_program} \
-                `#--MSA_Param {params.msa_param}` \
+                --MSA_Param {params.msa_param} \
                 --seqType codon \
                 --outDir $PWD/{output.folder}/{{/.}} \
-                `#--program {params.program}` \
-                --proc_num {threads} \
+                --program {params.program} \
+                --bootstraps {params.bootstraps} \
+                --proc_num 1 \
                 --genCode 1 \
         )2> {log} 1>&2
 

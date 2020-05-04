@@ -59,9 +59,10 @@ selection:
         evalue: 0.05  # e-value to say that a test is significant
         binary: "bin/codeml"
     guidance:
-        msa_program: "MAFFT"  # "PRANK"
-        msa_param: ""  # "\-F"
+        msa_program: "PRANK" # "MAFFT"  # "PRANK"
+        msa_param: "\\-F"
         program: "GUIDANCE2"
+        bootstraps: 2
     fastcodeml:
         min_foreground: 2  # Number of species needed for the foreground branch
         min_background: 2  # Number of species needed for the background branch
