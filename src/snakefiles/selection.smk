@@ -196,10 +196,10 @@ rule selection_guidance_group:
             perl -I "$PERLLIB" src/guidance.v2.02/www/Guidance/guidance.pl \
                 --seqFile {input.folder}/{{/.}}.fa \
                 --msaProgram {params.msa_program} \
-                --MSA_Param {params.msa_param} \
+                `#--MSA_Param {params.msa_param}` \
                 --seqType codon \
                 --outDir $PWD/{output.folder}/{{/.}} \
-                --program {params.program} \
+                `#--program {params.program}` \
                 --proc_num {threads} \
                 --genCode 1 \
         )2> {log} 1>&2
@@ -355,3 +355,36 @@ rule selection_pcorrection:
             SELECTION + "{group}/pcorrection.tsv",
             group=params["selection"]["foreground_branches"]
         )
+
+
+rule selection_selected_msas_group:
+    input:
+        tsv_corrected = SELECTION + "{group}/pcorrection.tsv",
+        msa_folder = SELECTION + "{group}/maxalign/"
+    output:
+        msa_folder = directory(SELECTION + "{group}/selected_msas/")
+    log: SELECTION + "{group}/selected_msas.log"
+    benchmark: SELECTION + "{group}/selected_msas.bmk"
+    conda: "selection.yml"
+    shell:
+        """
+        awk '$7 == "TRUE"' < {input.tsv_corrected} \
+        | cut -f 1 \
+        | parallel --jobs 1 --keep-order \
+            cp {input.msa_folder}/{{}}.fa {output.msa_folder} \
+        2> {log} 1>&2
+        """
+
+
+rule selection_selected_msas:
+    input:
+        expand(
+            SELECTION + "{group}/selected_msas/",
+            group=params["selection"]["foreground_branches"]
+        )
+
+
+# rule selection_saturation:
+#     input:
+#         tsv_corrected = SELECTION + "{group}/pcorrection.tsv"
+#     output:

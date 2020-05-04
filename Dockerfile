@@ -3,7 +3,9 @@ FROM ubuntu:18.04
 SHELL ["/bin/bash", "--login", "-c"]
 
 # apt packages
-RUN apt update && apt install --yes \
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update \
+&& DEBIAN_FRONTEND="noninteractive" apt install --yes \
     autoconf \
     autoconf-archive \
     automake \
@@ -22,10 +24,10 @@ RUN apt update && apt install --yes \
     libopenblas-dev \
     libtool \
     openmpi-bin \
+    tzdata \
     wget \
     xvfb \
 && rm -rf /var/lib/apt/lists/*
-
 
 ENV miniconda=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
