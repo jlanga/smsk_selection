@@ -25,7 +25,8 @@ addons:
         - libopenblas-dev
         - openmpi-bin
         - wget
-        # - xvfb
+        - tzdata
+        - xvfb
 
 cache:
     timeout: 1000
