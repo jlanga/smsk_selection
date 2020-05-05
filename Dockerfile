@@ -32,7 +32,6 @@ RUN apt-get update \
 
 SHELL ["/bin/bash", "-c"]
 
-
 ENV miniconda=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
 ENV PATH="/opt/miniconda3/bin:$PATH"
