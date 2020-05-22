@@ -11,6 +11,7 @@ RUN apt-get update \
     automake=1:1.15.1-3ubuntu2 \
     autotools-dev=20180224.1 \
     build-essential=12.4ubuntu1 \
+    ca-certificates=20180409 \
     cmake=3.10.2-1ubuntu2.18.04.1 \
     curl=7.58.0-2ubuntu3.8 \
     git=1:2.17.1-1ubuntu0.7 \
@@ -20,7 +21,7 @@ RUN apt-get update \
     liblapack-dev=3.7.1-4ubuntu1 \
     libnlopt0=2.4.2+dfsg-4 \
     libnlopt-dev=2.4.2+dfsg-4 \
-     libopenmpi-dev=2.1.1-8 \
+    libopenmpi-dev=2.1.1-8 \
     libopenblas-dev=0.2.20+ds-4 \
     libtool=2.4.6-2 \
     openmpi-bin=2.1.1-8 \
