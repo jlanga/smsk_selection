@@ -239,19 +239,11 @@ rule selection_trimal_group:
     threads: MAX_THREADS
     shell:
         """
-        mkdir --parents {output.trimal_folder}
-
-        (find {input.msa_folder} -name "*.fa" \
-        | sort --version-sort \
-        | parallel \
-            `#--keep-order` \
-            --jobs {threads} \
-            trimal \
-                -in {input.msa_folder}/{{/.}}.fa \
-                -out {output.trimal_folder}/{{/.}}.fa \
-                -automated1 \
-            ) \
-        2>> {log} 1>&2
+        python src/homologs/run_trimal.py \
+            --input-folder {input.msa_folder} \
+            --output-folder {output.trimal_folder} \
+            --threads {threads} \
+        2> {log} 1>&2
         """
 
 rule selection_trimal:
