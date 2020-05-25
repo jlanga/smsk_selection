@@ -343,8 +343,8 @@ rule selection_pcorrection_group:
         pvalue = params["selection"]["correction"]["pvalue"]
     shell:
         """
-        Rscript src/homologs/correct_pvalues.R \
-            --ete {input.tsv_ete} \
+        python src/homologs/correct_pvalues.py \
+            --ete3 {input.tsv_ete} \
             --fastcodeml {input.tsv_fastcodeml} \
             --output {output.tsv_corrected} \
             --pvalue {params.pvalue} \

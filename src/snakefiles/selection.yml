@@ -6,13 +6,13 @@ channels:
     - defaults
 dependencies:
     - biopython
-    # - lxml  # ete
+    - lxml  # ete
     - parallel
     - pip
     - perl=5.22  # maxalign, guidance
     - perl-bioperl  # guidance
     - prank
-    # - pyqt=4  # ete
+    - pyqt=4  # ete
     - six  # ete
     - scipy
     - trimal
@@ -22,7 +22,7 @@ dependencies:
     - mafft  # guidance
     - clustalw  # guidance
     - ruby
-    - r-tidyverse
-    - r-optparse
+    - statsmodels  # correct_pvalues
+    - pandas  # correct_pvalues
     - pip:
         - git+https://github.com/etetoolkit/ete
