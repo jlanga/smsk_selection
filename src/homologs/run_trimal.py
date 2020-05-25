@@ -14,7 +14,7 @@ from helpers import \
 
 
 bases = "TCAG"
-codons = [a + b + c for a in bases for b in bases for c in bases] + ['---']
+codons = [a + b + c for a in bases for b in bases for c in bases] + ['---'] 
 aminoacids = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG-'
 codon_table = dict(zip(codons, aminoacids))
 del bases, codons, aminoacids
@@ -25,8 +25,14 @@ def translate(string):
     string = string.upper()
     if n % 3 != 0:
         sys.exit()
-    return "".join(codon_table[string[i:i+3]] for i in range(0, n, 3))
-
+    translated = ""
+    for i in range(0, n, 3):
+        codon = string[i:i+3]
+        if codon not in codon_table:
+            translated += "-"
+        else:
+            translated += codon_table[codon]
+    return translated
 
 def translate_fasta(fasta_in, fasta_out):
     """Translate an entire fasta aligment"""
