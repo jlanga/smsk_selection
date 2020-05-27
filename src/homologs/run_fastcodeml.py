@@ -290,7 +290,7 @@ if __name__ == '__main__':
     TREE = tree_as_in_msa(TREE, MSA)
     TREE = clean_tree(TREE)
     SPP_TO_TRX = get_species_to_seqid(MSA)
-    TARGET_TRX = [SPP_TO_TRX[SPP] for SPP in TARGET_SPP]
+    TARGET_TRX = [SPP_TO_TRX[SPP] for SPP in TARGET_SPP if SPP in SPP_TO_TRX]
     TREE = mark_branch(TREE, TARGET_TRX)    
     TREE = clean_tree_names(TREE)
 
