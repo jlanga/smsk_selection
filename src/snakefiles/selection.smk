@@ -355,7 +355,7 @@ rule selection_pcorrection:
 rule selection_selected_msas_group:
     input:
         tsv_corrected = SELECTION + "{group}/pcorrection.tsv",
-        msa_folder = SELECTION + "{group}/maxalign/"
+        msa_folder = SELECTION + "{group}/maxalign"
     output:
         msa_folder = directory(SELECTION + "{group}/selected_msas/")
     log: SELECTION + "{group}/selected_msas.log"
