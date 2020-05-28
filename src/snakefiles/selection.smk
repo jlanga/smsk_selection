@@ -363,7 +363,7 @@ rule selection_selected_msas_group:
     conda: "selection.yml"
     shell:
         """
-        awk '$7 == "TRUE"' < {input.tsv_corrected} \
+        awk '$6 == "True"' < {input.tsv_corrected} \
         | cut -f 1 \
         | parallel --jobs 1 --keep-order \
             cp {input.msa_folder}/{{}}.fa {output.msa_folder} \
@@ -379,7 +379,37 @@ rule selection_selected_msas:
         )
 
 
-# rule selection_saturation:
-#     input:
-#         tsv_corrected = SELECTION + "{group}/pcorrection.tsv"
-#     output:
+rule selection_saturation_group:
+    input:
+        msa_folder = SELECTION + "{group}/selected_msas/",
+        tree = TREE + "exabayes/ExaBayes.rooted.nwk"
+    output:
+        saturation_folder = directory(SELECTION + "{group}/saturation/"),
+        saturation_tsv = SELECTION + "{group}/saturation.tsv"
+    log: SELECTION + "{group}/saturation.log"
+    benchmark: SELECTION + "{group}/saturation.bmk"
+    conda: "selection.yml"
+    threads: MAX_THREADS
+    params:
+        target_species = get_species,
+    shell:
+        """
+        bash src/homologs/saturation.sh \
+            --input-tree {input.tree} \
+            --input-msa-folder {input.msa_folder} \
+            --target-species {params.target_species} \
+            --jobs {MAX_THREADS} \
+            --output-folder {output.saturation_folder} \
+            --output-file {output.saturation_tsv} \
+        2> {log} 1>&2
+        """
+
+
+
+
+rule selection_saturation:
+    input:
+        expand(
+            SELECTION + "{group}/saturation/",
+            group=params["selection"]["foreground_branches"]
+        )
