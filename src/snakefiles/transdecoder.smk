@@ -1,12 +1,24 @@
 CHUNKS = params["transdecoder"]["chunks"]
 
 rule transdecoder_transcripts:
-    input: HOMOLOGS + "all.cds"
+    input:
+        all_cds = HOMOLOGS + "all.cds",
+        fai = HOMOLOGS + "all.cds.fai",
+        maxalign_folder = HOMOLOGS_REFINE2 + "maxalign"
     output: TRANSDECODER + "transcripts.fasta"
     log: TRANSDECODER + "transcripts.log"
     benchmark: TRANSDECODER + "transcripts.bmk"
     conda: "transdecoder.yml"
-    shell: "sed \'s/\.p[0-9]*$//g\' < {input} > {output} 2> {log}"
+    shell:
+        """
+        (find {input.maxalign_folder} -name "*.fa" -exec grep ^">" {{}} \; \
+        | cut -f 1 -d " " \
+        | tr -d ">" \
+        | xargs samtools faidx {input.all_cds} \
+        | sed  \'s/\.p[0-9]*//g\' \
+        > {output}) \
+        2> {log}
+        """
 
 
 
@@ -187,6 +199,7 @@ rule transdecoder_predict:
             --retain_pfam_hits {input.pfam_tsv} \
             --retain_blastp_hits {input.blastp_tsv} \
             --cpu {threads} \
+            --no_refine_starts \
         2> {log} 1>&2
 
         mv {params.bed} {output.bed} 2>> {log} 1>&2
