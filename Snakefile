@@ -29,10 +29,15 @@ include: snakefiles + "orthofinder.smk"
 include: snakefiles + "homologs.smk"
 include: snakefiles + "tree.smk"
 include: snakefiles + "selection.smk"
+include: snakefiles + "download.smk"
+include: snakefiles + "db.smk"
+include: snakefiles + "transdecoder.smk"
+include: snakefiles + "trinotate.smk"
 
 rule all:
     input:
         # rules.busco.input,
         # rules.homologs.input
         # rules.tree.input,
-        rules.selection_saturation.input
+        rules.selection_saturation.input,
+        rules.trinotate

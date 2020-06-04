@@ -27,3 +27,7 @@ HOMOLOGS_REFINE2 = HOMOLOGS + "refine2/"
 TREE = "results/tree/"
 
 SELECTION = "results/selection/"
+
+DOWNLOAD = "data/download/"
+DB = "data/db/"
+TRINOTATE = "results/trinotate/"

@@ -71,3 +71,15 @@ selection:
         binary: "./bin/fast"
     correction:
         pvalue: 0.05
+
+
+transdecoder:
+    chunks: 4
+
+trinotate:
+    chunks: 4
+    evalue: 1e-5
+    pfam_cutoff: DNC
+    rnammer:
+        rnammer_path: ./src/rnammer-1.2/rnammer  # Modify this
+        org_type: euk  # arc|bac|euk

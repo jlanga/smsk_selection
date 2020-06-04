@@ -1,4 +1,15 @@
 # Source for all databases
 ---
+# Busco
 busco_species:  # https://busco.ezlab.org/frame_wget.html
     - eukaryota
+
+# Trinotate/Transdecoder
+swissprot:
+    ftp://ftp.ebi.ac.uk/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz
+NOG.annotations:
+    http://eggnog5.embl.de/download/eggnog_4.5/data/NOG/NOG.annotations.tsv.gz
+obo:
+    http://purl.obolibrary.org/obo/go/go-basic.obo
+Pfam-A:
+    ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz
