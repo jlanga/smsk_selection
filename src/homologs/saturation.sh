@@ -95,7 +95,7 @@ get_bfree(){
     tempfile=$(mktemp)
 
     tree=$(grep ^"dS tree:" -A 1 "$bfree_out" | tail -n+2)
-    echo $tree > "$tempfile"
+    echo "$tree" > "$tempfile"
     
     branch_length=$(python src/homologs/extract_branch_length.py \
         --tree "$tempfile" \
