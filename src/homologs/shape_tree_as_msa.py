@@ -32,12 +32,12 @@ def shape_tree_from_msa(tree_in_fn, msa_in_fn, tree_out_fn):
     species_in_tree = set(leaf.name for leaf in tree.get_terminals())
     species_not_in_msa = species_in_tree - set(species_to_trx.keys())
     for species in species_not_in_msa:
-        tree.collapse(species)
+        tree.prune(species)
 
     # Rename the remaining
     for leaf in tree.get_terminals():
         leaf.name = species_to_trx[leaf.name]
-
+    
     Phylo.write(trees=tree, file=tree_out_fn, format="newick")
 
 
