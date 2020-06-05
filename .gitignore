@@ -23,3 +23,4 @@ src/guidance.v2.02/programs/semphy/semphy
 .RData
 .Rhistory
 smsk_orthofinder.Rproj
+data/download/*
