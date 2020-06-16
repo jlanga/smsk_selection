@@ -39,5 +39,5 @@ rule all:
         # rules.busco.input,
         # rules.homologs.input
         # rules.tree.input,
-        rules.selection_saturation.input,
+        rules.selection_speed.input,
         rules.trinotate.input

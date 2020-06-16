@@ -6,7 +6,6 @@ set -euo pipefail
 ete3_m0(){
 
     # Run ete3 evol to compute only M0
-    # From it, get the average omega for all tree
 
     tree=$1; shift
     msa=$1; shift
@@ -29,7 +28,7 @@ ete3_m0(){
 
 ete3_bfree(){
 
-    # Run ete3 evol to compute the aerage 
+    # Run ete3 evol to compute the "free-ratio" model (b_free) 
 
     tree=$1; shift
     msa=$1; shift
@@ -54,6 +53,8 @@ ete3_bfree(){
 
 
 run_models(){
+
+    # Run ete3 evol using the M0 (one-ratio) and b_free (free-ratio) models
 
     species_tree=$1; shift
     msa=$1; shift
@@ -81,28 +82,49 @@ run_models(){
 
 
 get_m0(){
+
+    # Extract the dN and dS of the results from "ete3 evol" M0 model 
+    # (one-ratio model)
+
     m0_out=$1; shift
 
-    grep ^"tree length for dS" "$m0_out" \
-    | grep -Eo '[+-]?[0-9]+([.][0-9]+)?'
+    ds=$(grep ^"tree length for dS" "$m0_out" \
+        | grep -Eo '[+-]?[0-9]+([.][0-9]+)?')
+    dn=$(grep ^"tree length for dN" "$m0_out" \
+        | grep -Eo '[+-]?[0-9]+([.][0-9]+)?')
+
+    echo -e "$dn\t$ds"
 }
 
 
 get_bfree(){
+
+    # Extract the dN and dS from the results of ete3 evol b_free model
+    # (free-ratio in a branch)
+
     bfree_out=$1; shift
     target_species=$1; shift
 
     tempfile=$(mktemp)
 
-    tree=$(grep ^"dS tree:" -A 1 "$bfree_out" | tail -n+2)
-    echo "$tree" > "$tempfile"
-    
-    branch_length=$(python src/homologs/extract_branch_length.py \
+    # Get the dS
+    ds_tree=$(grep ^"dS tree:" -A 1 "$bfree_out" | tail -n+2)
+    echo "$ds_tree" > "$tempfile"
+    ds=$(python src/homologs/extract_branch_length.py \
         --tree "$tempfile" \
         --species "$target_species")
+    rm --force "$tempfile"  # Clean just in case
+
+    # Get the dN
+    dn_tree=$(grep ^"dN tree:" -A 1 "$bfree_out" | tail -n+2)
+    echo "$dn_tree" > "$tempfile"
+    dn=$(python src/homologs/extract_branch_length.py \
+        --tree "$tempfile" \
+        --species "$target_species")
+    rm --force "$tempfile"  # Clean just in case
     
-    # rm -f "$tempfile"
-    echo "$branch_length"
+    
+    echo -e "$dn\t$ds"
 
 }
 
@@ -182,7 +204,7 @@ find "$MSA_FOLDER" -type f -name "*.fa" \
 
 
 
-echo -e "orthogroup\tds_m0\tds_bfree" > "$OUTPUT_FILE"
+echo -e "orthogroup\tdn_m0\tds_m0\tdn_bfree\tds_bfree" > "$OUTPUT_FILE"
 
 for orthogroup in "$OUTPUT_FOLDER"/* ; do
 

@@ -379,37 +379,44 @@ rule selection_selected_msas:
         )
 
 
-rule selection_saturation_group:
+rule selection_speed_group:
+    """Compute the evolution speeds of the orthogroups.
+
+    Compute the dN and dS of the one-ratio (M0) and free-ratio (b_free)
+    models to look later on for synonymous-site saturation and advantageous
+    allele rising.
+    """
+
     input:
         msa_folder = SELECTION + "{group}/selected_msas/",
         tree = TREE + "exabayes/ExaBayes.rooted.nwk"
     output:
-        saturation_folder = directory(SELECTION + "{group}/saturation/"),
-        saturation_tsv = SELECTION + "{group}/saturation.tsv"
-    log: SELECTION + "{group}/saturation.log"
-    benchmark: SELECTION + "{group}/saturation.bmk"
+        speed_folder = directory(SELECTION + "{group}/speed/"),
+        speed_tsv = SELECTION + "{group}/speed.tsv"
+    log: SELECTION + "{group}/speed.log"
+    benchmark: SELECTION + "{group}/speed.bmk"
     conda: "selection.yml"
     threads: MAX_THREADS
     params:
         target_species = get_species,
     shell:
         """
-        bash src/homologs/saturation.sh \
+        bash src/homologs/evolution_speed.sh \
             --input-tree {input.tree} \
             --input-msa-folder {input.msa_folder} \
             --target-species {params.target_species} \
             --jobs {MAX_THREADS} \
-            --output-folder {output.saturation_folder} \
-            --output-file {output.saturation_tsv} \
+            --output-folder {output.speed_folder} \
+            --output-file {output.speed_tsv} \
         2> {log} 1>&2
         """
 
 
 
 
-rule selection_saturation:
+rule selection_speed:
     input:
         expand(
-            SELECTION + "{group}/saturation/",
+            SELECTION + "{group}/speed/",
             group=params["selection"]["foreground_branches"]
         )
