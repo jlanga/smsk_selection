@@ -52,6 +52,9 @@ def get_definers(tree_fn, target_species):
     tree = Phylo.read(tree_fn, "newick")
 
     target_transcripts = translate_target_sequences(tree, target_species)
+    if len(target_transcripts) == 1:
+        return target_transcripts
+
     return get_pair_that_defines_group(tree, target_transcripts)
 
 
