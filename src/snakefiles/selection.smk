@@ -5,6 +5,12 @@ def get_models(wildcards):
 def get_species(wildcards):
     return params["selection"]["foreground_branches"][wildcards.group]["species"]
 
+def get_min_foreground(wildcards):
+    return params["selection"]["foreground_branches"][wildcards.group]["min_foreground"]
+
+def get_min_background(wildcards):
+    return params["selection"]["foreground_branches"][wildcards.group]["min_background"]
+
 rule selection_trees_group:
     input:
         tree = TREE + "exabayes/ExaBayes.rooted.nwk",
@@ -16,8 +22,8 @@ rule selection_trees_group:
     conda: "selection.yml"
     params:
         species = get_species,
-        min_foreground = params["selection"]["ete3"]["min_foreground"],
-        min_background = params["selection"]["ete3"]["min_background"]
+        min_foreground = get_min_foreground,
+        min_background = get_min_background
     shell:
         """
         python src/homologs/ete3_evol_prepare_folder.py \
@@ -295,8 +301,8 @@ rule selection_fastcodeml_group:
     params:
         omega_zeros = params["selection"]["fastcodeml"]["omega_zeros"],
         target_species = get_species,
-        min_foreground = params["selection"]["fastcodeml"]["min_foreground"],
-        min_background = params["selection"]["fastcodeml"]["min_background"],
+        min_foreground = get_min_foreground,
+        min_background = get_min_background,
         binary = params["selection"]["fastcodeml"]["binary"]
     shell:
         """
