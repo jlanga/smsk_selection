@@ -40,4 +40,4 @@ rule all:
         # rules.homologs.input
         # rules.tree.input,
         rules.selection_speed.input,
-        rules.trinotate.input
+        # rules.trinotate.input
