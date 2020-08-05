@@ -63,16 +63,17 @@ def run_trimal_backtrans(fasta_in, fasta_out, fasta_gapless):
     run(command)
 
 
-def run_pipeline(raw_fn, trimmed_fn):
-    """
-    Align with trimal
-    """
-    translated = tempfile.NamedTemporaryFile()
-    gapless = tempfile.NamedTemporaryFile()
+# def run_pipeline(raw_fn, trimmed_fn):
+#     """
+#     Align with trimal
+#     """
+#     translated = tempfile.NamedTemporaryFile()
+#     gapless = tempfile.NamedTemporaryFile()
 
-    translate_fasta(raw_fn, translated.name)
-    remove_gaps(raw_fn, gapless.name)
-    run_trimal_backtrans(translated.name, trimmed_fn, gapless.name)
+#     translate_fasta(raw_fn, translated.name)
+#     remove_gaps(raw_fn, gapless.name)
+#     run_trimal_backtrans(translated.name, trimmed_fn, gapless.name)
+    
     
 
 
@@ -108,6 +109,6 @@ if __name__ == '__main__':
     process_folders_parallel(
         fix_dir_path(ARGS["input_folder"]), "fa",
         fix_dir_path(ARGS["output_folder"]), "fa",
-        run_pipeline,
+        run_trimal,
         ncpus=ARGS["threads"]
     )
