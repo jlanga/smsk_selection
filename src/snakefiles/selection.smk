@@ -328,61 +328,61 @@ rule selection_fastcodeml:
         )
 
 
-rule selection_pcorrection_group:
-    input:
-        tsv_ete = SELECTION + "{group}/ete3.tsv",
-        tsv_fastcodeml = SELECTION + "{group}/fastcodeml.tsv"
-    output:
-        tsv_corrected = SELECTION + "{group}/pcorrection.tsv"
-    log: SELECTION + "{group}/pcorrection.log"
-    benchmark: SELECTION + "{group}/pcorrection.bmk"
-    conda: "selection.yml"
-    params:
-        pvalue = params["selection"]["correction"]["pvalue"]
-    shell:
-        """
-        python src/homologs/correct_pvalues.py \
-            --ete3 {input.tsv_ete} \
-            --fastcodeml {input.tsv_fastcodeml} \
-            --output {output.tsv_corrected} \
-            --pvalue {params.pvalue} \
-        2> {log} 1>&2 
-        """
+# rule selection_pcorrection_group:
+#     input:
+#         tsv_ete = SELECTION + "{group}/ete3.tsv",
+#         tsv_fastcodeml = SELECTION + "{group}/fastcodeml.tsv"
+#     output:
+#         tsv_corrected = SELECTION + "{group}/pcorrection.tsv"
+#     log: SELECTION + "{group}/pcorrection.log"
+#     benchmark: SELECTION + "{group}/pcorrection.bmk"
+#     conda: "selection.yml"
+#     params:
+#         pvalue = params["selection"]["correction"]["pvalue"]
+#     shell:
+#         """
+#         python src/homologs/correct_pvalues.py \
+#             --ete3 {input.tsv_ete} \
+#             --fastcodeml {input.tsv_fastcodeml} \
+#             --output {output.tsv_corrected} \
+#             --pvalue {params.pvalue} \
+#         2> {log} 1>&2 
+#         """
 
 
-rule selection_pcorrection:
-    input:
-        expand(
-            SELECTION + "{group}/pcorrection.tsv",
-            group=params["selection"]["foreground_branches"]
-        )
+# rule selection_pcorrection:
+#     input:
+#         expand(
+#             SELECTION + "{group}/pcorrection.tsv",
+#             group=params["selection"]["foreground_branches"]
+#         )
 
 
-rule selection_selected_msas_group:
-    input:
-        tsv_corrected = SELECTION + "{group}/pcorrection.tsv",
-        msa_folder = SELECTION + "{group}/maxalign"
-    output:
-        msa_folder = directory(SELECTION + "{group}/selected_msas/")
-    log: SELECTION + "{group}/selected_msas.log"
-    benchmark: SELECTION + "{group}/selected_msas.bmk"
-    conda: "selection.yml"
-    shell:
-        """
-        awk '$6 == "True"' < {input.tsv_corrected} \
-        | cut -f 1 \
-        | parallel --jobs 1 --keep-order \
-            cp {input.msa_folder}/{{}}.fa {output.msa_folder} \
-        2> {log} 1>&2
-        """
+# rule selection_selected_msas_group:
+#     input:
+#         tsv_corrected = SELECTION + "{group}/pcorrection.tsv",
+#         msa_folder = SELECTION + "{group}/maxalign"
+#     output:
+#         msa_folder = directory(SELECTION + "{group}/selected_msas/")
+#     log: SELECTION + "{group}/selected_msas.log"
+#     benchmark: SELECTION + "{group}/selected_msas.bmk"
+#     conda: "selection.yml"
+#     shell:
+#         """
+#         awk '$6 == "True"' < {input.tsv_corrected} \
+#         | cut -f 1 \
+#         | parallel --jobs 1 --keep-order \
+#             cp {input.msa_folder}/{{}}.fa {output.msa_folder} \
+#         2> {log} 1>&2
+#         """
 
 
-rule selection_selected_msas:
-    input:
-        expand(
-            SELECTION + "{group}/selected_msas/",
-            group=params["selection"]["foreground_branches"]
-        )
+# rule selection_selected_msas:
+#     input:
+#         expand(
+#             SELECTION + "{group}/selected_msas/",
+#             group=params["selection"]["foreground_branches"]
+#         )
 
 
 rule selection_speed_group:
@@ -394,7 +394,7 @@ rule selection_speed_group:
     """
 
     input:
-        msa_folder = SELECTION + "{group}/selected_msas/",
+        msa_folder = SELECTION + "{group}/maxalign/",
         tree = TREE + "exabayes/ExaBayes.rooted.nwk"
     output:
         speed_folder = directory(SELECTION + "{group}/speed/"),
