@@ -24,7 +24,7 @@ def translate(string):
     n = len(string)
     string = string.upper()
     if n % 3 != 0:
-        sys.exit()
+        sys.exit(f"ERROR: Incorrect number of characters: {n}")
     translated = ""
     for i in range(0, n, 3):
         codon = string[i:i+3]
@@ -43,7 +43,7 @@ def translate_fasta(fasta_in, fasta_out):
 
 def run_trimal(fasta_in, fasta_out):
     """Run trimal in automated1 mode"""
-    command = ["trimal", "-in", fasta_in, "-out", fasta_out, "-automated1"]
+    command = ["trimal", "-in", fasta_in, "-out", fasta_out, "-gt", "0.6", "-st", "0.001"]
     run(command)
 
 

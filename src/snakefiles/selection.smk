@@ -392,9 +392,8 @@ rule selection_speed_group:
     models to look later on for synonymous-site saturation and advantageous
     allele rising.
     """
-
     input:
-        msa_folder = SELECTION + "{group}/maxalign/",
+        msa_folder = SELECTION + "{group}/maxalign",
         tree = TREE + "exabayes/ExaBayes.rooted.nwk"
     output:
         speed_folder = directory(SELECTION + "{group}/speed/"),
