@@ -50,8 +50,7 @@ def run_trimal(fasta_in, fasta_out, fasta_gapless):
         "trimal",
         "-in", fasta_in,
         "-out", fasta_out,
-        "-gt", "0.6",
-        "-st", "0.001",
+        "-automated1", 
         "-backtrans", fasta_gapless
     ]
     run(command)
