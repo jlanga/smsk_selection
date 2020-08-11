@@ -48,6 +48,7 @@ def run_trimal(fasta_in, fasta_out):
 
 
 def remove_gaps(fasta_in, fasta_out):
+    """Remove all gaps in the alignment"""
     with open(fasta_out, "w") as f_out:
         for name, sequence in fasta_to_dict(fasta_in).items():
             f_out.write(f">{name}\n{sequence.replace('-', '')}\n")
@@ -63,16 +64,22 @@ def run_trimal_backtrans(fasta_in, fasta_out, fasta_gapless):
     run(command)
 
 
-# def run_pipeline(raw_fn, trimmed_fn):
-#     """
-#     Align with trimal
-#     """
-#     translated = tempfile.NamedTemporaryFile()
-#     gapless = tempfile.NamedTemporaryFile()
+def run_pipeline(raw_fn, trimmed_fn):
+    """
+    Align CDS with trimal (translate | trim | backtrans)
+    """
+    translated = tempfile.NamedTemporaryFile()
+    gapless = tempfile.NamedTemporaryFile()
+    trimal_prot = tempfile.NamedTemporaryFile()
 
-#     translate_fasta(raw_fn, translated.name)
-#     remove_gaps(raw_fn, gapless.name)
-#     run_trimal_backtrans(translated.name, trimmed_fn, gapless.name)
+    translate_fasta(fasta_in=raw_fn, fasta_out=translated.name)
+    run_trimal(fasta_in=translated.name, fasta_out=trimal_prot.name)
+    remove_gaps(fasta_in=raw_fn, fasta_out=gapless.name)
+    run_trimal_backtrans(
+        fasta_in=trimal_prot.name,
+        fasta_out=trimmed_fn,
+        fasta_gapless=gapless.name
+    )
     
     
 
