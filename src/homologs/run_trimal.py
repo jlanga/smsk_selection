@@ -41,9 +41,19 @@ def translate_fasta(fasta_in, fasta_out):
             f_out.write(f">{name}\n{translate(sequence)}\n")
 
 
-def run_trimal(fasta_in, fasta_out):
-    """Run trimal in automated1 mode"""
-    command = ["trimal", "-in", fasta_in, "-out", fasta_out, "-gt", "0.6", "-st", "0.001"]
+def run_trimal(fasta_in, fasta_out, fasta_gapless):
+    """Run trimal.
+    
+    At least 60% of the col is not a gap, simmilariy score < 0.001
+    """
+    command = [
+        "trimal",
+        "-in", fasta_in,
+        "-out", fasta_out,
+        "-gt", "0.6",
+        "-st", "0.001",
+        "-backtrans", fasta_gapless
+    ]
     run(command)
 
 
@@ -54,29 +64,17 @@ def remove_gaps(fasta_in, fasta_out):
             f_out.write(f">{name}\n{sequence.replace('-', '')}\n")
 
 
-def run_trimal_backtrans(fasta_in, fasta_out, fasta_gapless):
-    command = [
-        "trimal",
-        "-in", fasta_in,
-        "-out", fasta_out,
-        "-backtrans", fasta_gapless
-    ]
-    run(command)
-
-
 def run_pipeline(raw_fn, trimmed_fn):
     """
-    Align CDS with trimal (translate | trim | backtrans)
+    Align CDS with trimal (translate | trim)
     """
     translated = tempfile.NamedTemporaryFile()
     gapless = tempfile.NamedTemporaryFile()
-    trimal_prot = tempfile.NamedTemporaryFile()
 
     translate_fasta(fasta_in=raw_fn, fasta_out=translated.name)
-    run_trimal(fasta_in=translated.name, fasta_out=trimal_prot.name)
     remove_gaps(fasta_in=raw_fn, fasta_out=gapless.name)
-    run_trimal_backtrans(
-        fasta_in=trimal_prot.name,
+    run_trimal(
+        fasta_in=translated.name,
         fasta_out=trimmed_fn,
         fasta_gapless=gapless.name
     )
@@ -116,6 +114,6 @@ if __name__ == '__main__':
     process_folders_parallel(
         fix_dir_path(ARGS["input_folder"]), "fa",
         fix_dir_path(ARGS["output_folder"]), "fa",
-        run_trimal,
+        run_pipeline,
         ncpus=ARGS["threads"]
     )
