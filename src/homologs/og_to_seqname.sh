@@ -18,5 +18,4 @@ export -f process_orthogroup
 
 find "$1" -name "*.fa" -type f \
 | sort --version-sort \
-| parallel --keep-order \
-    process_orthogroup 
+| xargs -P 1 -I "{}" bash -c "process_orthogroup {}"
