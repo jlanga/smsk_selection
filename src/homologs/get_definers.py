@@ -70,4 +70,7 @@ if __name__ == '__main__':
     tree_fn = sys.argv[1]
     target_species = set(sys.argv[2].split(","))
     pair = get_definers(tree_fn, target_species)
-    sys.stdout.write(",,".join(pair) + "\n")
+    if isinstance(pair, str):
+        sys.stdout.write(pair)
+    else:
+        sys.stdout.write(",,".join(pair) + "\n")
