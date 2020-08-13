@@ -74,4 +74,5 @@ if __name__ == '__main__':
         sys.stderr.write(f"Not enough species: {pair}\n")
         sys.stderr.write(f"Target were: {target_species}\n")
         sys.stderr.write(f"Inspect tree in {tree_fn}\n")
+        sys.stdout.write(list(pair)[0])
     sys.stdout.write(",,".join(pair) + "\n")

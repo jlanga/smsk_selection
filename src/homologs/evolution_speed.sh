@@ -39,6 +39,11 @@ ete3_bfree(){
 
     transcripts=$(python src/homologs/get_definers.py "$tree" "$species")
 
+    if [[ ! "$transcripts" =~ "," ]] ; then
+        >&2 echo "Not enough transcripts. Skipping analysis" 
+        exit 0
+    fi
+
     ete3 evol \
         --resume \
         -t "$tree" \
