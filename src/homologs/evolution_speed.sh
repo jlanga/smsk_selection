@@ -20,6 +20,7 @@ ete3_m0(){
         --cpu 1 \
         --resume \
         --codeml_binary "$PWD/bin/codeml" \
+        --slr_binary /dev/null `# Just to make it shut up` \
         --model M0 \
     > "$output_txt"
     
@@ -47,6 +48,7 @@ ete3_bfree(){
         --cpu 1 \
         --resume \
         --codeml_binary "$PWD/bin/codeml" \
+        --slr_binary /dev/null `# Just to make it shut up` \
         --models b_free \
     > "$output_txt" 
 }
@@ -122,15 +124,14 @@ get_bfree(){
         --tree "$tempfile" \
         --species "$target_species")
     rm --force "$tempfile"  # Clean just in case
-    
-    
+        
     echo -e "$dn\t$ds"
 
 }
 
 
-
-JOBS="1"
+# Initial values in case not speciefied
+JOBS="1" 
 
 
 print_help(){
