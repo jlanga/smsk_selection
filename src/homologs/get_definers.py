@@ -70,6 +70,10 @@ if __name__ == '__main__':
     tree_fn = sys.argv[1]
     target_species = set(sys.argv[2].split(","))
     pair = get_definers(tree_fn, target_species)
+    if pair is None:
+        sys.stderr.write(f"All species are missing!: {target_species}\n")
+        sys.stderr.write(f"Inspect tree in {tree_fn}\n")
+        sys.exit(0)  # No error since it could break the pipeline
     if len(pair) != 2:
         sys.stderr.write(f"Not enough species: {pair}\n")
         sys.stderr.write(f"Target were: {target_species}\n")
