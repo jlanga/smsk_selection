@@ -70,7 +70,8 @@ if __name__ == '__main__':
     tree_fn = sys.argv[1]
     target_species = set(sys.argv[2].split(","))
     pair = get_definers(tree_fn, target_species)
-    if isinstance(pair, str):
-        sys.stdout.write(pair)
-    else:
-        sys.stdout.write(",,".join(pair) + "\n")
+    if len(pair) != 2:
+        sys.stderr.write(f"Not enough species: {pair}\n"
+        sys.stderr.write(f"Target were: {target_species}\n")
+        sys.stderr.write(f"Inspect tree in {tree_fn}\n")
+    sys.stdout.write(",,".join(pair) + "\n")
