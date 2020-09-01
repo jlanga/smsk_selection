@@ -74,9 +74,12 @@ if __name__ == '__main__':
         sys.stderr.write(f"All species are missing!: {target_species}\n")
         sys.stderr.write(f"Inspect tree in {tree_fn}\n")
         sys.exit(0)  # No error since it could break the pipeline
-    if len(pair) != 2:
+    if isinstance(pair, str):
+        sys.stdout.write(pair)
+    elif len(pair) != 2:
         sys.stderr.write(f"Not enough species: {pair}\n")
         sys.stderr.write(f"Target were: {target_species}\n")
         sys.stderr.write(f"Inspect tree in {tree_fn}\n")
         sys.stdout.write(list(pair)[0])
-    sys.stdout.write(",,".join(pair) + "\n")
+    else:
+        sys.stdout.write(",,".join(pair) + "\n")
