@@ -13,7 +13,7 @@ RUN apt-get update \
     build-essential=12.4ubuntu1 \
     ca-certificates=20180409 \
     cmake=3.10.2-1ubuntu2.18.04.1 \
-    curl=7.58.0-2ubuntu3.8 \
+    curl \
     git=1:2.17.1-1ubuntu0.7 \
     libarmadillo-dev=1:8.400.0+dfsg-2 \
     libatlas-cpp-0.6-dev=0.6.3-4ubuntu1 \
@@ -25,7 +25,7 @@ RUN apt-get update \
     libopenblas-dev=0.2.20+ds-4 \
     libtool=2.4.6-2 \
     openmpi-bin=2.1.1-8 \
-    tzdata=2019c-0ubuntu0.18.04 \
+    tzdata \
     wget=1.19.4-1ubuntu2.2 \
     xvfb=2:1.19.6-1ubuntu4.4 \
 && apt-get clean \

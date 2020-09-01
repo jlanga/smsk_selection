@@ -49,17 +49,17 @@ tree:
 
 selection:
     foreground_branches:
-       clupeinae:
+        clupeinae:
             species: "char,cpal"
             models: "bsA bsA1"
-            min_foreground: 2  # Number of species needed for the foreground branch
-            min_background: 2  # Number of species needed for the background branch
+            min_foreground: 2  # Species needed for the foreground branch
+            min_background: 2  # Species needed for the background branch
     ete3:
         omega_zeros: "0.5,1.0,1.5"  # Starting values for ML optimization
         evalue: 0.05  # e-value to say that a test is significant
         binary: "bin/codeml"
     guidance:
-        msa_program: "PRANK" # "MAFFT"  # "PRANK"
+        msa_program: "PRANK"  # "MAFFT"  # "PRANK"
         msa_param: "\\-F"
         program: "GUIDANCE2"
         bootstraps: 2

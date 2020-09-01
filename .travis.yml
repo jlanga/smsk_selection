@@ -47,4 +47,4 @@ before_cache: |
     bash .travis/before_cache.sh
 
 # after_failure:
-    # bash .travis/after_failure.sh
+#     bash .travis/after_failure.sh

@@ -25,4 +25,4 @@ dependencies:
     - statsmodels  # correct_pvalues
     - pandas  # correct_pvalues
     - pip:
-        - git+https://github.com/etetoolkit/ete
+          - git+https://github.com/etetoolkit/ete

@@ -3,9 +3,9 @@ set -euxo pipefail
 
 docker build -t smsk_orthofinder .
 
-command='export PATH=/opt/miniconda3/bin:$PATH; '
-command+='snakemake --use-conda --keep-going --keep-incomplete --show-failed-logs '
-command+="$@"
+command="export PATH=/opt/miniconda3/bin:$PATH; "
+command+="snakemake --use-conda --keep-going --keep-incomplete --show-failed-logs "
+command+="$*"
 docker run \
     --interactive \
     --tty \
