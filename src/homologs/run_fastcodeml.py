@@ -103,7 +103,10 @@ def mark_branch(tree, target_leafs):
         target for target in target_leafs 
         if target in [leaf.name for leaf in tree.get_terminals()]
     ]
-    tree.common_ancestor(targets_in_tree).name = "#1"
+    if len(targets_in_tree) == 1:  # targets is only a leaf
+        tree.common_ancestor(targets_in_tree).name += "#1"
+    else:
+        tree.common_ancestor(targets_in_tree).name = "#1"
     return tree
 
 
