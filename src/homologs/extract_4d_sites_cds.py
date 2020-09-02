@@ -9,14 +9,9 @@ Script to extract from a fasta file the 4-fold degenerate sites.
 
 import sys
 
-from Bio import \
-    AlignIO, \
-    Seq
+from Bio import AlignIO, Seq
 
-from helpers import \
-    process_folders, \
-    fix_dir_path
-    
+from helpers import process_folders, fix_dir_path
 
 
 def get_codon_dict():
@@ -74,7 +69,7 @@ def extract_fourfold_degenerate_sites(alignment):
 
     # Initialize data
     degenerated_codons = set(  # Let gaps pass
-        ["AC", "CC", "CG", "CT", "GC", "GG", "GT", "TC", '--']
+        ["AC", "CC", "CG", "CT", "GC", "GG", "GT", "TC", "--"]
     )
 
     n_columns = alignment.get_alignment_length()
@@ -106,11 +101,12 @@ def extract_fourfold_degenerate_sites(alignment):
             continue
 
         # Check that they are the same two start bases or a gap
-        if len(two_bases_set) == 1 or (len(two_bases_set) == 2 and '--' in two_bases_set):
-            output_alignment += alignment[:, 3*codon_index + 2 : 3 * codon_index + 3]
+        if len(two_bases_set) == 1 or (
+            len(two_bases_set) == 2 and "--" in two_bases_set
+        ):
+            output_alignment += alignment[:, 3 * codon_index + 2 : 3 * codon_index + 3]
 
     return output_alignment
-
 
 
 def filter_4ds_sites(file_in, file_out):
@@ -122,8 +118,7 @@ def filter_4ds_sites(file_in, file_out):
         sys.stderr.write(file_in + ": No fourfold-degenerate site was found\n")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 5:
         sys.stderr.write(
@@ -138,5 +133,3 @@ if __name__ == '__main__':
     OUT_EXT = sys.argv[4]
 
     process_folders(IN_DIR, IN_EXT, OUT_DIR, OUT_EXT, filter_4ds_sites)
-
-

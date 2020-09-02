@@ -18,46 +18,38 @@ def filter_by_occupancy(filename_in, filename_out, min_occupancy=0.5):
     columns. Store the results in fasta format.
     """
     fasta_raw = fasta_to_dict(filename_in)
-    
+
     n_sequences = len(fasta_raw.keys())
     alignment_length = len(fasta_raw[tuple(fasta_raw.keys())[0]])
-    
+
     columns = tuple(
-        "".join(
-            fasta_raw[seqname][column_index] 
-            for seqname in fasta_raw.keys()
-        )
+        "".join(fasta_raw[seqname][column_index] for seqname in fasta_raw.keys())
         for column_index in range(alignment_length)
     )
-    
+
     columns_to_keep = []
     for column_number, column in enumerate(columns):
-        n_gaps = column.count('-')
+        n_gaps = column.count("-")
         if 1 - float(n_gaps) / float(n_sequences) >= min_occupancy:
             columns_to_keep.append(column_number)
-    
+
     fasta_trimmed = {}
     for seqname, sequence in fasta_raw.items():
         fasta_trimmed[seqname] = "".join(
-            fasta_raw[seqname][column_to_keep] 
-            for column_to_keep in columns_to_keep
+            fasta_raw[seqname][column_to_keep] for column_to_keep in columns_to_keep
         )
-    
+
     if not os.path.exists(os.path.dirname(filename_out)):
         os.makedirs(os.path.dirname(filename_out))
 
     with open(filename_out, "w") as f_out:
         for seqname, sequence in fasta_trimmed.items():
             f_out.write(
-                ">{seqname}\n{sequence}\n".format(
-                    seqname=seqname,
-                    sequence=sequence
-                )
+                ">{seqname}\n{sequence}\n".format(seqname=seqname, sequence=sequence)
             )
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 4:
         sys.stderr.write(

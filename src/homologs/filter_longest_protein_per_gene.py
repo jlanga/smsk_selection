@@ -41,7 +41,7 @@ def compute_gene_to_longest_protein(protein_dict):
     return gene_to_protein
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     FASTA_OUT = sys.argv[1]
     FASTA_IN = sys.argv[2]
@@ -54,8 +54,4 @@ if __name__ == '__main__':
     GENE_TO_PROTEIN = compute_gene_to_longest_protein(PROTEIN_DICT)
 
     with open(FASTA_OUT, "w") as f_out:
-        SeqIO.write(
-            sequences=GENE_TO_PROTEIN.values(),
-            format="fasta",
-            handle=f_out
-        )
+        SeqIO.write(sequences=GENE_TO_PROTEIN.values(), format="fasta", handle=f_out)

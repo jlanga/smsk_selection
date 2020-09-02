@@ -12,6 +12,7 @@ from Bio import Phylo
 # def get_transcript_to_species(tree):
 #     return {x.name: x.name.split("@")[0] for x in tree.get_terminals()}
 
+
 def get_species_to_transcript(tree):
     """
     Get the {species: species@transcript_id} dictionary
@@ -26,7 +27,7 @@ def translate_target_sequences(tree, target_species):
     species_to_transcript = get_species_to_transcript(tree)
     return {
         species_to_transcript[species]
-        for species in target_species 
+        for species in target_species
         if species in species_to_transcript
     }
 
@@ -44,6 +45,7 @@ def get_pair_that_defines_group(tree, target_transcripts):
             return [u, v]
     return None
 
+
 def get_definers(tree_fn, target_species):
     """
     Get the two transcript_ids that define the specified branch in the tree from
@@ -58,15 +60,12 @@ def get_definers(tree_fn, target_species):
     return get_pair_that_defines_group(tree, target_transcripts)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 3:
-        sys.stderr.write(
-            "ERROR! python3 get_definers.py tree.nwk spp1,spp2,...,sppN\n"
-        )
+        sys.stderr.write("ERROR! python3 get_definers.py tree.nwk spp1,spp2,...,sppN\n")
         sys.exit(1)
-    
+
     tree_fn = sys.argv[1]
     target_species = set(sys.argv[2].split(","))
     pair = get_definers(tree_fn, target_species)

@@ -10,11 +10,12 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 from Bio import Phylo
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 6:
         sys.stderr.write(
-            "python2 newick_to_fasta.py tree.nwk in.cds in.pep out.cds out.pep")
+            "python2 newick_to_fasta.py tree.nwk in.cds in.pep out.cds out.pep"
+        )
         sys.exit(-1)
 
     # Parse arguments
@@ -41,14 +42,16 @@ if __name__ == '__main__':
         with open(CDS_OUT_FN, "w") as cds_out, open(PEP_OUT_FN, "w") as pep_out:
             for terminal in TREE.get_terminals():
                 identifier = terminal.name
-                cds_out.write(">{identifier}\n{sequence}\n".format(
-                    identifier=identifier,
-                    sequence=CDS_DICT[identifier]
-                ))
-                pep_out.write(">{identifier}\n{sequence}\n".format(
-                    identifier=identifier,
-                    sequence=PEP_DICT[identifier]
-                ))
+                cds_out.write(
+                    ">{identifier}\n{sequence}\n".format(
+                        identifier=identifier, sequence=CDS_DICT[identifier]
+                    )
+                )
+                pep_out.write(
+                    ">{identifier}\n{sequence}\n".format(
+                        identifier=identifier, sequence=PEP_DICT[identifier]
+                    )
+                )
 
     except ValueError:
         with open(CDS_OUT_FN, "w") as cds_out, open(PEP_OUT_FN, "w") as pep_out:

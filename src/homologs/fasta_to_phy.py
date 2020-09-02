@@ -8,7 +8,7 @@ import sys
 import Bio.AlignIO
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 1:
         sys.exit(
@@ -16,7 +16,4 @@ if __name__ == '__main__':
             "print a .phy file:\n    fasta_to_phy.py < file.fasta > file.phy"
         )
 
-    Bio.AlignIO.convert(
-        sys.stdin, "fasta",
-        sys.stdout, "phylip-sequential"
-    )
+    Bio.AlignIO.convert(sys.stdin, "fasta", sys.stdout, "phylip-sequential")

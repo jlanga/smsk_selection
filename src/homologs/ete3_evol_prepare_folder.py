@@ -13,19 +13,15 @@ import sys
 from Bio import Phylo
 from Bio import AlignIO
 
-from helpers import \
-    fix_dir_path, \
-    process_folders
+from helpers import fix_dir_path, process_folders
+
 
 def get_species_to_seqid(alignment):
     """Get the species to seqid dictionary:
     
     {"aalo": "aalo@TRINITY_DN123937_c0_g1_i1.p1"}
     """
-    return {
-        sequence.name.split("@")[0]: sequence.name
-        for sequence in alignment
-    }
+    return {sequence.name.split("@")[0]: sequence.name for sequence in alignment}
 
 
 def get_seqid_to_species(alignment):
@@ -33,10 +29,7 @@ def get_seqid_to_species(alignment):
     
     {"aalo@TRINITY_DN123937_c0_g1_i1.p1": "aalo"}
     """
-    return {
-        sequence.name: sequence.name.split("@")[0]
-        for sequence in alignment
-    }
+    return {sequence.name: sequence.name.split("@")[0] for sequence in alignment}
 
 
 def keep_leafs(tree, leafs):
@@ -61,16 +54,13 @@ def rename_tree(tree, alignment):
 
 
 def has_enough_by_background_and_foreground(
-        alignment, foreground_list, min_foreground=2, min_background=2
-    ):
+    alignment, foreground_list, min_foreground=2, min_background=2
+):
     """
     Return the alignment if it has at least min_foreground and min_background 
     sequences
     """
-    alignment_ids = {
-        sequence.id.split("@")[0]: sequence.id
-        for sequence in alignment
-    }
+    alignment_ids = {sequence.id.split("@")[0]: sequence.id for sequence in alignment}
     n_foreground = len(set(foreground_list) & set(alignment_ids.keys()))
     n_background = len(set(alignment_ids.keys()) - set(foreground_list))
     if n_foreground >= min_foreground and n_background >= min_background:
@@ -79,10 +69,13 @@ def has_enough_by_background_and_foreground(
 
 
 def ete3_evol_prepare(
-    tree_in_fn, alignment_in_fn,
+    tree_in_fn,
+    alignment_in_fn,
     tree_out_fn,
-    foreground_list, min_foreground=2, min_background=2
-    ):
+    foreground_list,
+    min_foreground=2,
+    min_background=2,
+):
     """
     Read a species tree and alignment (nwk and fasta),
     Read the list of foreground taxa
@@ -100,12 +93,12 @@ def ete3_evol_prepare(
 
     # Check that there are enough sequences
     if has_enough_by_background_and_foreground(
-            alignment_in, foreground_list, min_foreground, min_background
-        ):
+        alignment_in, foreground_list, min_foreground, min_background
+    ):
         Phylo.write(trees=tree_out, file=tree_out_fn, format="newick")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 9:
         sys.stderr.write(
@@ -131,14 +124,12 @@ if __name__ == '__main__':
             tree_out_fn=file_out,
             foreground_list=FOREGROUND_LIST,
             min_foreground=MIN_FOREGROUND,
-            min_background=MIN_BACKGROUND
+            min_background=MIN_BACKGROUND,
         )
-    
-    process_folders(
-        MSA_DIR_IN, MSA_EXT_IN, TREE_DIR_OUT, TREE_EXT_OUT,
-        ete3_evol_prepare_wrapper
-    )
 
+    process_folders(
+        MSA_DIR_IN, MSA_EXT_IN, TREE_DIR_OUT, TREE_EXT_OUT, ete3_evol_prepare_wrapper
+    )
 
 
 # if __name__ == '__main__':

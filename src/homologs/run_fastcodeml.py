@@ -21,10 +21,7 @@ def get_species_to_seqid(msa):
     
     {"aalo": "aalo@TRINITY_DN123937_c0_g1_i1.p1"}
     """
-    return {
-        sequence.name.split("@")[0]: sequence.name
-        for sequence in msa
-    }
+    return {sequence.name.split("@")[0]: sequence.name for sequence in msa}
 
 
 def get_seqid_to_species(msa):
@@ -32,10 +29,7 @@ def get_seqid_to_species(msa):
     
     {"aalo@TRINITY_DN123937_c0_g1_i1.p1": "aalo"}
     """
-    return {
-        sequence.name: sequence.name.split("@")[0]
-        for sequence in msa
-    }
+    return {sequence.name: sequence.name.split("@")[0] for sequence in msa}
 
 
 def keep_leafs(tree, leafs):
@@ -60,8 +54,8 @@ def tree_as_in_msa(tree, msa):
 
 
 def msa_has_enough_by_background_and_foreground(
-        msa, foreground_list, min_foreground=2, min_background=2
-    ):
+    msa, foreground_list, min_foreground=2, min_background=2
+):
     """
     Return the alignment if it has at least min_foreground and min_background 
     sequences
@@ -76,7 +70,8 @@ def msa_has_enough_by_background_and_foreground(
 
 
 def tree_has_enough_background_and_foreground(
-    tree, foreground_list, min_foreground=2, min_background=2):
+    tree, foreground_list, min_foreground=2, min_background=2
+):
     """Return if the alignment has enoung background and foreground leafs"""
     leafs = set(leaf.name for leaf in tree.get_terminals())
     foreground = set(foreground_list)
@@ -91,7 +86,7 @@ def clean_tree(tree):
     """Remove the confidence attribute in every branch of the tree"""
     tree = deepcopy(tree)
     for clade in tree.depths().keys():
-        if hasattr(clade, 'confidence'):
+        if hasattr(clade, "confidence"):
             del clade.confidence
     return tree
 
@@ -100,7 +95,8 @@ def mark_branch(tree, target_leafs):
     """Mark in the tree the common ancestor of the species in target_leafs"""
     tree = deepcopy(tree)
     targets_in_tree = [
-        target for target in target_leafs 
+        target
+        for target in target_leafs
         if target in [leaf.name for leaf in tree.get_terminals()]
     ]
     if len(targets_in_tree) == 1:  # targets is only a leaf
@@ -152,19 +148,29 @@ def write_phy(msa, fileout):
 
 
 def run_fastcodeml(
-    input_tree_fn, input_msa_fn, out_prefix, hypothesis, omega_zero, 
-    fastcodeml_binary="fast"):
+    input_tree_fn,
+    input_msa_fn,
+    out_prefix,
+    hypothesis,
+    omega_zero,
+    fastcodeml_binary="fast",
+):
     """Run fastcodeml and get the log likelihood"""
     command = [
         f"{fastcodeml_binary}",
-        "--number-of-threads", "1", 
-        "--only-hyp", str(hypothesis),
-        "--init-param", f"w0={omega_zero}",
-        "--init-param", f"p0=0.1",
-        #"--branch-lengths-fixed",
-        "--seed", "42",
-        f"{out_prefix}.nwk", 
-        f"{out_prefix}.phy"
+        "--number-of-threads",
+        "1",
+        "--only-hyp",
+        str(hypothesis),
+        "--init-param",
+        f"w0={omega_zero}",
+        "--init-param",
+        f"p0=0.1",
+        # "--branch-lengths-fixed",
+        "--seed",
+        "42",
+        f"{out_prefix}.nwk",
+        f"{out_prefix}.phy",
     ]
     output = [
         line
@@ -178,9 +184,9 @@ def run_fastcodeml(
 def write_pvalues(out_prefix, omegas={0.5, 1.0, 1.5}, fastcodeml_binary="fast"):
     """Run fastcodeml using multiple starting omegas and both hypothesis"""
     with open(f"{out_prefix}.tsv", "w") as tsv_out:
-        
+
         tsv_out.write(f"orthogroup\tomega_zero\tlnL0\tlnL1\tl\tpvalue\n")
-        
+
         for omega_zero in omegas:
             lnl0 = run_fastcodeml(
                 input_tree_fn=f"{out_prefix}.nwk",
@@ -188,7 +194,7 @@ def write_pvalues(out_prefix, omegas={0.5, 1.0, 1.5}, fastcodeml_binary="fast"):
                 out_prefix=out_prefix,
                 hypothesis=0,
                 omega_zero=omega_zero,
-                fastcodeml_binary=fastcodeml_binary
+                fastcodeml_binary=fastcodeml_binary,
             )
             lnl1 = run_fastcodeml(
                 input_tree_fn=f"{out_prefix}.nwk",
@@ -196,9 +202,9 @@ def write_pvalues(out_prefix, omegas={0.5, 1.0, 1.5}, fastcodeml_binary="fast"):
                 out_prefix=out_prefix,
                 hypothesis=1,
                 omega_zero=omega_zero,
-                fastcodeml_binary=fastcodeml_binary
+                fastcodeml_binary=fastcodeml_binary,
             )
-            delta_l = 2 * abs(lnl1 -lnl0)
+            delta_l = 2 * abs(lnl1 - lnl0)
             pvalue = 1 - chi2.cdf(delta_l, 1)
             group = out_prefix.split("/")[-1]
             tsv_out.write(
@@ -211,63 +217,71 @@ def parse_arguments():
     parser for run_fastcodeml.py
     """
     parser = argparse.ArgumentParser(
-        description='run_fastcodeml.py: run fastcodeml with multiple omega_0 '
-        'and get the p-values for each of them'
+        description="run_fastcodeml.py: run fastcodeml with multiple omega_0 "
+        "and get the p-values for each of them"
     )
     parser.add_argument(
-        '-t', '--tree',
-        help='Input species tree (Newick; not transcript tree)',
-        required=True
+        "-t",
+        "--tree",
+        help="Input species tree (Newick; not transcript tree)",
+        required=True,
     )
     parser.add_argument(
-        '-m', '--msa',
-        help='Input codon MSA (FASTA). Stops will be removed',
-        required=True
+        "-m",
+        "--msa",
+        help="Input codon MSA (FASTA). Stops will be removed",
+        required=True,
     )
     parser.add_argument(
-        '-w', '--omega-zeros',
-        help='Starting omega values to start the ML optimization, separated by '
-            'commas. Default: "0.5,1.0,1.5"',
+        "-w",
+        "--omega-zeros",
+        help="Starting omega values to start the ML optimization, separated by "
+        'commas. Default: "0.5,1.0,1.5"',
         required=False,
-        default='0.5,1.0,1.5'
+        default="0.5,1.0,1.5",
     )
     parser.add_argument(
-        '-s', '--target-species',
-        help='Target species for the branch-site test, as in the input tree, '
-            'separated by commas. Missing species will be ommited',
-        required=True
+        "-s",
+        "--target-species",
+        help="Target species for the branch-site test, as in the input tree, "
+        "separated by commas. Missing species will be ommited",
+        required=True,
     )
     parser.add_argument(
-        '-b', '--min-background',
-        help='Minimum number of species in the background of the tree. Default: 2',
-        required=False,
-        default=2,
-        type=int
-    )
-    parser.add_argument(
-        '-f', '--min-foreground',
-        help='Minimum number of species in the foreground of the tree. Default: 2',
+        "-b",
+        "--min-background",
+        help="Minimum number of species in the background of the tree. Default: 2",
         required=False,
         default=2,
-        type=int
+        type=int,
     )
     parser.add_argument(
-        '-o', '--output-prefix',
-        help='Output prefix where to store the tree and msa for fastcodeml and '
-            'the output tsv. Containing folders must exist',
-        required=True
+        "-f",
+        "--min-foreground",
+        help="Minimum number of species in the foreground of the tree. Default: 2",
+        required=False,
+        default=2,
+        type=int,
     )
     parser.add_argument(
-        '-c', '--fastcodeml-binary',
+        "-o",
+        "--output-prefix",
+        help="Output prefix where to store the tree and msa for fastcodeml and "
+        "the output tsv. Containing folders must exist",
+        required=True,
+    )
+    parser.add_argument(
+        "-c",
+        "--fastcodeml-binary",
         help='Path to the fastcodeml binary. Default: "fast"',
         required=False,
-        default='fast',
+        default="fast",
     )
 
     return vars(parser.parse_args())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     ARGS = parse_arguments()
     # print(ARGS)
@@ -280,11 +294,11 @@ if __name__ == '__main__':
     OMEGAS = set(ARGS["omega_zeros"].split(","))
 
     if not msa_has_enough_by_background_and_foreground(
-            msa=MSA,
-            foreground_list=TARGET_SPP,
-            min_background=ARGS["min_background"],
-            min_foreground=ARGS["min_foreground"]
-        ):
+        msa=MSA,
+        foreground_list=TARGET_SPP,
+        min_background=ARGS["min_background"],
+        min_foreground=ARGS["min_foreground"],
+    ):
         sys.stderr.write(
             f"{MSA_FN}: Not enough species background or foreground species\n"
         )
@@ -294,7 +308,7 @@ if __name__ == '__main__':
     TREE = clean_tree(TREE)
     SPP_TO_TRX = get_species_to_seqid(MSA)
     TARGET_TRX = [SPP_TO_TRX[SPP] for SPP in TARGET_SPP if SPP in SPP_TO_TRX]
-    TREE = mark_branch(TREE, TARGET_TRX)    
+    TREE = mark_branch(TREE, TARGET_TRX)
     TREE = clean_tree_names(TREE)
 
     MSA = remove_stops(MSA)
@@ -306,6 +320,5 @@ if __name__ == '__main__':
     write_pvalues(
         out_prefix=OUT_PREFIX,
         omegas=OMEGAS,
-        fastcodeml_binary=ARGS["fastcodeml_binary"]
+        fastcodeml_binary=ARGS["fastcodeml_binary"],
     )
-

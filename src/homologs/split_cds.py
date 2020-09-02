@@ -11,10 +11,7 @@ every single msa as codons in a separate folder for post-processing.
 
 import sys
 
-from helpers import \
-    fasta_to_dict, \
-    fix_dir_path, \
-    process_folders
+from helpers import fasta_to_dict, fix_dir_path, process_folders
 
 
 def subset_file(pep_fn, cds_fn, cds_dict):
@@ -22,14 +19,11 @@ def subset_file(pep_fn, cds_fn, cds_dict):
     with open(cds_fn, "w") as cds_out:
         for seqid in fasta_to_dict(pep_fn).keys():
             cds_out.write(
-                ">{seqid}\n{sequence}\n".format(
-                    seqid=seqid,
-                    sequence=cds_dict[seqid]
-                )
+                ">{seqid}\n{sequence}\n".format(seqid=seqid, sequence=cds_dict[seqid])
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 6:
         sys.stderr.write(
@@ -46,10 +40,8 @@ if __name__ == '__main__':
 
     CDS_DICT = fasta_to_dict(CDS_FN)
 
-
     def process(pep_fn, cds_fn):
         """Fix parameter"""
         return subset_file(pep_fn, cds_fn, CDS_DICT)
 
     process_folders(IN_DIR, IN_EXT, OUT_DIR, OUT_EXT, process)
-    

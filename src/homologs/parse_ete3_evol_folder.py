@@ -8,11 +8,9 @@ import re
 import sys
 import os
 
-from helpers import \
-    fix_dir_path, \
-    process_folders
+from helpers import fix_dir_path, process_folders
 
-hexadecimal_pattern = re.compile(r'[0-9a-f]{32} \|')
+hexadecimal_pattern = re.compile(r"[0-9a-f]{32} \|")
 
 
 def parse_ete3_evol_file(file_in):
@@ -26,17 +24,15 @@ def parse_ete3_evol_file(file_in):
             lrt_line = numberline
         if line[0:17] == "SUMMARY BY MODEL":
             summary_line = numberline
-    block = lines[lrt_line + 4: summary_line -1]
-    assert(block)
+    block = lines[lrt_line + 4 : summary_line - 1]
+    assert block
     for line in block:
         model1, model2, pvalue = [x.strip() for x in line.split("|")]
         model1 = model1.split(".")[0]
         model2 = model2.split(".")[0]
         pvalue = pvalue.strip("*")
-        sys.stdout.write(
-            f"{orthogroup}\t{omega_zero}\t{model1}\t{model2}\t{pvalue}\n"
-        )
-    
+        sys.stdout.write(f"{orthogroup}\t{omega_zero}\t{model1}\t{model2}\t{pvalue}\n")
+
 
 def parse_ete3_evol_folder(in_dir, in_ext):
     """Parse an entire folder"""
@@ -46,7 +42,7 @@ def parse_ete3_evol_folder(in_dir, in_ext):
             parse_ete3_evol_file(in_dir + "/" + file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 3:
         sys.stderr.write(

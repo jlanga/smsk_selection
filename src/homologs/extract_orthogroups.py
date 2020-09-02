@@ -11,6 +11,7 @@ import sys
 import pandas as pd
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
+
 def get_species_sequences(orthogroups, in_dir, in_ext):
     """Build {species: {identifier: sequence}} dict
     """
@@ -33,16 +34,14 @@ def assign_sequences_to_orthogroups(dict_of_sequences, orthogroups):
 
     for orthogroup_id in orthogroups.index:
         for species_id in orthogroups.columns:
-            elements = orthogroups\
-                .loc[orthogroup_id, species_id]
+            elements = orthogroups.loc[orthogroup_id, species_id]
             if pd.isna(elements):
                 continue
-            elements = elements\
-                .replace(",", "")\
-                .split(" ")
+            elements = elements.replace(",", "").split(" ")
             for element in elements:
-                dict_of_orthogroups[orthogroup_id][element] = \
-                    dict_of_sequences[species_id][element]
+                dict_of_orthogroups[orthogroup_id][element] = dict_of_sequences[
+                    species_id
+                ][element]
 
     return dict_of_orthogroups
 
@@ -56,7 +55,7 @@ def write_orthogroups(dict_of_orthogroups, out_dir, out_ext):
                 handle.write(">%s\n%s\n" % (identifier, sequence))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 6:
         sys.exit(
@@ -70,22 +69,14 @@ if __name__ == '__main__':
     OUT_DIR = sys.argv[4]
     OUT_EXT = sys.argv[5]
 
-    ORTHOGROUPS = pd\
-        .read_csv(ORTHOGROUPS_FN, sep="\t", index_col=0)
+    ORTHOGROUPS = pd.read_csv(ORTHOGROUPS_FN, sep="\t", index_col=0)
 
     SPECIES_TO_SEQUENCES = get_species_sequences(
-        orthogroups=ORTHOGROUPS,
-        in_dir=IN_DIR,
-        in_ext=IN_EXT
+        orthogroups=ORTHOGROUPS, in_dir=IN_DIR, in_ext=IN_EXT
     )
 
     ORTHOGROUPS_TO_SEQUENCES = assign_sequences_to_orthogroups(
-        dict_of_sequences=SPECIES_TO_SEQUENCES,
-        orthogroups=ORTHOGROUPS
+        dict_of_sequences=SPECIES_TO_SEQUENCES, orthogroups=ORTHOGROUPS
     )
 
-    write_orthogroups(
-        ORTHOGROUPS_TO_SEQUENCES,
-        out_dir=OUT_DIR,
-        out_ext=OUT_EXT
-    )
+    write_orthogroups(ORTHOGROUPS_TO_SEQUENCES, out_dir=OUT_DIR, out_ext=OUT_EXT)

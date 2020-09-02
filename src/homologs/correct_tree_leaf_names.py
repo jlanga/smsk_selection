@@ -9,9 +9,8 @@ import sys
 
 from Bio import Phylo
 
-from helpers import \
-    fix_dir_path, \
-    process_folders
+from helpers import fix_dir_path, process_folders
+
 
 def correct_tree_leaf_names(filename_in, filename_out):
     """Correct a single tree
@@ -19,14 +18,14 @@ def correct_tree_leaf_names(filename_in, filename_out):
     - Removes the ENA|id| since pdc removes it too
     """
     tree = Phylo.read(filename_in, "newick")
-    ena_regex = re.compile(r'ENA\|[A-Z0-9]*\|')
+    ena_regex = re.compile(r"ENA\|[A-Z0-9]*\|")
     for terminal in tree.get_terminals():
         terminal.name = terminal.name.replace("_", "@", 1)
         terminal.name = ena_regex.sub("", terminal.name)
     Phylo.write(tree, filename_out, "newick")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(sys.argv) != 5:
         sys.exit("correct_leaf_names.py in_dir .in_ext out_dir .out_ext")
