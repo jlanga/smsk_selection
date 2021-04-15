@@ -1,7 +1,5 @@
 FROM ubuntu:18.04
 
-# apt packages
-
 ENV DEBIAN_FRONTEND="noninteractive" 
 
 RUN apt-get update \
@@ -14,7 +12,7 @@ RUN apt-get update \
     ca-certificates=20180409 \
     cmake=3.10.2-1ubuntu2.18.04.1 \
     curl \
-    git=1:2.17.1-1ubuntu0.7 \
+    git=1:2.17.1-1ubuntu0.8 \
     libarmadillo-dev=1:8.400.0+dfsg-2 \
     libatlas-cpp-0.6-dev=0.6.3-4ubuntu1 \
     libboost-all-dev=1.65.1.0ubuntu1 \
@@ -27,7 +25,7 @@ RUN apt-get update \
     openmpi-bin=2.1.1-8 \
     tzdata \
     wget=1.19.4-1ubuntu2.2 \
-    xvfb=2:1.19.6-1ubuntu4.4 \
+    xvfb=2:1.19.6-1ubuntu4.9 \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
 
@@ -46,10 +44,12 @@ RUN conda config --add channels defaults \
 && conda config --add channels bioconda \
 && conda config --add channels conda-forge \
 && conda install \
-    --yes --channel bioconda \
-    snakemake-minimal=5.15 \
+    --yes --channel conda-forge \
+    mamba \
+&& mamba install --yes --channel bioconda \
+    snakemake-minimal=6 \
     pandas=1.0.3 \
-&& conda clean --all --yes
+&& mamba clean --all --yes
 
 RUN mkdir /.conda \
 && chmod ugo+rwx /.conda
