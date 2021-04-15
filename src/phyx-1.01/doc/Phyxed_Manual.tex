@@ -1,0 +1,478 @@
+\documentclass[12pt,letterpaper]{memoir}
+%\usepackage{longtable}
+%\usepackage{fixltx2e}
+%\usepackage{textcomp}
+\usepackage{fullpage}
+%\usepackage{amsfonts}
+\usepackage{verbatim}
+\usepackage[english]{babel}
+%\usepackage{pifont}
+\usepackage{color}
+%\usepackage{setspace}
+%\usepackage[normalem]{ulem}
+%\usepackage{natbib}
+%\usepackage{float}
+%\usepackage{latexsym}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{graphicx}
+%\usepackage{amssymb}
+%\usepackage{amsmath}
+%\usepackage{bm}
+%\usepackage{array}
+%\usepackage{ifthen}
+%\usepackage{caption}
+\usepackage{hyperref}
+%\usepackage{amsthm}
+%\usepackage{amstext}
+%\usepackage{etoolbox}
+%\usepackage{setspace}% http://ctan.org/pkg/setspace
+
+\linespread{1}
+\setcounter{secnumdepth}{0}
+\pagenumbering{arabic}
+
+\begin{document}
+
+\begin{flushright}
+Version dated: \today
+\end{flushright}
+\noindent{\Large \textbf{Phyx: Phylogenetic tools for Unix}}
+\bigskip
+
+\noindent {\normalsize Joseph W. Brown$^{\dagger}$, Joseph F. Walker$^{\dagger}$, and Stephen A. Smith*}\\
+\noindent {\small 
+Department of Ecology and Evolutionary Biology, University of Michigan, Ann Arbor, Michigan, 48109, USA}\\
+\noindent {\small
+$^{\dagger}$Joint first authors.}\\
+\noindent {\small
+$^{*}$Corresponding author}\\
+
+\medskip
+\noindent{Emails:} \href{josephwb@umich.edu}{josephwb@umich.edu}, \href{jfwalker@umich.edu}{jfwalker@umich.edu}, and \href{eebsmith@umich.edu}{eebsmith@umich.edu}.\\
+\medskip
+
+\section{What is Phyx?}\label{abstract}
+Phyx (pronounced ``fix'') is a set of data analysis programs modeled after POSIX-style command-line tools, to help them be easily incorporated in bioinformatic pipelines. The majority of Phyx programs focus on phylogenetic analyses, which includes a variety of programs to clean data matrices, simulate data, and perform basic phylogenetic analyses. Phyx is an ever expanding library of programs, and we welcome any feature requests through github issue submissions: \href{https://github.com/FePhyFoFum/phyx/issues}{https://github.com/FePhyFoFum/phyx/issues}. 
+All programs are open source and Phyx operates under the GPL3 licence: \href{https://www.gnu.org/licenses/gpl-3.0.html}{https://www.gnu.org/licenses/gpl-3.0.html}
+
+\subsection{Installing Phyx}\label{introduction}
+\begin{flushleft}
+Installation instructions for both unix and mac may be found at the Phyx wiki: \href{https://github.com/FePhyFoFum/phyx/wiki/Installation}{https://github.com/FePhyFoFum/phyx/wiki/Installation}.
+\end{flushleft}
+
+\section{Pheatures of Phyx}
+
+The following is a list of the programs that are currently available. For all programs typing the argument \texttt{-h} will produce a list of program options. Below is a list of current programs with examples on how to run them. Programs are updated regularly with new options being added. The most up to date list of options for each program can be found in the help menu.
+
+\subsection{Data formats}
+
+Phyx supports the popular formats for sequence alignments (fasta, fastq, phylip, and Nexus) and trees (newick and Nexus) and uses format auto-detection on the fly. Therefore, for nearly all Phyx programs any of these formats (or a combination thereof, e.g. with \texttt{pxcat}, below) can be used without user specification.
+
+\subsection{Repeatability}
+
+Phyx will track the programs and commands input to a file called ``phyx.logfile''. This allows users to see exactly what settings they used to run a program and can help others replicate experiments (say, but including the logfile as supplementary information to a paper).
+
+\subsection{Piping}
+
+By optionally reading from \texttt{stdin} and writing to \texttt{stout}, Phyx provides the ability of programs to pipe the output of one into another, allowing for an efficient processing of data. An example of this would be to if someone wanted to perform a codon alignment, then remove all columns with missing data, and finally make a rough neighbor-joining tree.
+\begin{flushleft}
+\begin{verbatim}
+pxaa2cdn -a amino_acid_alignment -n nucleotide_alignment | pxclsq -p 1.0 
+| pxnj -n 3 -o output_tree_file
+\end{verbatim}
+\end{flushleft}
+
+\section{Examples}
+
+A list of example files can be found in the ``example\_files'' folder. Subfolder names correspond to individual program names.
+
+\subsection{pxaa2cdn}
+
+Often times a coding DNA alignment does not end up with the data divided into sets of three (codons) and as a result this may introduce bias into the analysis or make positive selection tests difficult. This program allows the user to first align the amino acid alignment, then using the alignment the user inputs the corresponding nucleotide sequences and the program will return the codon aligned sequence.
+\begin{flushleft}
+\begin{verbatim}
+pxaa2cdn -a AA_Alignment.fa -n Unaligned_Nucleotide.fa -o CDN_aln.fa
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxbdfit}
+
+Diversification has becoming a rapidly expanding field and as a result tools to analyze the data are essential. This program will fit a diversification model to a tree. The model which is chosen with \texttt{-m} may be (the default) birth-death model (\texttt{bd}), a pure-birth yule model (\texttt{yule}), or the optimal of these two models (\texttt{best}) as determined by AIC. The program will return the model parameters (b,d,r,e), likelihood, aic and tree statistics.
+\begin{flushleft}
+\begin{verbatim}
+pxbdfit -t bd.tre -m yule
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxbdsim}
+
+Birth death processes are an essential part to understanding diversification and simulation gives researchers the ability to study these processes using known birth and death parameters. Per-lineage-per-time birth and death rates are specified with the \texttt{-b} and \texttt{-d} arguments, respectively. The user chooses the termination condition, either specifying the final number of extant taxa (\texttt{-e}) or the simulation timeframe (\texttt{-t}). In addition, when running with non-zero extinction the user can choose to return a tree that includes all extinct lineages as well by providing the \texttt{-s} argument.
+
+\begin{flushleft}
+\begin{verbatim}
+pxbdsim -e 100 -s -b 1 -d 0.5 -o output_tree_file
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxboot}
+
+Using a variety of statistical methods for evaluating certainty of phylogenetic trees is essential as all methods have both positives and negatives associated with them. This program will allow the user to create resampled datasets for two of the most commonly used methods: non-parametric bootstrapping and the jackknife. The proportion of data to be incorporated in a jackknife may be specified with \texttt{-f} and a random seed may be specified with \texttt{-x}.
+
+\begin{flushleft}
+Example jackknife:
+\begin{verbatim}
+pxboot -s Alignment -x 112233 -f 0.50 -o output_of_50_jackknife
+\end{verbatim}
+Example bootstrap:
+\begin{verbatim}
+pxboot -s Alignment -p parts -o output_of_bootstrap
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxbp}
+
+Analyzing similarities among phylogenetic trees has become a growing part of phylogenetics, especially in the field of phylogenomics to determine if a clade is found in a gene tree and in a species tree. This program allows the user to print out all the bipartitions that are in phylogenetic tree file (which may contain multiple trees).
+
+\begin{flushleft}
+\begin{verbatim}
+pxbp -t Tree.tre -o bp_output
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxcat}
+
+When developing a supermatrix for an analysis concatenation of the genes is essential and manual programs that perform this for thousands of genes at once are capable of saving users a lot of time importing each gene into visualization software. This program allows the user to specify a variety of different file types to be concatenated together and can print partition information to a file with the \texttt{-p} argument.
+
+\begin{flushleft}
+An example where the sequences to be concatenated are in a variety of formats:
+\begin{verbatim}
+pxcat -s *.fas *.fa *.phy -p Parts.txt -o Supermatrix.fa
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxclsq}
+
+Having a large amount of missing data in a column of a supermatrix, may be due to errors in alignment or a variety of other factors. Therefore, removing highly ambiguous columns of data may help better estimate a model of evolution for a dataset. This program allows the user to specify a proportion of data that is required to be present (\texttt{-p}). The program attempts to detect the sequence type (DNA or protein); if it fails,  a protein interpretation can be forced with the \texttt{-a} argument. If the verbose \texttt{-v} argument is used the program will print to screen the name of any sequences that are entirely removed (i.e. are left with only ambiguous characters after other columns have be removed).
+
+\begin{flushleft}
+An example to clean a nucleotide alignment down to only columns with a
+maximum of 40\% data allowed to be missing:
+\begin{verbatim}
+pxclsq -s Alignment -p 0.6
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxconsq}
+
+This program will allow the user to get the consensus sequence 
+
+\begin{flushleft}
+\begin{verbatim}
+pxconsq -s Alignment
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxcontrates}
+
+Comparing continuous characters across phylogenies provides a valuable tool for understanding the evolution of such characters. Two of the most commonly used models are Brownian and OU models, and this program can be used to estimate the rate of character evolution. The input for this is a fasta file where instead of nucleotide data there is tab delimited character states and a tree file for this to mapped onto. The program may then perform an ancestral state reconstruction (\texttt{-a 0} or default) or test for model fit between OU and Brownian motion (\texttt{-a 1}).
+
+\begin{flushleft}
+Example model test for a set of characters across a tree:
+\begin{verbatim}
+pxcontrates -c contrates_file.txt -t contrates_tree.tre -a 1
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxfqfilt}
+
+Filtering based on a certain quality score is essential for processing raw fastq reads from next generation sequencing data. This program allows the user to specify a mean quality score (\texttt{-m}) and filter based on that quality score.
+
+\begin{flushleft}
+\begin{verbatim}
+pxfqfilt -s fqfilt_test.fastq -m 10
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxlog}
+
+This program is an MCMC log manipulator and concatenator. Resamples parameter or tree MCMC samples using some burnin and thinning across an arbitrary number of log files. Input files may be indicated using wildcards e.g. `*.trees'. NOTE: resampling parameters are in terms of number of samples, not number of generations. To determine the attributes of the log files, you can first use the \texttt{-i} flag:
+
+\begin{flushleft}
+\begin{verbatim}
+pxlog -t *.trees -i
+\end{verbatim}
+\end{flushleft}
+and then sample accordingly:
+\begin{flushleft}
+\begin{verbatim}
+pxlog -t *.trees -b 75 -n 2 -o some_output_filename
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxlssq}
+
+Due to the high variability that is found in sequences and in data matrices it is often important to find out various aspects (e.g. amount of missing data, character state frequencies, etc.). This program will allow provide the user with a variety of these aspects of a the data and provide an easy way to summarize sequence data and concatenated matrices.
+
+\begin{flushleft}
+\begin{verbatim}
+pxlssq -s Alignment
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxlstr}
+
+Aspects of trees often provide a large amount of information regarding the behavior of the data that was used to create the tree. This program conveniently allows the user to uncover many of these aspects from the command line, such as tree length, whether a tree is rooted, number of terminals, etc.
+
+\begin{flushleft}
+\begin{verbatim}
+pxlstr -t Tree.tre
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxmrca}
+
+This program will provide the information regarding the most recent common ancestor, giving number of tips in the tree and number of tips for each clade specified. The clade that will be analyzed is the smallest clade containing the tips specified. Specifically the user provides the species in a clade of interest using an MRCA file formatted as follows:
+\texttt{MRCANAME = tip1 tip2}
+
+\begin{flushleft}
+\begin{verbatim}
+pxmrca -t mrca_test.tre -m mrca.txt
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxmrcacut}
+
+With extremely large trees becoming more common place (species level, gene families etc.) it is useful to focus on certain clades. This program allows the user to specify tips of a clade (-m), only two are required and will remove a newick for the smallest clade that encompasses both species specified. mrca file format:
+\texttt{MRCANAME = tip1 tip2}
+
+\begin{flushleft}
+\begin{verbatim}
+pxmrcacut -t tree -m mrca_file
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxmrcaname}
+
+This program allows the user to label the internal nodes with clade names. The program takes in an mrca file in the same format as (pxmrca and pxmrcacut)
+
+\begin{flushleft}
+\begin{verbatim}
+pxmrcaname -t tree -m mrca_file
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxnj}
+
+This program will create a basic neighbor joining tree from an alignment matrix.
+
+\begin{flushleft}
+\begin{verbatim}
+pxnj -s Alignment.aln
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxnw}
+
+This program will do pairwise alignments using the Needleman-Wunsch algorithm. It also allows alignment scores to be analyzed and various scoring matrices to be used by specifiying the \texttt{-m} argument.
+
+\begin{flushleft}
+\begin{verbatim}
+pxnw -s Alignment.aln
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxrecode}
+
+This program will recode a nucleotide alignment using any combination of the recognized recoding schemes: R (A$|$G), Y (C$|$T), S (C$|$G), W (A$|$T), M (A$|$C), K (G$|$T), B (C$|$G$|$T), D (A$|$G$|$T), H (A$|$C$|$T), V (A$|$C$|$G). Recoding schemes (e.g., `RY', `SW', `MK', etc.) are specified with the \texttt{-r} argument. If no scheme is provided, RY-coding is used by default.
+
+\begin{flushleft}
+\begin{verbatim}
+pxrecode -r ry -s Nucleotide.fa
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxrevcomp}
+
+This program will provide the reverse complement of DNA sequences from an alignment file.
+
+\begin{flushleft}
+\begin{verbatim}
+pxrevcomp -s Nucleotide.fa
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxrls}
+
+This program allows the user to rename taxa by giving a sequence file and specifying files listing current \texttt{-c} and new names \texttt{-n}; name ordering in the files must be identical, with one taxon per line.
+
+\begin{flushleft}
+\begin{verbatim}
+pxrls -s SeqFile -c CurrentNames -n NewNames
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxrlt}
+
+This program provides a way to relabel the tips of trees by giving a tree file and specifying files listing current \texttt{-c} and new names \texttt{-n}; name ordering in the files must be identical, with one taxon per line.
+
+\begin{flushleft}
+\begin{verbatim}
+pxrlt -t kingdoms.tre -c kingdoms.oldnames.txt -n kingdoms.newnames.txt
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxrms}
+
+This program will remove sequences from a sequence file, either by typing them on the command line using \texttt{-n} (comma-delimited) or by specifying a file using \texttt{-f} (one taxon per line). Use the \texttt{-c} flag to remove the complementary taxa.
+
+\begin{flushleft}
+\begin{verbatim}
+pxrms -s Nucleotide.fa -f taxa_to_delete.txt
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxrmt}
+
+This program will remove tips from a tree file, either by typing them on the command line using \texttt{-n} (comma-delimited) or by specifying a file using \texttt{-f} (one taxon per line). Use the \texttt{-c} flag to remove the complementary taxa.
+
+\begin{flushleft}
+Example to remove tips s1, s6, and s8:
+\begin{verbatim}
+pxrmt -t rmt_test.tre -n s1,s6,s8
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxrr}
+
+This program will re-root trees in a tree file based on specified outgroups (\texttt{-g}), or the program can unroot a tree (\texttt{-u}). For re-rooting, if not all the outgroups are found in the tree the program will print an error. However, \texttt{pxrr} can re-root the tree based on the outgroups that \textit{are} available by using the silent option (\texttt{-s}). Alternatively, if the outgroups are ranked in preference but not all necessarily present in a given tree \texttt{pxrr} can root on the first outgroup present by using the \texttt{-r} option. It provides a useful tool for re-rooting thousands of trees which can then be used for analyzing gene discordance across phylogenies.
+
+\begin{flushleft}
+Example to root on the outgroups s1 and s2:
+\begin{verbatim}
+pxrr -t rr_test.tre -g s1,s2
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxs2fa and pxs2phy and  pxs2nex}
+
+This programs are all designed in a similar vain, with the ability to convert a file from its current format to fasta, phylip or nexus, respectively. You may also specify if you would like to have the output in uppercase with the option \texttt{-u}.
+
+\begin{flushleft}
+\begin{verbatim}
+pxs2* -s Alignment
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxseqgen}
+
+This is a sequence simulator that allows the user to give a tree and specify a model of evolution and sequences will be generated for that tree under the model. Some features are that it allows for the model of evolution to change at nodes along the tree using the \texttt{-m} option. The program also allows the user to specify rate variation through a value for the shape of the gamma distribution with the \texttt{-g} option and the user is able to specify the proportion of invariable sites the would like to include using the \texttt{-i} option. Other options can be found from the help menu by typing \texttt{-h} after the program.
+
+The sequence simulator features have been thoroughly tested except the multimodel simulation which is still under active development and has not been thoroughly tested to the developers comfort!
+
+For multimodel simulations it is easiest to print out the node labels on your tree originally using the \texttt{-p} option. Once you know the nodes that you would like the model to change at you can specify these nodes on the input using the \texttt{-m} option. An example if you wanted two models of evolution on your tree one for the tree and one where it changes at node two, you would enter the command as follows.
+
+\begin{flushleft}
+example\_file example (which uses a simple JC69 model):
+\begin{verbatim}
+pxseqgen -t seqgen_test.tre
+\end{verbatim}
+
+Substitution model parameters are always given in the following order (with no spaces):
+
+A$<$-$>$C,A$<$-$>$G,A$<$-$>$T,C$<$-$>$G,C$<$-$>$T,G$<$-$>$T.
+\newline
+\newline
+Multi-model commands are given as the following:
+pxseqgen -t tree\_file -m A$<$-$>$C,A$<$-$>$G,A$<$-$>$T,C$<$-$>$G,C$<$-$>$T,G$<$-$>$T,Node\#,A$<$-$>$C,A$<$-$>$G,A$<$-$>$T,C$<$-$>$G,C$<$-$>$T,G$<$-$>$T
+\newline
+\newline
+If, for example, the model you want for the tree is (.33,.33,.33,.33,.33) and you want the model to change at node two to (.30,.30,.20,.50,.40), the command would be as follows: 
+
+\begin{verbatim}
+pxseqgen -t tree_file -o output_alignment 
+-m .33,.33,.33,.33,.33,.33,2,.3,.3,.2,.5,.4,.2
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxsstat}
+
+This program calculates multinomial alignment test statistics that can be used for assessing model adequacy. Currently limited to the test statistic of Bollback (2002) MBE, but more are coming.
+
+\begin{flushleft}
+\begin{verbatim}
+pxsstat -s Alignment.fa
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxstrec}
+
+This is a program that does some ancestral state reconstruction and stochastic mapping of categorical characters. There are a number of options and the requirement for a control file. The control file can be as simple as ancstates = all which designates that you want ancestral states calculated for each node. The can then be output on a tree in a file given by an -o FILE option. If you only want to look at particular nodes, these can be designated in the control with the \texttt{mrca = MRCANAME tipid1 tipid2}. Then the MRCANAME can be given at the \texttt{ancstates = MRCANAME}. If you would like stochastic mapping with the time in the state mapped you can use the same format but instead of ancstates you would put stochtime. For stochastic number of events stochnumber or `stochnumber any. For the stochastic mapping, you will need to designate an MRCA or MRCAs (not all). Multiple can be separated by commas or spaces. You can output these to a file with -n for number of events, -a for the total number of events, and -m for the duration. 
+
+\begin{flushleft}
+\begin{verbatim}
+pxstrec -d test.data.narrow -t test.tre -c config_stmap
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxsw}
+
+This program will do pairwise alignments using the Smith-Waterman algorithm. It also allows alignment scores to be analyzed and various scoring matrices to be used (\texttt{-m}).
+
+\begin{flushleft}
+\begin{verbatim}
+pxsw -s Alignment.fa
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxt2new}
+
+This will convert a tree file to newick format.
+
+\begin{flushleft}
+\begin{verbatim}
+pxt2new -t Tree.nex
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxtlate}
+
+This program will take an input coding DNA sequence and translate it to the associated amino acid alignment. The \texttt{-t} argument specifies which translation table to use; the standard code is used by default. Use \texttt{-h} to see which tables are currently available, and feel free to suggest additions (\href{https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi}{see alternative translation tables described on genbank}).
+
+\begin{flushleft}
+\begin{verbatim}
+pxtlate -s Sequence.fa
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxtscale}
+
+This program will rescale a tree when the user inputs either a scaling factor (\texttt{-s}) or a root height (\texttt{-r}; this option requires an ultrametric tree).
+
+\begin{flushleft}
+\begin{verbatim}
+pxtscale -t Tree -s 2.0
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxupgma}
+
+Provides publication quality Unweighted Paired group Method with Arithmatic Mean (UPGMA) tree, just kidding don't use this for a final tree mainly designed as a teaching tool.
+
+\begin{flushleft}
+\begin{verbatim}
+pxupgma -s drosophila.aln
+\end{verbatim}
+\end{flushleft}
+
+\subsection{pxvcf2fa}
+Convert vcf file to fasta, and can force upper case with \texttt{-u}.
+Currently only handles haploid data; phased data will come soon.
+
+\begin{flushleft}
+\begin{verbatim}
+pxvcf2fa -s vcf_file
+\end{verbatim}
+\end{flushleft}
+
+\end{document}

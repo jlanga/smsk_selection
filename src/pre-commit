@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# pre-commit hooks:
+# check that the pipeline works,
+# check linters:
+#   python conde: pylint
+#   shell: shellcheck
+#   yaml: yamllint
+#   r: lintr
+
+
+# Pipeline
+do_clean() {
+    snakemake --version
+    snakemake clean -j 1
+}
+
+do_pipeline_dry_run() {
+    snakemake --version
+    snakemake --dryrun --printshellcmds -j 1
+}
+
+do_pipeline() {
+    snakemake --version
+    snakemake --use-conda -j 4
+}
+
+
+# Linting
+do_pylint_snakefiles() {
+    pylint --version
+
+    pylint \
+        --disable=syntax-error \
+        Snakefile src/snakefiles/*.smk
+
+}
+
+do_pylint_python() {
+
+    pylint --version
+    folders=(src/homologs)
+    for folder in "${folders[@]}" ; do
+        pushd "$folder"
+        pylint .
+        popd
+    done
+    echo 
+}
+
+do_shellcheck(){
+    shellcheck --version
+
+    # Check all files with a bash shebang
+    find src \
+        -name "*.sh" \
+        -not -path "src/exabayes-1.5/*" \
+        -not -path "src/phyx-1.01/*" \
+        -not -path "src/guidance.v2.02/*" \
+        -not -path "src/fastcodeml/*" \
+        -print0 \
+    | xargs --null shellcheck
+}
+
+do_yamllint(){
+    yamllint --version
+
+    find . -type f -name "*.yml" -o -name "*.yaml" \
+    | grep -v ^"./.snakemake" `# snakemake can generate some` \
+    | xargs yamllint --strict
+}
+
+
+# Error
+fail () {
+    echo "$0: [FAILED]"
+    exit 1
+}
+
+# Run everything
+echo "Cleaning results"
+do_clean || fail clean
+
+echo "Checking the pipeline"
+do_pipeline_dry_run || fail pipeline_dry_run
+
+echo "Linting Snakefiles"
+do_pylint_snakefiles || fail pylint_snakefiles
+
+echo "Linting Python scripts"
+do_pylint_python || fail pylint
+
+echo "Linting Shell scripts"
+do_shellcheck || fail shellcheck
+
+echo "Linting YAML files"
+do_yamllint || fail yamllint
+
+echo "Running the pipeline"
+do_pipeline || fail Snakemake

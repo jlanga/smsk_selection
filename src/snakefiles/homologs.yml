@@ -1,0 +1,16 @@
+# Environment for homology tree trimming procedure
+---
+channels:
+    - conda-forge
+    - bioconda
+    - smirarab
+    - defaults
+dependencies:
+    - python=2.7
+    - mafft
+    - seqtk
+    - biopython
+    - parallel
+    - kalign2=2.04
+    - t_coffee
+    - raxml-ng

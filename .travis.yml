@@ -1,14 +1,32 @@
 # Travis configuration file
 ---
-dist: trusty
+dist: bionic
 
 language: bash
 
 addons:
     apt_packages:
+        - autoconf
+        - autoconf-archive
+        - automake
+        - autotools-dev
         - build-essential
-        - git
+        - cmake
         - curl
+        - git
+        - libarmadillo-dev
+        - libatlas-cpp-0.6-dev
+        - libboost-all-dev
+        - liblapack-dev
+        - libnlopt0
+        - libnlopt-dev
+        - libopenmpi-dev
+        - libopenblas-dev
+        - libtool
+        - openmpi-bin
+        - tzdata
+        - wget
+        - xvfb
 
 cache:
     timeout: 1000
@@ -17,45 +35,16 @@ cache:
         - "$TRAVIS_BUILD_DIR/.snakemake/conda"  # snakemake envs
 
 before_install: |
-    url="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-    if [[ -d "$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin ]]; then
-        echo "miniconda already installed."
-    else
-        echo "Installing miniconda."
-        mkdir -p "$HOME"/download
-        wget \
-            --continue \
-            --output-document "$HOME"/download/miniconda_"$TRAVIS_OS_NAME".sh \
-            $url
-        chmod +x "$HOME"/download/miniconda_"$TRAVIS_OS_NAME".sh
-        "$HOME"/download/miniconda_"$TRAVIS_OS_NAME".sh \
-            -u \
-            -b \
-            -p "$HOME"/miniconda3_"$TRAVIS_OS_NAME"
-        "$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin/conda clean --all --yes
-        echo "local_repodata_ttl: 1800" >> ~/.condarc
-    fi
+    bash .travis/before_install.sh
 
 install: |
-    export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
-    echo "$PATH"
-    conda config --add channels defaults
-    conda config --add channels conda-forge
-    conda config --add channels bioconda
-    conda install --quiet --yes --channel bioconda snakemake=5.3.0
-    snakemake --use-conda --create-envs-only
-    conda clean --all --yes
+    bash .travis/install.sh
 
 script: |
-    echo $PATH
-    python --version
-    export PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"/bin:"$PATH"
-    snakemake --use-conda --jobs 2
-    # snakemake --cleanup-conda
+    bash .travis/script.sh
 
 before_cache: |
-    CONDA_PATH="$HOME"/miniconda3_"$TRAVIS_OS_NAME"
-    conda clean --all --yes
-    rm -rf "$CONDA_PATH"/{locks,pkgs,var,conda-meta/history}
+    bash .travis/before_cache.sh
 
-after_failure:
+# after_failure:
+#     bash .travis/after_failure.sh

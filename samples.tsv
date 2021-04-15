@@ -1,5 +1,6 @@
-species	fasta	g2t	url	name
-amex	data/transcriptomes/amex.fad.fa	data/transcriptomes/amex.fad.g2t.tsv	ftp://ftp.ensembl.org/pub/release-85/fasta/astyanax_mexicanus/cdna/Astyanax_mexicanus.AstMex102.cdna.all.fa.gz	Astyanax mexicanus
-gmor	data/transcriptomes/gmor.fad.fa	data/transcriptomes/gmor.fad.g2t.tsv	ftp://ftp.ensembl.org/pub/release-85/fasta/gadus_morhua/cdna/Gadus_morhua.gadMor1.cdna.all.fa.gz	Gadus morhua
-trur	data/transcriptomes/trur.fad.fa	data/transcriptomes/trur.fad.g2t.tsv	ftp://ftp.ensembl.org/pub/release-85/fasta/takifugu_rubripes/cdna/Takifugu_rubripes.FUGU4.cdna.all.fa.gz	Takifugu rubripes
-drer	data/transcriptomes/drer.fad.fa	data/transcriptomes/drer.fad.g2t.tsv	ftp://ftp.ensembl.org/pub/release-85/fasta/danio_rerio/cdna/Danio_rerio.GRCz10.cdna.all.fa.gz	Danio rerio
+species	pep	cds	inout
+char	data/transcriptomes/char.pep	data/transcriptomes/char.cds	IN
+cpal	data/transcriptomes/cpal.pep	data/transcriptomes/cpal.cds	IN
+dclu	data/transcriptomes/dclu.pep	data/transcriptomes/dclu.cds	OUT
+kpun	data/transcriptomes/kpun.pep	data/transcriptomes/kpun.cds	IN
+spil	data/transcriptomes/spil.pep	data/transcriptomes/spil.cds	IN

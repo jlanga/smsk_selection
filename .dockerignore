@@ -1,0 +1,6 @@
+.git
+.snakemake
+results
+data/busco/
+data/db/
+data/download/

@@ -1,4 +1,4 @@
-# Environment to download data for transdecoder
+# Env to download files from the internet
 ---
 channels:
     - conda-forge

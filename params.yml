@@ -1,25 +1,83 @@
 # Snakemake parameter configuration file
 ---
-transdecoder:
-    chunks: 1  # Same for blastx and hmmscan
-    blastp:
-        database: swissprot  # or uniref90
-        evalue: 1e-5
-        max_target_seqs: 1
-    hmmscan:
-    predict:
+max_threads: 24
+
+cd-hit:
+    threshold: 0.995  # Identity threshold to merge proteins
 
 orthofinder:
     blastp_evalue: 0.001
-    number_of_chunks: 1
     mcl_inflation: 1.5
     msa_program: mafft
     tree_program: fasttree
 
+homologs:
+    pxclsq:
+        min_occupancy: 0.1
+    trim_tips:
+        relative_cutoff: 10
+        absolute_cutoff: 2
+    mask_tips:
+        mask_paraphyletic: "y"
+    cut_internal_long_branches:
+        internal_branch_cutoff: 0.5
+        minimum_taxa: 3
+    root_to_tip:
+        minimum_ingroup_taxa: 3
 
-orthogroups:
-    extract_orthogroups:
-        minimum: 2
+tree:
+    supermatrix:
+        min_taxa: 4  # Raxml requires at least 4
+        min_length: 0  # 0 if 4d sites, 300 for codons, 100 for aa
+    min_occupation: 0.5
+    raxml:
+        threads: 1
+        bootstrap_replicates: 1000
+    executables:
+        exabayes: "./bin/exabayes"  # "./bin/yggdrasil"
+        sdsf: "./bin/sdsf"
+        postprocparam: "./bin/postProcParam"
+        tracer: "tracer"
+        consense: "./bin/consense"
+    exabayes:
+        mcmc_runs: 4
+        coupled_chains: 3
+        generations: 1000  # 1e6
+        sampling_frequency: 500  # 1000 by default
+        threads: 1
+    outgroup: spil
 
-fastcodeml:
-    maximizer: 22
+selection:
+    foreground_branches:
+        clupeinae:
+            species: "char,cpal"
+            models: "bsA bsA1"
+            min_foreground: 2  # Species needed for the foreground branch
+            min_background: 2  # Species needed for the background branch
+    ete3:
+        omega_zeros: "0.5,1.0,1.5"  # Starting values for ML optimization
+        evalue: 0.05  # e-value to say that a test is significant
+        binary: "bin/codeml"
+    guidance:
+        msa_program: "PRANK"  # "MAFFT"  # "PRANK"
+        msa_param: "\\-F"
+        program: "GUIDANCE2"
+        bootstraps: 2
+    fastcodeml:
+        omega_zeros: "0.5,1.0,1.5"  # Starting values for ML optimization
+        evalue: 0.05  # e-value to say that a test is significant
+        binary: "./bin/fast"
+    correction:
+        pvalue: 0.05
+
+
+transdecoder:
+    chunks: 4
+
+trinotate:
+    chunks: 4
+    evalue: 1e-5
+    pfam_cutoff: DNC
+    rnammer:
+        rnammer_path: ./src/rnammer-1.2/rnammer  # Modify this
+        org_type: euk  # arc|bac|euk

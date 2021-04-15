@@ -2,47 +2,43 @@ import pandas as pd
 import yaml
 
 from snakemake.utils import min_version
-min_version("5.0")
+min_version("5.7.4")
 
 shell.prefix("set -euo pipefail;")
 
-params = yaml.load(open("params.yml", "r"))
-features = yaml.load(open("features.yml", "r"))
-samples = pd.read_table("samples.tsv").set_index("species")
+params = yaml.safe_load(open("params.yml", "r"))
+features = yaml.safe_load(open("features.yml", "r"))
+samples = pd.read_csv("samples.tsv", sep="\t").set_index("species")
 
 singularity: "docker://continuumio/miniconda3:4.4.10"
 
 SPECIES = samples.index.tolist()
 N_SPECIES = len(SPECIES)
 
+MAX_THREADS = params["max_threads"]
+
 snakefiles = "src/snakefiles/"
 
-include: snakefiles + "folders.py"
-include: snakefiles + "clean.py"
-include: snakefiles + "generic.py"
-include: snakefiles + "raw.py"
-include: snakefiles + "download.py"
-include: snakefiles + "db.py"
-include: snakefiles + "busco.py"
-include: snakefiles + "transdecoder.py"
-include: snakefiles + "tag.py"
-include: snakefiles + "filterlen.py"
-include: snakefiles + "orthofinder.py"
-# include: snakefiles + "orthogroups"
+include: snakefiles + "folders.smk"
+include: snakefiles + "clean.smk"
+include: snakefiles + "generic.smk"
+include: snakefiles + "raw.smk"
+include: snakefiles + "busco.smk"
+include: snakefiles + "cdhit.smk"
+include: snakefiles + "orthofinder.smk"
+include: snakefiles + "homologs.smk"
+include: snakefiles + "tree.smk"
+include: snakefiles + "selection.smk"
+include: snakefiles + "download.smk"
+include: snakefiles + "db.smk"
+include: snakefiles + "transdecoder.smk"
+include: snakefiles + "trinotate.smk"
 
 rule all:
     input:
-        # DOWNLOAD + "uniref90.fa.gz",
-        # DOWNLOAD + "swissprot.fa.gz",
-        # DOWNLOAD + "pfama.hmm.gz",
-        # expand(
-        #     TRANSDECODER + "{species}.pep",
-        #     species=species
-        # ),
-        # expand(
-        #     TAG + "{species}.{extension}",
-        #     species=species,
-        #     extension="pep cds".split()
-        # ),
-        ORTHOFINDER + "clean.ok",
-        rules.busco.input
+        # rules.busco.input,
+        # rules.homologs.input
+        # rules.tree.input,
+        rules.selection_fastcodeml.input,
+        rules.selection_speed.input,
+        # rules.trinotate.input
