@@ -1,19 +1,17 @@
-# smsk_orthofinder: A Snakemake pipeline to find orthologs and marks of positive selection
-
-[![Build Status](https://travis-ci.org/jlanga/smsk_orthofinder.svg?branch=master)](https://travis-ci.org/jlanga/smsk)
+# smsk_selection: A Snakemake pipeline to find orthologs and marks of positive selection
 
 ## 1. Description
 
 This is a pipeline to (briefly described):
 
 1. Predict proteins from transcriptomes (transdecoder),
+2. Find orhogroups with OrthoFinder, and methods from Yang et al.
+3. Find patterns of positive selection with FastCodeML.
+4. Annotate transcripts with transdecoder / trinotate
+5. Assess transcriptome completeness with Busco
 
-2. Find orhogroups with OrthoFinder,
 
-3. __WIP__ Find patterns of positive selection with FastCodeML.
-
-
-![smsk_orthofinder pipeline](rulegraph.svg)
+![smsk_selection pipeline](rulegraph.svg)
 
 ## 2. First steps
 
@@ -25,20 +23,30 @@ This is a pipeline to (briefly described):
 conda install --yes snakemake
 ```
 
-3. Clone this repo
+3. Clone this repo. In case of error with SSL certificates, add `-c http.sslVerify=false`
 
-    ```sh
-    git clone --recursive https://github.com/jlanga/smsk_orthofinder.git
-    ```
+```sh
+git clone --recursive https://github.com/jlanga/smsk_orthofinder.git
+```
 
-4. Introduce the paths to your samples in `samples.tsv`.
+4. Compile the necessary dependencies: `phyx`, `guidance` and `fastcodeml`:
+```sh
+bash src/compile_deps.sh
+```
 
-5. Run the pipeline!
+5. Introduce the paths to your samples in `samples.tsv`.
 
-    ```
-    snakemake --use-conda --jobs
-    ```
+6. Run the pipeline as is:
 
+```
+snakemake --use-conda --jobs
+```
+
+or run it inside a Docker container:
+
+```
+bash src/docker_run.sh -j 4 
+```
 
 
 
@@ -47,24 +55,29 @@ conda install --yes snakemake
 The hierarchy of the folder is the one described in [A Quick Guide to Organizing Computational Biology Projects](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1000424):
 
 ```
-smsk_orthofinder
+smsk_selection
 ├── data: raw data, downloaded fastas, databases,....
 ├── README.md
+├── Snakefile: Pipeline runner
 ├── results: processed data.
-|   ├── filterlen: fastas with longest protein per gene
-|   ├── orthofinder: results from orthofinder
-|   ├── tag: trancriptomes/proteomes with modified headers
-|   ├── transcriptome: raw transcriptomes
-|   └── transdecodder: protein and cds predictions
-└── src: additional source code, tarballs, etc.
+|   ├── busco: SCOs identified
+|   ├── cdhit: clustered transcriptome
+|   ├── homologs: clustered orthogroups as in Yang et al.
+|   ├── orthofinder: clustered orthogroups by orthofinder
+|   ├── selection: alignments and positive selection results
+|   ├── transcriptome: links to input transcriptomes
+|   ├── transdecoder: predicted CDS
+|   ├── tree: ML and bayesian species tree from 4fold degenerate sites
+|   └── trinotate: transcriptome annotation
+└── src: additional source code, tarballs, snakefiles, etc.
 ```
 
 
 ## 4. Requirements
 
-To run this pipeline it should be only necessary to have `snakemake` and `conda`. They together are able to download the required packages to run each step.
+To run this pipeline it should be only necessary to have `snakemake` and `conda` / `mamba`. They together are able to download the required packages to run each step.
 
-
+In case of doubt, the `Dockerfile` contains the list of the required packages to install.
 
 ## Bibliography
 
