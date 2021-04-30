@@ -7,7 +7,8 @@ echo "$PATH"
 conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
-conda install --quiet --yes --channel bioconda snakemake=5.15
+conda install --quiet --yes --channel conda-forge mamba
+mamba install --yes --channel bioconda snakemake
 snakemake --use-conda --conda-create-envs-only -j 4
 conda clean --all --yes
 
