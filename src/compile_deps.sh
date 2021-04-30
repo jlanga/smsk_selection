@@ -2,8 +2,6 @@
 set -euxo pipefail
 
 # conda
-export PATH="$HOME"/miniconda3/bin:"$PATH"
-echo "$PATH"
 conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
